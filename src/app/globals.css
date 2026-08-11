@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@import "../../design-system/tokens.css";
+
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-arabic: var(--font-arabic);
+  --color-navy-900: var(--color-navy-900);
+  --color-navy-700: var(--color-navy-700);
+  --color-teal-600: var(--color-teal-600);
+  --color-teal-500: var(--color-teal-500);
+  --color-cyan-500: var(--color-cyan-500);
+  --color-coral-500: var(--color-coral-500);
+  --color-slate-900: var(--color-slate-900);
+  --color-slate-800: var(--color-slate-800);
+  --color-slate-600: var(--color-slate-600);
+  --color-slate-400: var(--color-slate-400);
+  --color-slate-200: var(--color-slate-200);
+  --color-slate-50: var(--color-slate-50);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;
+}
+
+[dir="rtl"] body {
+  font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;
+}
