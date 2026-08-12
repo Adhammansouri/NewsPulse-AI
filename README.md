@@ -1,56 +1,71 @@
-# NewsPlus
+# Newsplus
 
 AI-powered news assistant for monitoring, summarisation, translation, and report writing.
 
 ## Stack
 
-- **Next.js 16** — Web app + API routes
-- **Tailwind CSS 4** — Styling with design tokens
-- **OpenAI API** — AI generation (to be connected)
-
-## Getting Started
-
-```bash
-# Install dependencies
-npm install
-
-# Copy environment variables
-cp .env.example .env.local
-
-# Run development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000)
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React 19 + Vite + TypeScript + Tailwind CSS 4 |
+| **Backend** | Node.js + Fastify + TypeScript |
+| **Shared** | `@newsplus/shared` — API types |
+| **AI** | OpenAI API (to be connected) |
 
 ## Project Structure
 
 ```
-design-system/     Brand assets, colors, tokens
-docs/              Scope of work & documentation
-public/            Static assets, PWA manifest, logos
-src/
-  app/             Pages & API routes
-  components/      UI components
+newsplus-workspace/
+├── newsplus-API/           # Backend (Fastify)
+├── newsplus-front/         # Frontend (React/Vite)
+├── packages/shared/        # Shared TypeScript types
+├── design-system/          # Brand tokens & assets
+└── docs/                   # Business docs & scripts
 ```
 
-## Features (Roadmap)
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for details.
 
-| Feature | Route | Status |
-|---------|-------|--------|
-| News summaries | `/news` | UI ready |
-| Content generation | `/generate` | UI ready |
-| Translation | `/translate` | UI ready |
-| OpenAI integration | `/api/*` | Next |
+## Getting Started
+
+```bash
+npm install
+cp newsplus-API/.env.example newsplus-API/.env
+cp newsplus-front/.env.example newsplus-front/.env
+npm run dev
+```
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:5173 |
+| API | http://localhost:3001/api/health |
+
+## Scripts
+
+```bash
+npm run dev          # API + frontend
+npm run dev:api      # Backend only
+npm run dev:front    # Frontend only
+npm run build        # Production build
+npm run typecheck    # Type-check all packages
+npm run install:all  # Install all workspaces
+```
 
 ## Environment Variables
 
+### API (`newsplus-API/.env`)
+
 | Variable | Description |
 |----------|-------------|
-| `OPENAI_API_KEY` | OpenAI API key for AI features |
-| `NEXT_PUBLIC_APP_NAME` | App display name |
-| `NEXT_PUBLIC_APP_URL` | Public app URL |
+| `PORT` | API port (default: 3001) |
+| `CORS_ORIGIN` | Frontend URL |
+| `OPENAI_API_KEY` | OpenAI API key |
+
+### Frontend (`newsplus-front/.env`)
+
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_BASE_URL` | API base (dev uses Vite proxy `/api`) |
+| `VITE_APP_NAME` | App display name |
 
 ## Design System
 
-See `design-system/newsplus-design-system.md` for colors, typography, and logo usage.
+See `design-system/newsplus-design-system.md`.

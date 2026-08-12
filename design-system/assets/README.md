@@ -1,8 +1,6 @@
-# NewsPlus Brand Assets
+# Newsplus Brand Assets
 
-Official approved logos only.
-
-| File | Description | Use |
-|------|-------------|-----|
-| `logo-icon.png` | NP icon (logomark) | App icon, favicon, Telegram avatar |
-| `logo-horizontal.png` | Icon + NewsPlus wordmark | Website header, docs, presentations |
+| File | Use |
+|------|-----|
+| `logo-horizontal.png` | Icon + Newsplus wordmark — website header, docs, presentations |
+| `logo-icon.png` | Icon only — app, favicon, Telegram avatar |

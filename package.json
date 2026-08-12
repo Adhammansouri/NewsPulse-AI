@@ -1,28 +1,25 @@
 {
-  "name": "newsplus",
-  "version": "0.1.0",
+  "name": "newsplus-workspace",
   "private": true,
-  "description": "NewsPlus — AI-powered news monitoring, summarisation, translation & report writing",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+  "version": "0.1.0",
+  "description": "Newsplus — AI-powered news monitoring, summarisation, translation & report writing",
+  "engines": {
+    "node": ">=18.20.8"
   },
-  "dependencies": {
-    "next": "^16.3.0",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+  "workspaces": [
+    "newsplus-API",
+    "newsplus-front",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev": "concurrently -n API,FRONT -c blue,green \"npm run dev -w newsplus-API\" \"npm run dev -w newsplus-front\"",
+    "dev:api": "npm run dev -w newsplus-API",
+    "dev:front": "npm run dev -w newsplus-front",
+    "build": "npm run build -w newsplus-API && npm run build -w newsplus-front",
+    "typecheck": "npm run typecheck -w @newsplus/shared && npm run typecheck -w newsplus-API && npm run typecheck -w newsplus-front",
+    "install:all": "npm install --workspaces"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "^26.2.0",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "eslint": "^9.39.5",
-    "eslint-config-next": "^16.3.0",
-    "postcss": "^8.5.26",
-    "tailwindcss": "^4.3.3",
-    "typescript": "^6.0.3"
+    "concurrently": "^9.2.1"
   }
 }

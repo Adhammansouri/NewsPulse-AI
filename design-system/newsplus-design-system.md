@@ -1,6 +1,6 @@
-# NewsPlus Design System
+# Newsplus Design System
 
-Professional visual identity for **NewsPlus** — AI-powered news monitoring, summarisation, translation & report writing.
+Professional visual identity for **Newsplus** — AI-powered news monitoring, summarisation, translation & report writing.
 
 ---
 
@@ -103,7 +103,7 @@ Notification → coral-400 (#F4845F)
 | Arabic body | Noto Sans Arabic | 400 | 14–16px |
 | Logo wordmark | Inter | 700 | — |
 
-**Logo wordmark rule:** `News` in `navy-900`, `Plus` in `teal-600`, same bold rounded sans-serif.
+**Logo wordmark rule:** `News` in `navy-900`, `plus` in `teal-600`, same bold rounded sans-serif (reads as **Newsplus**).
 
 ---
 

@@ -1,6 +1,6 @@
 {
-  "name": "NewsPlus",
-  "short_name": "NewsPlus",
+  "name": "Newsplus",
+  "short_name": "Newsplus",
   "description": "AI-powered news monitoring, summarisation, translation & report writing",
   "start_url": "/",
   "display": "standalone",
