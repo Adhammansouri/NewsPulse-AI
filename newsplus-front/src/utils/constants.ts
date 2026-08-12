@@ -5,6 +5,11 @@ export const NAV_ITEMS = [
   { href: "/translate", label: "ترجمة" },
 ] as const;
 
+export const HEADER_CTA = {
+  href: "/generate",
+  label: "ابدأ الآن",
+} as const;
+
 export const HOME_FEATURES = [
   {
     href: "/news",

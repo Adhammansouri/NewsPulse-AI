@@ -1,4 +1,7 @@
 import "dotenv/config";
 import { startServer } from "./server.js";
 
-await startServer();
+void startServer().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
