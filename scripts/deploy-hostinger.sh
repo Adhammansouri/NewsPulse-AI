@@ -20,9 +20,10 @@ cd "${REPO_DIR}"
 git fetch origin main
 git reset --hard origin/main
 
-npm ci
-npm run build -w newsplus-API
-npm run build -w newsplus-front
+npm ci --include=dev
+
+(cd newsplus-API && npm run build)
+(cd newsplus-front && npm run build)
 
 mkdir -p "${NODE_APP}"
 rsync -a --delete \
