@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="/opt/alt/alt-nodejs20/root/bin:$PATH"
+
 DOMAIN="darkred-sparrow-645513.hostingersite.com"
 BASE="/home/u358087675/domains/${DOMAIN}"
 PUBLIC_HTML="${BASE}/public_html"
@@ -28,11 +30,11 @@ rsync -a --delete \
   --exclude .git \
   newsplus-API/ "${NODE_APP}/"
 
-cat > "${NODE_APP}/.env" <<'EOF'
-HOST=0.0.0.0
-CORS_ORIGIN=https://darkred-sparrow-645513.hostingersite.com
-NODE_ENV=production
-EOF
+printf '%s\n' \
+  "HOST=0.0.0.0" \
+  "CORS_ORIGIN=https://darkred-sparrow-645513.hostingersite.com" \
+  "NODE_ENV=production" \
+  > "${NODE_APP}/.env"
 
 cd "${NODE_APP}"
 npm ci --omit=dev
