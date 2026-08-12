@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { BrandMark } from "@/components/shared/BrandMark";
 import { HEADER_CTA, NAV_ITEMS } from "@/utils/constants";
 
 export function Footer() {
@@ -11,21 +12,8 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link to="/" className="inline-flex items-center gap-2.5">
-              <img
-                src="/icons/logo-icon.png"
-                alt=""
-                width={32}
-                height={32}
-                className="rounded-lg ring-1 ring-slate-200/60"
-              />
-              <img
-                src="/logo-horizontal.png"
-                alt="Newsplus"
-                width={120}
-                height={24}
-                className="h-6 w-auto"
-              />
+            <Link to="/">
+              <BrandMark showTagline size="sm" />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-7 text-slate-600">
               مساعد إخباري بالذكاء الاصطناعي — من الخبر الخام إلى محتوى جاهز للنشر.
