@@ -23,7 +23,7 @@ jobs:
       - name: Install and build
         run: |
           rm -rf node_modules
-          npm install --workspaces --include=dev
+          npm install --workspaces --include=dev --include=optional
           npm run build --workspace=newsplus-API
           npm run build --workspace=newsplus-front
 
