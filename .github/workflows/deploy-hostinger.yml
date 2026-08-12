@@ -22,9 +22,8 @@ jobs:
 
       - name: Install and build
         run: |
-          rm -rf node_modules
+          rm -rf node_modules package-lock.json
           npm install --workspaces --include=dev --include=optional
-          cd newsplus-front && npm install --include=optional && cd ..
           npm run build --workspace=newsplus-API
           npm run build --workspace=newsplus-front
 
