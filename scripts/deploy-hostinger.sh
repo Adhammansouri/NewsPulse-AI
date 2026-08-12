@@ -11,7 +11,7 @@ echo "==> Deploy Newsplus to ${DOMAIN}"
 
 mkdir -p "${BASE}/repos"
 if [ ! -d "${REPO_DIR}/.git" ]; then
-  git clone "https://github.com/Adhammansouri/NewsPulse-AI.git" "${REPO_DIR}"
+  git clone "git@github.com:Adhammansouri/NewsPulse-AI.git" "${REPO_DIR}"
 fi
 
 cd "${REPO_DIR}"
