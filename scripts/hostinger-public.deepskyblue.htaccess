@@ -1,0 +1,18 @@
+PassengerAppRoot /home/u358087675/domains/deepskyblue-ibis-463603.hostingersite.com/hbuilds/current/nodejs
+PassengerAppType node
+PassengerNodejs /opt/alt/alt-nodejs20/root/bin/node
+PassengerStartupFile server.js
+PassengerBaseURI /
+PassengerRestartDir /home/u358087675/domains/deepskyblue-ibis-463603.hostingersite.com/hbuilds/current/nodejs/tmp
+SetEnv NODE_OPTIONS "--require /home/u358087675/domains/deepskyblue-ibis-463603.hostingersite.com/hbuilds/config/preload-timestamp.js"
+SetEnv LSNODE_CONSOLE_LOG console.log
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !^/api
+  RewriteRule . /index.html [L]
+</IfModule>
