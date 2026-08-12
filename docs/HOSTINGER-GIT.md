@@ -1,74 +1,41 @@
-# النشر على Hostinger عبر Git
+# Git → Hostinger (تلقائي)
 
-الريبو: **https://github.com/Adhammansouri/NewsPulse-AI**
+كل **push** على `main` يشغّل GitHub Actions وينشر على:
 
-الموقع: **https://darkred-sparrow-645513.hostingersite.com**
+**https://darkred-sparrow-645513.hostingersite.com**
 
----
+## ما تم إعداده
 
-## 1. ربط GitHub من hPanel (مرة واحدة)
+- GitHub Actions workflow: `.github/workflows/deploy-hostinger.yml`
+- Secrets على GitHub: `HOSTINGER_SSH_*`
+- Deploy key على الريبو للسيرفر (git pull عند الحاجة)
+- متغيرات البيئة على السيرفر تُكتب تلقائيًا أثناء النشر
 
-1. افتح **Websites** → **darkred-sparrow-645513.hostingersite.com**
-2. من **Deployments** (عمليات النشر) → القائمة **⋮** → **Connect to GitHub**
-3. ثبّت **Hostinger GitHub App** واختر ريبو **NewsPulse-AI**
-4. اضبط الإعدادات:
-
-| الإعداد | القيمة |
-|---------|--------|
-| **Repository** | `Adhammansouri/NewsPulse-AI` |
-| **Branch** | `main` |
-| **Framework** | Fastify |
-| **Node.js version** | 20 |
-| **Root directory** | `newsplus-API` |
-| **Build command** | `build` |
-| **Output directory** | `dist` |
-| **Entry file** | `server.js` |
-
-5. اضغط **Deploy**
-
-بعد الربط، كل **push** على `main` يشغّل build تلقائي بدل رفع `newsplus-api.zip` يدويًا.
-
----
-
-## 2. متغيرات البيئة (hPanel → Environment variables)
-
-| المتغير | القيمة |
-|---------|--------|
-| `NODE_ENV` | `production` |
-| `HOST` | `0.0.0.0` |
-| `CORS_ORIGIN` | `https://darkred-sparrow-645513.hostingersite.com` |
-| `OPENAI_API_KEY` | *(مفتاحك — اختياري)* |
-
----
-
-## 3. سير العمل اليومي
+## سير العمل
 
 ```bash
 git add .
-git commit -m "وصف التغيير"
+git commit -m "تغيير"
 git push origin main
 ```
 
-Hostinger يسحب الكود، يشغّل `npm install` + `npm run build`، ويعيد تشغيل الـ API.
+راقب النشر: **GitHub → Actions → Deploy to Hostinger**
 
----
+## ربط hPanel GitHub (اختياري)
 
-## 4. الواجهة (Frontend)
+Hostinger hPanel Git يحتاج OAuth يدوي. البديل الحالي (GitHub Actions + SSH) يحقق نفس الهدف: **push = deploy**.
 
-الواجهة static في `public_html`. تحديثها من Git يحتاج إما:
+لو حابب hPanel Git للـ API فقط:
+- Root directory: `newsplus-API`
+- Entry file: `server.js`
+- Build: `build`
+- Node: 20
 
-- **Redeploy static** من hPanel بعد `npm run build -w newsplus-front`، أو
-- **GitHub Actions** (انظر `.github/workflows/deploy-hostinger.yml`)
+## Secrets (موجودة)
 
-الـ API وحده يتحدّث تلقائيًا بعد ربط Git.
-
----
-
-## 5. استكشاف الأخطاء
-
-| المشكلة | الحل |
-|---------|------|
-| Build failed | راجع **Deployments** → logs |
-| `ERR_REQUIRE_ASYNC_MODULE` | تأكد أن **Entry file** = `server.js` |
-| الموقع قديم | **Redeploy** أو امسح cache |
-| GitHub not connected | **Connect to GitHub** من القائمة ⋮ |
+| Secret | القيمة |
+|--------|--------|
+| HOSTINGER_SSH_HOST | 213.130.145.182 |
+| HOSTINGER_SSH_USER | u358087675 |
+| HOSTINGER_SSH_PORT | 65002 |
+| HOSTINGER_SSH_KEY | مفتاح SSH |
