@@ -20,7 +20,8 @@ cd "${REPO_DIR}"
 git fetch origin main
 git reset --hard origin/main
 
-npm ci --workspaces --include=dev
+rm -rf node_modules package-lock.json
+npm install --workspaces --include=dev --include=optional
 
 (cd newsplus-API && npm run build)
 (cd newsplus-front && npm run build)

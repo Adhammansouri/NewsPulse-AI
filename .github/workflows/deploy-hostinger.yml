@@ -3,90 +3,9 @@ name: Deploy to Hostinger
 on:
   push:
     branches: [main]
-  workflow_dispatch:
-
-concurrency:
-  group: hostinger-deploy
-  cancel-in-progress: true
 
 jobs:
-  deploy:
+  notify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-
-      - name: Install and build
-        run: |
-          rm -rf node_modules package-lock.json
-          npm install --workspaces --include=dev --include=optional
-          npm run build --workspace=newsplus-API
-          npm run build --workspace=newsplus-front
-
-      - name: Prepare API bundle
-        run: |
-          mkdir -p release/api
-          rsync -a newsplus-API/ release/api/ --exclude node_modules
-
-      - name: Upload API bundle
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          source: "release/api/*"
-          target: "/home/u358087675/domains/darkred-sparrow-645513.hostingersite.com/hbuilds/current/nodejs"
-          strip_components: 2
-          overwrite: true
-
-      - name: Upload frontend
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          source: "newsplus-front/dist/*"
-          target: "/home/u358087675/domains/darkred-sparrow-645513.hostingersite.com/public_html"
-          strip_components: 2
-          overwrite: true
-
-      - name: Upload .htaccess
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          source: "scripts/hostinger-public.htaccess"
-          target: "/home/u358087675/domains/darkred-sparrow-645513.hostingersite.com/public_html"
-          overwrite: true
-
-      - name: Finalize on server
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          script_stop: true
-          script: |
-            export PATH="/opt/alt/alt-nodejs20/root/bin:$PATH"
-            PUBLIC_HTML="/home/u358087675/domains/darkred-sparrow-645513.hostingersite.com/public_html"
-            NODE_APP="/home/u358087675/domains/darkred-sparrow-645513.hostingersite.com/hbuilds/current/nodejs"
-            mv -f "$PUBLIC_HTML/hostinger-public.htaccess" "$PUBLIC_HTML/.htaccess"
-            cd "$NODE_APP"
-            printf '%s\n' \
-              "HOST=0.0.0.0" \
-              "CORS_ORIGIN=https://darkred-sparrow-645513.hostingersite.com" \
-              "NODE_ENV=production" \
-              > .env
-            npm ci --omit=dev
-            mkdir -p tmp
-            touch tmp/restart.txt
-            echo "Deploy complete"
+      - run: echo "Pushed to main. Hostinger cron deploys within 5 minutes."
