@@ -20,7 +20,7 @@ cd "${REPO_DIR}"
 git fetch origin main
 git reset --hard origin/main
 
-npm ci --include=dev
+npm ci --workspaces --include=dev
 
 (cd newsplus-API && npm run build)
 (cd newsplus-front && npm run build)
