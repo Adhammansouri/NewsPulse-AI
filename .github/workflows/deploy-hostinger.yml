@@ -1,51 +1,30 @@
-name: Deploy Frontend to Hostinger
+name: Deploy to Hostinger
 
 on:
   push:
     branches: [main]
-    paths:
-      - "newsplus-front/**"
-      - "packages/shared/**"
-      - ".github/workflows/deploy-hostinger.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: hostinger-deploy
+  cancel-in-progress: true
 
 jobs:
-  deploy-frontend:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build frontend
-        run: npm run build -w newsplus-front
-        env:
-          VITE_APP_NAME: Newsplus
-
-      - name: Deploy via SSH
-        if: ${{ secrets.HOSTINGER_SSH_KEY != '' }}
-        uses: appleboy/scp-action@v0.1.7
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOSTINGER_SSH_HOST }}
           username: ${{ secrets.HOSTINGER_SSH_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          source: "newsplus-front/dist/*"
-          target: "/home/u358087675/domains/darkred-sparrow-645513.hostingersite.com/public_html"
-          strip_components: 2
-
-      - name: Upload .htaccess
-        if: ${{ secrets.HOSTINGER_SSH_KEY != '' }}
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          source: "scripts/hostinger-public.htaccess"
-          target: "/home/u358087675/domains/darkred-sparrow-645513.hostingersite.com/public_html"
+          script_stop: true
+          script: |
+            REPO="/home/u358087675/domains/darkred-sparrow-645513.hostingersite.com/repos/NewsPulse-AI"
+            if [ ! -d "$REPO/.git" ]; then
+              mkdir -p "$(dirname "$REPO")"
+              git clone "https://github.com/Adhammansouri/NewsPulse-AI.git" "$REPO"
+            fi
+            bash "$REPO/scripts/deploy-hostinger.sh"
