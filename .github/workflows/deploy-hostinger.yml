@@ -94,7 +94,8 @@ jobs:
         run: |
           ssh -p "${{ secrets.HOSTINGER_SSH_PORT }}" \
             "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}" \
-            "bash '${HOSTINGER_BASE}/repos/NewsPulse-AI/scripts/hostinger-finish-deploy.sh'"
+            "sed -i 's/\r$//' '${HOSTINGER_BASE}/repos/NewsPulse-AI/scripts/hostinger-finish-deploy.sh' && \
+             bash '${HOSTINGER_BASE}/repos/NewsPulse-AI/scripts/hostinger-finish-deploy.sh'"
 
       - name: Verify production health
         run: |
