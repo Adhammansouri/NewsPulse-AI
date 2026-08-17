@@ -45,45 +45,39 @@ jobs:
           tar -czf newsplus-deploy.tgz -C .deploy .
           ls -la newsplus-deploy.tgz
 
-      - name: Upload deploy bundle
-        uses: appleboy/scp-action@v0.1.7
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
         with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          source: newsplus-deploy.tgz
-          target: /tmp/
+          known_hosts: ${{ secrets.HOSTINGER_SSH_HOST }}
+
+      - name: Add Hostinger SSH host key
+        run: ssh-keyscan -p "${{ secrets.HOSTINGER_SSH_PORT }}" "${{ secrets.HOSTINGER_SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload deploy bundle
+        run: |
+          scp -P "${{ secrets.HOSTINGER_SSH_PORT }}" newsplus-deploy.tgz \
+            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:/tmp/newsplus-deploy.tgz"
 
       - name: Extract bundle and finish deploy
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          command_timeout: 10m
-          script: |
-            set -euo pipefail
-            BASE="${{ env.HOSTINGER_BASE }}"
-            NODE_APP="${BASE}/hbuilds/current/nodejs"
-            SCRIPTS="${BASE}/repos/NewsPulse-AI/scripts"
-            WORK="/tmp/newsplus-deploy-$$"
-            BUNDLE="$(find /tmp -maxdepth 2 -name 'newsplus-deploy.tgz' -type f | head -n 1)"
-            if [ -z "${BUNDLE}" ]; then
-              echo "Deploy bundle not found under /tmp"
-              exit 1
-            fi
-            mkdir -p "${WORK}" "${NODE_APP}/public" "${NODE_APP}/dist" "${SCRIPTS}"
-            tar -xzf "${BUNDLE}" -C "${WORK}"
-            rsync -a --delete "${WORK}/public/" "${BASE}/public_html/"
-            rsync -a --delete "${WORK}/public/" "${NODE_APP}/public/"
-            rsync -a --delete "${WORK}/dist/" "${NODE_APP}/dist/"
-            cp "${WORK}/server.cjs" "${WORK}/server.js" "${WORK}/package.json" "${WORK}/package-lock.json" "${NODE_APP}/"
-            cp "${WORK}/scripts/"* "${SCRIPTS}/"
-            sed -i 's/\r$//' "${SCRIPTS}/hostinger-finish-deploy.sh"
-            bash "${SCRIPTS}/hostinger-finish-deploy.sh"
-            rm -rf "${WORK}" "${BUNDLE}"
+        run: |
+          ssh -p "${{ secrets.HOSTINGER_SSH_PORT }}" \
+            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}" \
+            "set -euo pipefail
+            BASE='${{ env.HOSTINGER_BASE }}'
+            NODE_APP=\"\${BASE}/hbuilds/current/nodejs\"
+            SCRIPTS=\"\${BASE}/repos/NewsPulse-AI/scripts\"
+            WORK=\"/tmp/newsplus-deploy-\$\$\"
+            mkdir -p \"\${WORK}\" \"\${NODE_APP}/public\" \"\${NODE_APP}/dist\" \"\${SCRIPTS}\"
+            tar -xzf /tmp/newsplus-deploy.tgz -C \"\${WORK}\"
+            rsync -a --delete \"\${WORK}/public/\" \"\${BASE}/public_html/\"
+            rsync -a --delete \"\${WORK}/public/\" \"\${NODE_APP}/public/\"
+            rsync -a --delete \"\${WORK}/dist/\" \"\${NODE_APP}/dist/\"
+            cp \"\${WORK}/server.cjs\" \"\${WORK}/server.js\" \"\${WORK}/package.json\" \"\${WORK}/package-lock.json\" \"\${NODE_APP}/\"
+            cp \"\${WORK}/scripts/\"* \"\${SCRIPTS}/\"
+            sed -i 's/\r$//' \"\${SCRIPTS}/hostinger-finish-deploy.sh\"
+            bash \"\${SCRIPTS}/hostinger-finish-deploy.sh\"
+            rm -rf \"\${WORK}\" /tmp/newsplus-deploy.tgz"
 
       - name: Verify production health
         run: |
