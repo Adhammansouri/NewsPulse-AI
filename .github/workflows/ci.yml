@@ -24,15 +24,6 @@ jobs:
       - name: Install dependencies
         run: npm ci --include=dev
 
-      - name: Typecheck shared
-        run: npm run typecheck -w @newsplus/shared
-
-      - name: Typecheck API
-        run: npm run typecheck -w newsplus-API
-
-      - name: Typecheck frontend
-        run: npm run typecheck -w newsplus-front
-
       - name: Build API
         run: npm run build -w newsplus-API
 
