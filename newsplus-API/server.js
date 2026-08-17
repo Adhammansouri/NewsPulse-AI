@@ -1,7 +1,5 @@
-import "dotenv/config";
-import { startServer } from "./dist/server.js";
+// Hostinger Git entry file — delegates to server.cjs (same bootstrap Passenger uses).
+import { createRequire } from "node:module";
 
-void startServer().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+const require = createRequire(import.meta.url);
+require("./server.cjs");

@@ -9,12 +9,38 @@ PUBLIC_HTML="${BASE}/public_html"
 NODE_APP="${BASE}/hbuilds/current/nodejs"
 REPO_DIR="${BASE}/repos/NewsPulse-AI"
 LOG_FILE="${BASE}/logs/post-deploy.log"
-ENV_FILE="${BASE}/hbuilds/config/.env"
+ENV_DIR="${BASE}/hbuilds/config"
+ENV_FILE="${ENV_DIR}/.env"
+SITE_URL="https://${DOMAIN}"
 
-mkdir -p "${BASE}/logs"
+mkdir -p "${BASE}/logs" "${ENV_DIR}"
 
 log() {
   echo "[$(date -Iseconds)] $*" | tee -a "${LOG_FILE}"
+}
+
+ensure_env_file() {
+  if [ ! -f "${ENV_FILE}" ]; then
+    log "Creating Hostinger env file"
+    cat > "${ENV_FILE}" <<EOF
+NODE_ENV=production
+HOST=0.0.0.0
+CORS_ORIGIN=${SITE_URL}
+EOF
+  fi
+
+  if ! grep -q '^JWT_SECRET=' "${ENV_FILE}"; then
+    printf "JWT_SECRET='%s'\n" "$(openssl rand -hex 32)" >> "${ENV_FILE}"
+    log "Generated JWT_SECRET in Hostinger env"
+  fi
+
+  if ! grep -q '^CORS_ORIGIN=' "${ENV_FILE}"; then
+    printf "CORS_ORIGIN='%s'\n" "${SITE_URL}" >> "${ENV_FILE}"
+  fi
+
+  if ! grep -q '^NODE_ENV=' "${ENV_FILE}"; then
+    printf "NODE_ENV=production\n" >> "${ENV_FILE}"
+  fi
 }
 
 log "==> Post-deploy start"
@@ -44,27 +70,31 @@ log "Syncing frontend to public_html"
 rsync -a --delete "${REPO_DIR}/newsplus-front/dist/" "${PUBLIC_HTML}/"
 cp "${REPO_DIR}/scripts/hostinger-public.deepskyblue.htaccess" "${PUBLIC_HTML}/.htaccess"
 
+ensure_env_file
+
 if [ -f "${NODE_APP}/package.json" ]; then
   log "Installing API runtime dependencies"
   cd "${NODE_APP}"
   npm install --omit=dev
 
+  if [ ! -f "${NODE_APP}/dist/server.js" ]; then
+    log "dist/server.js missing in NODE_APP — building API from repo"
+    npm run build --prefix "${REPO_DIR}/newsplus-API"
+    rsync -a "${REPO_DIR}/newsplus-API/dist/" "${NODE_APP}/dist/"
+  fi
+
   log "Syncing frontend into Node public/"
   mkdir -p "${NODE_APP}/public"
   rsync -a --delete "${REPO_DIR}/newsplus-front/dist/" "${NODE_APP}/public/"
 
-  if [ -f "${ENV_FILE}" ]; then
-    if ! grep -q '^JWT_SECRET=' "${ENV_FILE}"; then
-      printf "JWT_SECRET='%s'\n" "$(openssl rand -hex 32)" >> "${ENV_FILE}"
-      log "Generated JWT_SECRET in Hostinger env"
-    fi
-    cp "${ENV_FILE}" "${NODE_APP}/.env"
-    chmod 600 "${NODE_APP}/.env"
-  fi
+  cp "${ENV_FILE}" "${NODE_APP}/.env"
+  chmod 600 "${NODE_APP}/.env"
 
   mkdir -p tmp
   touch tmp/restart.txt
   log "Triggered Node.js restart"
+else
+  log "WARN: NODE_APP not found at ${NODE_APP}; skipped API sync"
 fi
 
 log "==> Post-deploy complete"
