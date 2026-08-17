@@ -25,18 +25,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
-        run: npm ci --workspaces --include=dev
+        run: npm ci
 
       - name: Build frontend and API
-        run: |
-          npm run build --workspace=newsplus-front
-          npm run build --workspace=newsplus-API
+        run: npm run build
 
       - name: Create deploy bundle
         run: |
+          test -f newsplus-front/dist/index.html
+          test -f newsplus-API/dist/server.js
           rm -rf .deploy
           mkdir -p .deploy/public .deploy/dist .deploy/scripts
           cp -a newsplus-front/dist/. .deploy/public/
@@ -44,6 +43,7 @@ jobs:
           cp newsplus-API/server.cjs newsplus-API/server.js newsplus-API/package.json newsplus-API/package-lock.json .deploy/
           cp scripts/hostinger-finish-deploy.sh scripts/hostinger-public.deepskyblue.htaccess scripts/hostinger-preload-timestamp.js .deploy/scripts/
           tar -czf newsplus-deploy.tgz -C .deploy .
+          ls -la newsplus-deploy.tgz
 
       - name: Upload deploy bundle
         uses: appleboy/scp-action@v0.1.7
@@ -69,8 +69,13 @@ jobs:
             NODE_APP="${BASE}/hbuilds/current/nodejs"
             SCRIPTS="${BASE}/repos/NewsPulse-AI/scripts"
             WORK="/tmp/newsplus-deploy-$$"
+            BUNDLE="$(find /tmp -maxdepth 2 -name 'newsplus-deploy.tgz' -type f | head -n 1)"
+            if [ -z "${BUNDLE}" ]; then
+              echo "Deploy bundle not found under /tmp"
+              exit 1
+            fi
             mkdir -p "${WORK}" "${NODE_APP}/public" "${NODE_APP}/dist" "${SCRIPTS}"
-            tar -xzf /tmp/newsplus-deploy.tgz -C "${WORK}"
+            tar -xzf "${BUNDLE}" -C "${WORK}"
             rsync -a --delete "${WORK}/public/" "${BASE}/public_html/"
             rsync -a --delete "${WORK}/public/" "${NODE_APP}/public/"
             rsync -a --delete "${WORK}/dist/" "${NODE_APP}/dist/"
@@ -78,7 +83,7 @@ jobs:
             cp "${WORK}/scripts/"* "${SCRIPTS}/"
             sed -i 's/\r$//' "${SCRIPTS}/hostinger-finish-deploy.sh"
             bash "${SCRIPTS}/hostinger-finish-deploy.sh"
-            rm -rf "${WORK}" /tmp/newsplus-deploy.tgz
+            rm -rf "${WORK}" "${BUNDLE}"
 
       - name: Verify production health
         run: |
