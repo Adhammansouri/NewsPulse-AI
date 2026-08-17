@@ -30,7 +30,9 @@ jobs:
         run: npm ci
 
       - name: Build frontend and API
-        run: npm run build
+        run: |
+          npm run build -w newsplus-API
+          npm exec -w newsplus-front -- vite build
 
       - name: Create deploy bundle
         run: |
