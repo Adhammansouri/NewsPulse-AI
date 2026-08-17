@@ -45,23 +45,23 @@ jobs:
           tar -czf newsplus-deploy.tgz -C .deploy .
           ls -la newsplus-deploy.tgz
 
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          known_hosts: ${{ secrets.HOSTINGER_SSH_HOST }}
-
-      - name: Add Hostinger SSH host key
-        run: ssh-keyscan -p "${{ secrets.HOSTINGER_SSH_PORT }}" "${{ secrets.HOSTINGER_SSH_HOST }}" >> ~/.ssh/known_hosts
+      - name: Configure SSH
+        env:
+          HOSTINGER_SSH_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$HOSTINGER_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ secrets.HOSTINGER_SSH_PORT }}" "${{ secrets.HOSTINGER_SSH_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Upload deploy bundle
         run: |
-          scp -P "${{ secrets.HOSTINGER_SSH_PORT }}" newsplus-deploy.tgz \
+          scp -i ~/.ssh/deploy_key -P "${{ secrets.HOSTINGER_SSH_PORT }}" newsplus-deploy.tgz \
             "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:/tmp/newsplus-deploy.tgz"
 
       - name: Extract bundle and finish deploy
         run: |
-          ssh -p "${{ secrets.HOSTINGER_SSH_PORT }}" \
+          ssh -i ~/.ssh/deploy_key -p "${{ secrets.HOSTINGER_SSH_PORT }}" \
             "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}" \
             "set -euo pipefail
             BASE='${{ env.HOSTINGER_BASE }}'
