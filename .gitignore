@@ -41,3 +41,10 @@ Thumbs.db
 # Misc
 *.log
 *.pem
+
+# Local deploy artifacts (CI builds on GitHub Actions)
+.deploy/
+deploy/
+newsplus-deploy.tgz
+newsplus-deploy.zip
+newsplus-API/public/

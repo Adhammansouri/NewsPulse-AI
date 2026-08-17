@@ -14,9 +14,9 @@ env:
   HOSTINGER_BASE: /home/u358087675/domains/deepskyblue-ibis-463603.hostingersite.com
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,39 +45,63 @@ jobs:
           tar -czf newsplus-deploy.tgz -C .deploy .
           ls -la newsplus-deploy.tgz
 
-      - name: Configure SSH
-        env:
-          HOSTINGER_SSH_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "$HOSTINGER_SSH_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p "${{ secrets.HOSTINGER_SSH_PORT }}" "${{ secrets.HOSTINGER_SSH_HOST }}" >> ~/.ssh/known_hosts
+      - name: Upload deploy artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: newsplus-deploy
+          path: newsplus-deploy.tgz
+          retention-days: 3
 
-      - name: Upload deploy bundle
-        run: |
-          scp -i ~/.ssh/deploy_key -P "${{ secrets.HOSTINGER_SSH_PORT }}" newsplus-deploy.tgz \
-            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:/tmp/newsplus-deploy.tgz"
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download deploy artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: newsplus-deploy
+
+      - name: Upload bundle to Hostinger
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOSTINGER_SSH_HOST }}
+          username: ${{ secrets.HOSTINGER_SSH_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_SSH_PORT }}
+          source: newsplus-deploy.tgz
+          target: /tmp/
+          overwrite: true
 
       - name: Extract bundle and finish deploy
-        run: |
-          ssh -i ~/.ssh/deploy_key -p "${{ secrets.HOSTINGER_SSH_PORT }}" \
-            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}" \
-            "set -euo pipefail
-            BASE='${{ env.HOSTINGER_BASE }}'
-            NODE_APP=\"\${BASE}/hbuilds/current/nodejs\"
-            SCRIPTS=\"\${BASE}/repos/NewsPulse-AI/scripts\"
-            WORK=\"/tmp/newsplus-deploy-\$\$\"
-            mkdir -p \"\${WORK}\" \"\${NODE_APP}/public\" \"\${NODE_APP}/dist\" \"\${SCRIPTS}\"
-            tar -xzf /tmp/newsplus-deploy.tgz -C \"\${WORK}\"
-            rsync -a --delete \"\${WORK}/public/\" \"\${BASE}/public_html/\"
-            rsync -a --delete \"\${WORK}/public/\" \"\${NODE_APP}/public/\"
-            rsync -a --delete \"\${WORK}/dist/\" \"\${NODE_APP}/dist/\"
-            cp \"\${WORK}/server.cjs\" \"\${WORK}/server.js\" \"\${WORK}/package.json\" \"\${WORK}/package-lock.json\" \"\${NODE_APP}/\"
-            cp \"\${WORK}/scripts/\"* \"\${SCRIPTS}/\"
-            sed -i 's/\r$//' \"\${SCRIPTS}/hostinger-finish-deploy.sh\"
-            bash \"\${SCRIPTS}/hostinger-finish-deploy.sh\"
-            rm -rf \"\${WORK}\" /tmp/newsplus-deploy.tgz"
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.HOSTINGER_SSH_HOST }}
+          username: ${{ secrets.HOSTINGER_SSH_USER }}
+          port: ${{ secrets.HOSTINGER_SSH_PORT }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+            BASE="${{ env.HOSTINGER_BASE }}"
+            NODE_APP="${BASE}/hbuilds/current/nodejs"
+            SCRIPTS="${BASE}/repos/NewsPulse-AI/scripts"
+            WORK="/tmp/newsplus-deploy-$$"
+            BUNDLE="$(find /tmp -maxdepth 2 -name 'newsplus-deploy.tgz' -type f | head -n 1)"
+            if [ -z "${BUNDLE}" ]; then
+              echo "Deploy bundle not found under /tmp"
+              exit 1
+            fi
+            mkdir -p "${WORK}" "${NODE_APP}/public" "${NODE_APP}/dist" "${SCRIPTS}"
+            tar -xzf "${BUNDLE}" -C "${WORK}"
+            rsync -a --delete "${WORK}/public/" "${BASE}/public_html/"
+            rsync -a --delete "${WORK}/public/" "${NODE_APP}/public/"
+            rsync -a --delete "${WORK}/dist/" "${NODE_APP}/dist/"
+            cp "${WORK}/server.cjs" "${WORK}/server.js" "${WORK}/package.json" "${WORK}/package-lock.json" "${NODE_APP}/"
+            cp "${WORK}/scripts/"* "${SCRIPTS}/"
+            sed -i 's/\r$//' "${SCRIPTS}/hostinger-finish-deploy.sh"
+            bash "${SCRIPTS}/hostinger-finish-deploy.sh"
+            rm -rf "${WORK}" "${BUNDLE}"
 
       - name: Verify production health
         run: |
