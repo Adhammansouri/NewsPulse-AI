@@ -35,48 +35,66 @@ jobs:
           npm run build --workspace=newsplus-front
           npm run build --workspace=newsplus-API
 
-      - name: Configure SSH
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p "${{ secrets.HOSTINGER_SSH_PORT }}" "${{ secrets.HOSTINGER_SSH_HOST }}" >> ~/.ssh/known_hosts
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.HOSTINGER_SSH_KEY }}
 
-      - name: Sync frontend assets
-        run: |
-          RSYNC_RSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_SSH_PORT }} -o StrictHostKeyChecking=yes"
-          export RSYNC_RSH
-          rsync -az --delete newsplus-front/dist/ \
-            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:${HOSTINGER_BASE}/public_html/"
-          rsync -az --delete newsplus-front/dist/ \
-            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:${HOSTINGER_BASE}/hbuilds/current/nodejs/public/"
+      - name: Add Hostinger to known_hosts
+        run: ssh-keyscan -p "${{ secrets.HOSTINGER_SSH_PORT }}" "${{ secrets.HOSTINGER_SSH_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Sync API runtime
+      - name: Prepare remote directories
         run: |
-          RSYNC_RSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_SSH_PORT }} -o StrictHostKeyChecking=yes"
-          export RSYNC_RSH
-          TARGET="${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:${HOSTINGER_BASE}/hbuilds/current/nodejs/"
-          rsync -az --delete newsplus-API/dist/ "${TARGET}dist/"
-          rsync -az newsplus-API/server.cjs newsplus-API/server.js newsplus-API/package.json newsplus-API/package-lock.json "${TARGET}"
+          ssh -p "${{ secrets.HOSTINGER_SSH_PORT }}" \
+            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}" \
+            "mkdir -p '${HOSTINGER_BASE}/public_html' \
+                       '${HOSTINGER_BASE}/hbuilds/current/nodejs/public' \
+                       '${HOSTINGER_BASE}/hbuilds/current/nodejs/dist' \
+                       '${HOSTINGER_BASE}/repos/NewsPulse-AI/scripts'"
 
-      - name: Sync deploy scripts
+      - name: Upload frontend bundle
         run: |
-          RSYNC_RSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_SSH_PORT }} -o StrictHostKeyChecking=yes"
-          export RSYNC_RSH
-          rsync -az scripts/hostinger-finish-deploy.sh scripts/hostinger-public.deepskyblue.htaccess scripts/hostinger-preload-timestamp.js \
+          tar -C newsplus-front/dist -czf /tmp/newsplus-front.tgz .
+          scp -P "${{ secrets.HOSTINGER_SSH_PORT }}" /tmp/newsplus-front.tgz \
+            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:/tmp/newsplus-front.tgz"
+          ssh -p "${{ secrets.HOSTINGER_SSH_PORT }}" \
+            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}" \
+            "rm -rf '${HOSTINGER_BASE}/public_html/'* && \
+             tar -xzf /tmp/newsplus-front.tgz -C '${HOSTINGER_BASE}/public_html' && \
+             rm -f /tmp/newsplus-front.tgz && \
+             rm -rf '${HOSTINGER_BASE}/hbuilds/current/nodejs/public/'* && \
+             mkdir -p '${HOSTINGER_BASE}/hbuilds/current/nodejs/public' && \
+             tar -C '${HOSTINGER_BASE}/public_html' -czf /tmp/newsplus-front-node.tgz . && \
+             tar -xzf /tmp/newsplus-front-node.tgz -C '${HOSTINGER_BASE}/hbuilds/current/nodejs/public' && \
+             rm -f /tmp/newsplus-front-node.tgz"
+
+      - name: Upload API runtime
+        run: |
+          tar -C newsplus-API/dist -czf /tmp/newsplus-api-dist.tgz .
+          scp -P "${{ secrets.HOSTINGER_SSH_PORT }}" /tmp/newsplus-api-dist.tgz \
+            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:/tmp/newsplus-api-dist.tgz"
+          scp -P "${{ secrets.HOSTINGER_SSH_PORT }}" \
+            newsplus-API/server.cjs newsplus-API/server.js newsplus-API/package.json newsplus-API/package-lock.json \
+            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:${HOSTINGER_BASE}/hbuilds/current/nodejs/"
+          ssh -p "${{ secrets.HOSTINGER_SSH_PORT }}" \
+            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}" \
+            "rm -rf '${HOSTINGER_BASE}/hbuilds/current/nodejs/dist/'* && \
+             tar -xzf /tmp/newsplus-api-dist.tgz -C '${HOSTINGER_BASE}/hbuilds/current/nodejs/dist' && \
+             rm -f /tmp/newsplus-api-dist.tgz"
+
+      - name: Upload deploy scripts
+        run: |
+          scp -P "${{ secrets.HOSTINGER_SSH_PORT }}" \
+            scripts/hostinger-finish-deploy.sh \
+            scripts/hostinger-public.deepskyblue.htaccess \
+            scripts/hostinger-preload-timestamp.js \
             "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:${HOSTINGER_BASE}/repos/NewsPulse-AI/scripts/"
 
       - name: Finish deploy on server
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          command_timeout: 10m
-          script: |
-            set -euo pipefail
-            bash /home/u358087675/domains/deepskyblue-ibis-463603.hostingersite.com/repos/NewsPulse-AI/scripts/hostinger-finish-deploy.sh
+        run: |
+          ssh -p "${{ secrets.HOSTINGER_SSH_PORT }}" \
+            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}" \
+            "bash '${HOSTINGER_BASE}/repos/NewsPulse-AI/scripts/hostinger-finish-deploy.sh'"
 
       - name: Verify production health
         run: |
