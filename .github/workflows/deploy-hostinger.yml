@@ -29,8 +29,11 @@ jobs:
 
       - name: Install dependencies
         run: |
+          # Work around npm optional-deps bug (lightningcss native binding on Linux CI)
+          rm -rf node_modules
+          rm -f package-lock.json
           npm install --no-audit --no-fund
-          npm install lightningcss-linux-x64-gnu@1.33.0 @rolldown/binding-linux-x64-gnu@1.2.4 -w newsplus-front --force
+          node -e "require('lightningcss-linux-x64-gnu'); console.log('lightningcss binding ok')"
 
       - name: Build frontend and API
         run: |
