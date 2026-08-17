@@ -11,9 +11,9 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route element={<RequireAuth />}>
+      <Route element={<RequireAuth />}>
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<HomePage />} />
           <Route path="/news" element={<NewsPage />} />
           <Route path="/generate" element={<GeneratePage />} />
           <Route path="/translate" element={<TranslatePage />} />
