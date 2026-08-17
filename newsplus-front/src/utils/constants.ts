@@ -10,6 +10,15 @@ export const HEADER_CTA = {
   label: "ابدأ الآن",
 } as const;
 
+export const HEADER_LOGIN = {
+  href: "/login",
+  label: "دخول",
+} as const;
+
+export const HEADER_LOGOUT = {
+  label: "خروج",
+} as const;
+
 export const HOME_FEATURES = [
   {
     href: "/news",

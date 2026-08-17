@@ -11,5 +11,10 @@ export type ApiSuccessResponse<T> = {
   data: T;
 };
 
+export type ApiFailResponse = {
+  status: "fail";
+  message: string;
+};
+
 /** @deprecated Use HealthData inside ApiSuccessResponse */
 export type HealthResponse = HealthData;

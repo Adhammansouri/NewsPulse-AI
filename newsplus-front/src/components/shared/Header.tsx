@@ -1,151 +1,314 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
 import { BrandMark } from "@/components/shared/BrandMark";
-import { HEADER_CTA, NAV_ITEMS } from "@/utils/constants";
+
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
+
+import { useSession } from "@/hooks/useSession";
+
+import { logout } from "@/services/authService";
+
+import { HEADER_CTA, HEADER_LOGIN, HEADER_LOGOUT, NAV_ITEMS } from "@/utils/constants";
+
+
 
 function isActivePath(pathname: string, href: string) {
+
   if (href === "/") return pathname === "/";
+
   return pathname.startsWith(href);
+
 }
 
-function navLinkClass(active: boolean) {
-  return [
-    "relative rounded-lg px-3.5 py-2 text-sm font-medium transition-colors duration-200",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/40 focus-visible:ring-offset-2",
-    active
-      ? "bg-white text-navy-900 shadow-sm ring-1 ring-slate-200/80"
-      : "text-slate-600 hover:bg-white/70 hover:text-navy-900",
-  ].join(" ");
-}
 
-const ctaClass =
-  "inline-flex shrink-0 items-center justify-center rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-600/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/40 focus-visible:ring-offset-2";
 
 export function Header() {
+
   const { pathname } = useLocation();
+
+  const navigate = useNavigate();
+
+  const session = useSession();
+
   const [mobileOpen, setMobileOpen] = useState(false);
 
+
+
+  async function handleLogout() {
+
+    await logout();
+
+    navigate("/login", { replace: true });
+
+  }
+
+
+
   useEffect(() => {
+
     setMobileOpen(false);
+
   }, [pathname]);
 
+
+
   useEffect(() => {
+
     document.body.style.overflow = mobileOpen ? "hidden" : "";
+
     return () => {
+
       document.body.style.overflow = "";
+
     };
+
   }, [mobileOpen]);
 
-  return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-white/85">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-l from-teal-600 via-cyan-500 to-teal-600" />
 
-      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+
+  return (
+
+    <header className="brand-header-sticky">
+
+      <div className="brand-header-shell">
+
         <Link
+
           to="/"
-          className="group shrink-0 rounded-xl transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/40 focus-visible:ring-offset-2"
+
+          className="shrink-0 rounded-full transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/40 focus-visible:ring-offset-2"
+
           aria-label="Newsplus — الصفحة الرئيسية"
+
         >
-          <BrandMark />
+
+          <BrandMark size="sm" />
+
         </Link>
 
-        <nav
-          className="hidden flex-1 items-center justify-center md:flex"
-          aria-label="التنقل الرئيسي"
-        >
-          <div className="flex items-center gap-1 rounded-xl bg-slate-100/80 p-1 ring-1 ring-slate-200/60">
+
+
+        <nav className="hidden flex-1 items-center justify-center md:flex" aria-label="التنقل الرئيسي">
+
+          <div className="brand-header-nav">
+
             {NAV_ITEMS.map((item) => {
+
               const active = isActivePath(pathname, item.href);
+
               return (
+
                 <Link
+
                   key={item.href}
+
                   to={item.href}
-                  className={navLinkClass(active)}
+
+                  className={active ? "brand-header-nav-link brand-header-nav-link--active" : "brand-header-nav-link"}
+
                   aria-current={active ? "page" : undefined}
+
                 >
+
                   {item.label}
+
                 </Link>
+
               );
+
             })}
+
           </div>
+
         </nav>
 
-        <div className="hidden shrink-0 md:block">
-          <Link to={HEADER_CTA.href} className={ctaClass}>
+
+
+        <div className="hidden shrink-0 items-center gap-2 md:flex">
+
+          <ThemeToggle />
+
+          {session ? (
+
+            <button type="button" className="brand-header-ghost-btn" onClick={() => void handleLogout()}>
+
+              {HEADER_LOGOUT.label}
+
+            </button>
+
+          ) : (
+
+            <Link to={HEADER_LOGIN.href} className="brand-header-ghost-btn">
+
+              {HEADER_LOGIN.label}
+
+            </Link>
+
+          )}
+
+          <Link to={HEADER_CTA.href} className="brand-btn brand-btn-pill">
+
             {HEADER_CTA.label}
+
           </Link>
+
         </div>
 
+
+
         <button
+
           type="button"
-          className="ms-auto inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-navy-900 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/40 focus-visible:ring-offset-2 md:hidden"
+
+          className="brand-header-icon-btn brand-header-icon-btn--neutral ms-auto md:hidden"
+
           aria-label={mobileOpen ? "إغلاق القائمة" : "فتح القائمة"}
+
           aria-expanded={mobileOpen}
+
           aria-controls="mobile-nav"
+
           onClick={() => setMobileOpen((open) => !open)}
+
         >
+
           {mobileOpen ? (
+
             <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-              <path
-                d="M6 6l12 12M18 6L6 18"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
+
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+
             </svg>
+
           ) : (
+
             <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-              <path
-                d="M4 7h16M4 12h16M4 17h16"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
+
+              <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+
             </svg>
+
           )}
+
         </button>
+
       </div>
 
+
+
       {mobileOpen && (
+
         <>
+
           <button
+
             type="button"
-            className="fixed inset-0 top-[69px] z-40 bg-navy-900/20 backdrop-blur-[1px] md:hidden"
+
+            className="fixed inset-0 z-40 bg-[color-mix(in_srgb,var(--color-navy-900)_18%,transparent)] md:hidden"
+
             aria-label="إغلاق القائمة"
+
             onClick={() => setMobileOpen(false)}
+
           />
+
           <nav
+
             id="mobile-nav"
-            className="relative z-50 border-t border-slate-200 bg-white px-4 py-3 shadow-md md:hidden"
+
+            className="brand-header-mobile-sheet relative z-50 md:hidden"
+
             aria-label="التنقل الرئيسي"
+
           >
-            <div className="flex flex-col gap-1">
+
+            <div className="brand-header-nav w-full flex-col gap-1">
+
               {NAV_ITEMS.map((item) => {
+
                 const active = isActivePath(pathname, item.href);
+
                 return (
+
                   <Link
+
                     key={item.href}
+
                     to={item.href}
+
                     className={[
-                      "rounded-xl px-4 py-3 text-sm font-medium transition-colors",
-                      active
-                        ? "bg-teal-600/10 text-teal-600"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-navy-900",
+
+                      "brand-header-nav-link w-full justify-start",
+
+                      active ? "brand-header-nav-link--active" : "",
+
                     ].join(" ")}
+
                     aria-current={active ? "page" : undefined}
+
                   >
+
                     {item.label}
+
                   </Link>
+
                 );
+
               })}
 
-              <Link to={HEADER_CTA.href} className={`${ctaClass} mt-2 w-full py-3`}>
-                {HEADER_CTA.label}
-              </Link>
             </div>
+
+
+
+            <div className="mt-3 flex flex-col gap-2">
+              <div className="flex justify-center">
+                <ThemeToggle />
+              </div>
+              {session ? (
+
+                <button
+
+                  type="button"
+
+                  className="brand-header-ghost-btn w-full"
+
+                  onClick={() => void handleLogout()}
+
+                >
+
+                  {HEADER_LOGOUT.label}
+
+                </button>
+
+              ) : (
+
+                <Link to={HEADER_LOGIN.href} className="brand-header-ghost-btn w-full">
+
+                  {HEADER_LOGIN.label}
+
+                </Link>
+
+              )}
+
+              <Link to={HEADER_CTA.href} className="brand-btn brand-btn-pill w-full">
+
+                {HEADER_CTA.label}
+
+              </Link>
+
+            </div>
+
           </nav>
+
         </>
+
       )}
+
     </header>
+
   );
+
 }
+

@@ -1,5 +1,7 @@
 # Newsplus Design System
 
+> **Hybrid:** Marketing uses this palette. Tool screens (`/news`, `/generate`, `/translate`) use [Nothing dashboard style](./HYBRID.md). See `HYBRID.md` for the full split.
+
 Professional visual identity for **Newsplus** — AI-powered news monitoring, summarisation, translation & report writing.
 
 ---
@@ -96,12 +98,12 @@ Notification → coral-400 (#F4845F)
 
 | Role | Font | Weight | Size |
 |------|------|--------|------|
-| Display | Inter | 700 | 32–48px |
-| Heading | Inter | 600 | 20–28px |
-| Body | Inter | 400 | 14–16px |
-| Caption | Inter | 500 | 12px |
-| Arabic body | Noto Sans Arabic | 400 | 14–16px |
-| Logo wordmark | Inter | 700 | — |
+| Display | IBM Plex Sans | 700 | 32–48px |
+| Heading | IBM Plex Sans | 600 | 20–28px |
+| Body | IBM Plex Sans | 400 | 14–16px |
+| Caption | IBM Plex Sans | 500 | 12px |
+| Arabic body | IBM Plex Sans Arabic | 400 | 14–16px |
+| Logo wordmark | IBM Plex Sans | 700 | — |
 
 **Logo wordmark rule:** `News` in `navy-900`, `plus` in `teal-600`, same bold rounded sans-serif (reads as **Newsplus**).
 

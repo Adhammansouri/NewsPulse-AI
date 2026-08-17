@@ -1,65 +1,71 @@
-import { FeatureCard } from "@/components/shared/FeatureCard";
+import { FeatureCard } from "@/components/brand/FeatureCard";
+import { BrandHeroLockup } from "@/components/brand/BrandHeroLockup";
+import { HeroCta } from "@/components/brand/HeroCta";
+import { BrandSystemStatus } from "@/components/brand/SystemStatus";
 import { useHealth } from "@/hooks/useHealth";
 import { HOME_FEATURES } from "@/utils/constants";
 
 export default function HomePage() {
   const { data: health, isLoading, isError } = useHealth();
+  const [featured, ...rest] = HOME_FEATURES;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <section className="mb-12 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-12">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="mb-3 inline-flex rounded-full bg-teal-600/10 px-3 py-1 text-sm font-medium text-teal-600">
-              مساعد إخباري بالذكاء الاصطناعي
-            </p>
-            <h1 className="mb-4 text-3xl font-bold leading-tight text-navy-900 sm:text-4xl">
-              من الخبر الخام إلى محتوى جاهز للنشر
+      <section className="mb-14 lg:mb-16">
+        <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-12">
+          <div className="brand-fade-in">
+            <span className="brand-badge brand-badge-teal">مساعد إخباري بالذكاء الاصطناعي</span>
+
+            <h1 className="brand-display mt-5">
+              من الخبر{" "}
+              <span className="inline-flex align-middle">
+                <img
+                  src="/icons/logo-icon.png"
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="inline-block rounded-md align-middle shadow-sm ring-1 brand-border-default"
+                />
+              </span>
+              {" "}الخام إلى محتوى جاهز للنشر
             </h1>
-            <p className="text-lg leading-8 text-slate-600">
+
+            <p className="brand-body mt-5">
               Newsplus يساعدك على متابعة الأخبار، تلخيصها، ترجمتها، وكتابة تقارير
               احترافية بأسلوب تحريري متسق.
             </p>
+
+            <HeroCta />
           </div>
-          <div className="flex shrink-0 justify-center lg:justify-end">
-            <img
-              src="/icons/logo-icon.png"
-              alt="Newsplus"
-              width={160}
-              height={160}
-              className="rounded-2xl"
-            />
+
+          <div className="brand-panel relative overflow-hidden rounded-[1.35rem] bg-navy-900 p-6 text-center sm:p-8 brand-fade-in">
+            <div className="absolute inset-x-0 top-0 h-1 bg-teal-500" aria-hidden="true" />
+            <BrandHeroLockup />
+            <p className="mt-8 max-w-xs text-sm leading-7 text-slate-300">
+              منصة واحدة لمراقبة المصادر، التلخيص، الترجمة، وتوليد المحتوى التحريري.
+            </p>
           </div>
         </div>
       </section>
 
-      <section className="mb-10">
-        <h2 className="mb-6 text-xl font-semibold text-navy-900">ابدأ من هنا</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {HOME_FEATURES.map((feature) => (
-            <FeatureCard key={feature.href} {...feature} />
-          ))}
+      <section className="mb-14">
+        <div className="mb-8">
+          <h2 className="brand-text-primary text-xl font-semibold tracking-tight">ابدأ من هنا</h2>
+          <p className="brand-text-secondary mt-1 text-sm">اختر الأداة المناسبة لسير عملك التحريري</p>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <FeatureCard {...featured} variant="featured" index={0} />
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {rest.map((feature, i) => (
+              <FeatureCard key={feature.href} {...feature} index={i + 1} />
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-        {isLoading && <p className="text-slate-600">جاري التحقق من حالة النظام...</p>}
-        {isError && (
-          <p className="text-coral-500">
-            تعذّر الاتصال بالخادم. تأكد أن الـ API يعمل على المنفذ 3001.
-          </p>
-        )}
-        {health && (
-          <p className="text-slate-600">
-            حالة النظام:{" "}
-            <span className="font-medium text-teal-600">{health.status}</span>
-            {" · "}
-            الإصدار {health.version}
-            {" · "}
-            OpenAI {health.openai ? "متصل" : "غير مُعدّ"}
-          </p>
-        )}
-      </section>
+      <BrandSystemStatus isLoading={isLoading} isError={isError} health={health} />
     </div>
   );
 }

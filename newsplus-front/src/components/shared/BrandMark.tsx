@@ -28,16 +28,16 @@ export function BrandMark({ showTagline = false, size = "md" }: BrandMarkProps) 
         alt=""
         width={styles.icon}
         height={styles.icon}
-        className="rounded-lg shadow-sm ring-1 ring-slate-200/60"
+        className="rounded-lg shadow-sm ring-1 ring-[color-mix(in_srgb,var(--border-default)_60%,transparent)]"
       />
 
       <div className="flex flex-col leading-none">
         <span className={`${styles.title} font-bold tracking-tight`}>
-          <span className="text-navy-900">News</span>
-          <span className="text-teal-600">plus</span>
+          <span className="brand-logo-n">News</span>
+          <span className="brand-logo-p">plus</span>
         </span>
         {showTagline && (
-          <span className={`${styles.tagline} mt-1 font-medium text-slate-500`}>
+          <span className={`${styles.tagline} brand-text-secondary mt-1 font-medium`}>
             مساعد إخباري بالذكاء الاصطناعي
           </span>
         )}

@@ -7,7 +7,8 @@ export default function TranslatePage() {
       description="ترجم بين العربية والإنجليزية مع عرض النص الأصلي والمترجم."
       placeholder="الصق النص أو رابط المحتوى للترجمة..."
       actionLabel="ترجمة"
-      badge="قريباً"
+      badge="BILINGUAL"
+      previewLabel="TRANSLATION"
     />
   );
 }

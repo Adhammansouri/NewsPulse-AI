@@ -1,76 +1,87 @@
-:root {
-  /* Primary — Editorial Navy */
-  --color-navy-900: #0C2340;
-  --color-navy-700: #1A3A5C;
-  --color-navy-500: #2E5078;
-
-  /* Accent — Pulse Teal */
-  --color-teal-600: #0D9B8A;
-  --color-teal-500: #14B8A6;
-  --color-teal-400: #2DD4BF;
-
-  /* Accent — Intelligence Cyan */
-  --color-cyan-500: #0EA5E9;
-  --color-cyan-400: #38BDF8;
-
-  /* Accent — Alert Coral */
-  --color-coral-500: #EF6C57;
-  --color-coral-400: #F4845F;
-
-  /* Neutrals */
-  --color-slate-900: #0F172A;
-  --color-slate-800: #1E293B;
-  --color-slate-600: #475569;
-  --color-slate-400: #94A3B8;
-  --color-slate-200: #E2E8F0;
-  --color-slate-50: #F8FAFC;
-  --color-white: #FFFFFF;
-
-  /* Semantic */
-  --color-success: #10B981;
-  --color-warning: #F59E0B;
-  --color-error: #EF4444;
-  --color-info: #0EA5E9;
-
-  /* Logo */
-  --logo-n: var(--color-navy-900);
-  --logo-p: var(--color-teal-600);
-  --logo-plus: var(--color-white);
-  --logo-notification: var(--color-coral-500);
-
-  /* UI */
-  --bg-primary: var(--color-slate-50);
-  --bg-surface: var(--color-white);
-  --text-primary: var(--color-navy-900);
-  --text-secondary: var(--color-slate-600);
-  --border-default: var(--color-slate-200);
-  --accent-primary: var(--color-teal-600);
-  --accent-link: var(--color-cyan-500);
-  --accent-alert: var(--color-coral-500);
-
-  /* Typography */
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-arabic: 'Noto Sans Arabic', sans-serif;
-
-  /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(12, 35, 64, 0.06);
-  --shadow-md: 0 4px 12px rgba(12, 35, 64, 0.10);
-  --shadow-lg: 0 8px 24px rgba(12, 35, 64, 0.14);
-}
-
-[data-theme="dark"] {
-  --bg-primary: var(--color-slate-900);
-  --bg-surface: var(--color-slate-800);
-  --text-primary: var(--color-slate-50);
-  --text-secondary: var(--color-slate-400);
-  --border-default: var(--color-navy-700);
-  --logo-n: var(--color-white);
-  --logo-p: var(--color-teal-400);
-  --logo-plus: var(--color-slate-900);
-}
+:root,
+[data-theme="light"] {
+  /* Primary — Editorial Navy */
+  --color-navy-900: #0C2340;
+  --color-navy-700: #1A3A5C;
+  --color-navy-500: #2E5078;
+
+  /* Accent — Pulse Teal */
+  --color-teal-600: #0D9B8A;
+  --color-teal-500: #14B8A6;
+  --color-teal-400: #2DD4BF;
+
+  /* Accent — Intelligence Cyan */
+  --color-cyan-500: #0EA5E9;
+  --color-cyan-400: #38BDF8;
+
+  /* Accent — Alert Coral */
+  --color-coral-500: #EF6C57;
+  --color-coral-400: #F4845F;
+
+  /* Neutrals */
+  --color-slate-900: #0F172A;
+  --color-slate-800: #1E293B;
+  --color-slate-600: #475569;
+  --color-slate-400: #94A3B8;
+  --color-slate-200: #E2E8F0;
+  --color-slate-50: #F8FAFC;
+  --color-white: #FFFFFF;
+
+  /* Semantic */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #0EA5E9;
+
+  /* Logo */
+  --logo-n: var(--color-navy-900);
+  --logo-p: var(--color-teal-600);
+  --logo-plus: var(--color-white);
+  --logo-notification: var(--color-coral-500);
+
+  /* UI */
+  --bg-primary: var(--color-slate-50);
+  --bg-surface: var(--color-white);
+  --bg-elevated: var(--color-white);
+  --text-primary: var(--color-navy-900);
+  --text-secondary: var(--color-slate-600);
+  --border-default: var(--color-slate-200);
+  --accent-primary: var(--color-teal-600);
+  --accent-link: var(--color-cyan-500);
+  --accent-alert: var(--color-coral-500);
+
+  /* Typography */
+  --font-sans: 'IBM Plex Sans', 'Geist Variable', 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, monospace;
+  --font-arabic: 'IBM Plex Sans Arabic', 'IBM Plex Sans', 'Noto Sans Arabic', sans-serif;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(12, 35, 64, 0.06);
+  --shadow-md: 0 4px 12px rgba(12, 35, 64, 0.10);
+  --shadow-lg: 0 8px 24px rgba(12, 35, 64, 0.14);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0F172A;
+  --bg-surface: #1E293B;
+  --bg-elevated: #334155;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --border-default: #334155;
+  --accent-primary: var(--color-teal-400);
+  --accent-link: var(--color-cyan-400);
+  --accent-alert: var(--color-coral-400);
+  --logo-n: var(--color-white);
+  --logo-p: var(--color-teal-400);
+  --logo-plus: var(--color-slate-900);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.22);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.34);
+}
+

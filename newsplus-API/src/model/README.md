@@ -1,3 +1,3 @@
 # Models
 
-Database models (Prisma / Mongoose) will live here.
+Domain records for the current in-memory auth store. Database models (Prisma / Mongoose) will replace `InMemoryUserRepository` behind the same interface.

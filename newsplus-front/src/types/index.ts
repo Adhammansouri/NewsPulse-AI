@@ -1,1 +1,1 @@
-export type { HealthResponse } from "@newsplus/shared";
+export type { AuthUser, HealthResponse } from "@newsplus/shared";

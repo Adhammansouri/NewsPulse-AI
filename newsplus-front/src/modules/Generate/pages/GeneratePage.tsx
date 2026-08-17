@@ -7,7 +7,8 @@ export default function GeneratePage() {
       description="أنشئ تقارير ومقالات إخبارية بأسلوب تحريري احترافي."
       placeholder="اكتب الموضوع، الزاوية، أو الصق نصاً مرجعياً..."
       actionLabel="توليد المحتوى"
-      badge="قريباً"
+      badge="GENERATE"
+      previewLabel="OUTPUT"
     />
   );
 }
