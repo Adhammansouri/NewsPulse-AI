@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install --no-audit --no-fund
-          npm install -w newsplus-front @rolldown/binding-linux-x64-gnu lightningcss-linux-x64-gnu --no-save
+          npm install lightningcss-linux-x64-gnu@1.33.0 @rolldown/binding-linux-x64-gnu@1.2.4 -w newsplus-front --force
 
       - name: Build frontend and API
         run: |
