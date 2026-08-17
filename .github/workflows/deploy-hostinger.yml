@@ -10,6 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  NODE_ENV: development
   HOSTINGER_DOMAIN: deepskyblue-ibis-463603.hostingersite.com
   HOSTINGER_BASE: /home/u358087675/domains/deepskyblue-ibis-463603.hostingersite.com
 
@@ -27,7 +28,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --include=dev
 
       - name: Build frontend and API
         run: |

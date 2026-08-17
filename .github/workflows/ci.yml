@@ -10,6 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      NODE_ENV: development
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -20,7 +22,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --include=dev
 
       - name: Typecheck shared
         run: npm run typecheck -w @newsplus/shared
