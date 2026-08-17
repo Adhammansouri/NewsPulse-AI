@@ -3,6 +3,7 @@ import { createAuthService } from "./container.js";
 import { corsPlugin } from "./plugins/cors.plugin.js";
 import { errorHandlerPlugin } from "./plugins/errorHandler.plugin.js";
 import { jwtPlugin } from "./plugins/jwt.plugin.js";
+import { staticPlugin } from "./plugins/static.plugin.js";
 import { createApiRoutes } from "./routes/index.js";
 
 export async function buildApp() {
@@ -14,6 +15,7 @@ export async function buildApp() {
 
   const authService = await createAuthService(app);
   await app.register(createApiRoutes(authService), { prefix: "/api" });
+  await app.register(staticPlugin);
 
   return app;
 }

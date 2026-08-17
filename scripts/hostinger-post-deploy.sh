@@ -9,6 +9,7 @@ PUBLIC_HTML="${BASE}/public_html"
 NODE_APP="${BASE}/hbuilds/current/nodejs"
 REPO_DIR="${BASE}/repos/NewsPulse-AI"
 LOG_FILE="${BASE}/logs/post-deploy.log"
+ENV_FILE="${BASE}/hbuilds/config/.env"
 
 mkdir -p "${BASE}/logs"
 
@@ -17,14 +18,6 @@ log() {
 }
 
 log "==> Post-deploy start"
-
-if [ -f "${NODE_APP}/package.json" ] && [ ! -d "${NODE_APP}/node_modules" ]; then
-  log "Installing API runtime dependencies"
-  cd "${NODE_APP}"
-  npm ci --omit=dev
-  mkdir -p tmp
-  touch tmp/restart.txt
-fi
 
 mkdir -p "${BASE}/repos"
 if [ ! -d "${REPO_DIR}/.git" ]; then
@@ -51,9 +44,26 @@ log "Syncing frontend to public_html"
 rsync -a --delete "${REPO_DIR}/newsplus-front/dist/" "${PUBLIC_HTML}/"
 cp "${REPO_DIR}/scripts/hostinger-public.deepskyblue.htaccess" "${PUBLIC_HTML}/.htaccess"
 
-if [ -d "${NODE_APP}" ]; then
-  mkdir -p "${NODE_APP}/tmp"
-  touch "${NODE_APP}/tmp/restart.txt"
+if [ -f "${NODE_APP}/package.json" ]; then
+  log "Installing API runtime dependencies"
+  cd "${NODE_APP}"
+  npm install --omit=dev
+
+  log "Syncing frontend into Node public/"
+  mkdir -p "${NODE_APP}/public"
+  rsync -a --delete "${REPO_DIR}/newsplus-front/dist/" "${NODE_APP}/public/"
+
+  if [ -f "${ENV_FILE}" ]; then
+    if ! grep -q '^JWT_SECRET=' "${ENV_FILE}"; then
+      printf "JWT_SECRET='%s'\n" "$(openssl rand -hex 32)" >> "${ENV_FILE}"
+      log "Generated JWT_SECRET in Hostinger env"
+    fi
+    cp "${ENV_FILE}" "${NODE_APP}/.env"
+    chmod 600 "${NODE_APP}/.env"
+  fi
+
+  mkdir -p tmp
+  touch tmp/restart.txt
   log "Triggered Node.js restart"
 fi
 
