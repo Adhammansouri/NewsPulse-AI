@@ -2,13 +2,13 @@
 
 كل **push** على `main` يشغّل GitHub Actions وينشر على:
 
-**https://darkred-sparrow-645513.hostingersite.com**
+**https://deepskyblue-ibis-463603.hostingersite.com**
 
 ## ما تم إعداده
 
-- GitHub Actions workflow: `.github/workflows/deploy-hostinger.yml`
+- GitHub Actions workflow: `.github/workflows/deploy-hostinger.yml` (SSH + `hostinger-post-deploy.sh` + health check)
 - Secrets على GitHub: `HOSTINGER_SSH_*`
-- Deploy key على الريبو للسيرفر (git pull عند الحاجة)
+- Deploy key على الريبو للسيرفر (git pull أثناء post-deploy)
 - متغيرات البيئة على السيرفر تُكتب تلقائيًا أثناء النشر
 
 ## سير العمل

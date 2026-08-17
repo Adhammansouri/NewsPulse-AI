@@ -3,9 +3,39 @@ name: Deploy to Hostinger
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: hostinger-deploy
+  cancel-in-progress: true
 
 jobs:
-  notify:
+  deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - run: echo "Pushed to main. Hostinger cron deploys within 5 minutes."
+      - name: Run post-deploy on Hostinger
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.HOSTINGER_SSH_HOST }}
+          username: ${{ secrets.HOSTINGER_SSH_USER }}
+          port: ${{ secrets.HOSTINGER_SSH_PORT }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+            bash /home/u358087675/domains/deepskyblue-ibis-463603.hostingersite.com/repos/NewsPulse-AI/scripts/hostinger-post-deploy.sh
+
+      - name: Verify production health
+        run: |
+          url="https://deepskyblue-ibis-463603.hostingersite.com/api/health"
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsS "$url" | grep -q '"status":"ok"'; then
+              echo "Health check passed: $url"
+              exit 0
+            fi
+            echo "Waiting for API... ($attempt/6)"
+            sleep 10
+          done
+          echo "Health check failed: $url"
+          exit 1

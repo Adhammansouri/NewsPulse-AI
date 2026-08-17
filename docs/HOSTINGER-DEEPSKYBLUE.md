@@ -10,7 +10,7 @@ Common causes:
 
 1. **`JWT_SECRET` missing** while `NODE_ENV=production` — fixed in `newsplus-API/server.cjs` (auto-generates if absent).
 2. **`dist/server.js` missing** — Hostinger Git build must run `npm run build` in `newsplus-API`.
-3. **Frontend not synced into `public/`** — run the post-deploy cron (below).
+3. **Frontend not synced into `public/`** — run the GitHub Actions deploy workflow or `hostinger-post-deploy.sh` over SSH.
 
 ## hPanel Node.js app settings
 
@@ -34,14 +34,16 @@ JWT_SECRET=<openssl rand -hex 32>
 
 `server.cjs` copies this file into the running app as `.env` on each start.
 
-## Post-deploy cron (required for SPA assets)
+## Post-deploy (required for SPA assets)
 
 Hostinger Git deploy only builds the API workspace. The React app must be built separately and copied into:
 
 - `public_html/` (static fallback)
 - `hbuilds/current/nodejs/public/` (served by Fastify when Passenger runs Node)
 
-Cron command (every 5 minutes or after deploy):
+**Automatic:** every push to `main` runs `.github/workflows/deploy-hostinger.yml`, which SSHs into Hostinger and executes `scripts/hostinger-post-deploy.sh`.
+
+**Manual (SSH):**
 
 ```bash
 bash /home/u358087675/domains/deepskyblue-ibis-463603.hostingersite.com/repos/NewsPulse-AI/scripts/hostinger-post-deploy.sh
