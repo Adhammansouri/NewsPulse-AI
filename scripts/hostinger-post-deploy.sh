@@ -72,6 +72,12 @@ cp "${REPO_DIR}/scripts/hostinger-public.deepskyblue.htaccess" "${PUBLIC_HTML}/.
 
 ensure_env_file
 
+PRELOAD_FILE="${ENV_DIR}/preload-timestamp.js"
+if [ ! -f "${PRELOAD_FILE}" ]; then
+  cp "${REPO_DIR}/scripts/hostinger-preload-timestamp.js" "${PRELOAD_FILE}"
+  log "Installed preload-timestamp.js"
+fi
+
 if [ -f "${NODE_APP}/package.json" ]; then
   log "Installing API runtime dependencies"
   cd "${NODE_APP}"
