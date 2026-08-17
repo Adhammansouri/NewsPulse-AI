@@ -6,7 +6,7 @@
 
 ## ما تم إعداده
 
-- GitHub Actions workflow: `.github/workflows/deploy-hostinger.yml` (SSH + `hostinger-post-deploy.sh` + health check)
+- GitHub Actions workflow: `.github/workflows/deploy-hostinger.yml` (CI build + rsync + `hostinger-finish-deploy.sh` + health check)
 - Secrets على GitHub: `HOSTINGER_SSH_*`
 - Deploy key على الريبو للسيرفر (git pull أثناء post-deploy)
 - متغيرات البيئة على السيرفر تُكتب تلقائيًا أثناء النشر

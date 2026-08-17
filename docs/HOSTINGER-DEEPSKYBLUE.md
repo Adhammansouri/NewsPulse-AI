@@ -41,7 +41,7 @@ Hostinger Git deploy only builds the API workspace. The React app must be built 
 - `public_html/` (static fallback)
 - `hbuilds/current/nodejs/public/` (served by Fastify when Passenger runs Node)
 
-**Automatic:** every push to `main` runs `.github/workflows/deploy-hostinger.yml`, which SSHs into Hostinger and executes `scripts/hostinger-post-deploy.sh`.
+**Automatic:** every push to `main` runs `.github/workflows/deploy-hostinger.yml` — builds in GitHub Actions, rsyncs artifacts over SSH, then runs `scripts/hostinger-finish-deploy.sh` on the server (no Vite build on shared hosting).
 
 **Manual (SSH):**
 

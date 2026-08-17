@@ -9,26 +9,78 @@ concurrency:
   group: hostinger-deploy
   cancel-in-progress: true
 
+env:
+  HOSTINGER_DOMAIN: deepskyblue-ibis-463603.hostingersite.com
+  HOSTINGER_BASE: /home/u358087675/domains/deepskyblue-ibis-463603.hostingersite.com
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Run post-deploy on Hostinger
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --workspaces --include=dev
+
+      - name: Build frontend and API
+        run: |
+          npm run build --workspace=newsplus-front
+          npm run build --workspace=newsplus-API
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ secrets.HOSTINGER_SSH_PORT }}" "${{ secrets.HOSTINGER_SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Sync frontend assets
+        run: |
+          RSYNC_RSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_SSH_PORT }} -o StrictHostKeyChecking=yes"
+          export RSYNC_RSH
+          rsync -az --delete newsplus-front/dist/ \
+            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:${HOSTINGER_BASE}/public_html/"
+          rsync -az --delete newsplus-front/dist/ \
+            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:${HOSTINGER_BASE}/hbuilds/current/nodejs/public/"
+
+      - name: Sync API runtime
+        run: |
+          RSYNC_RSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_SSH_PORT }} -o StrictHostKeyChecking=yes"
+          export RSYNC_RSH
+          TARGET="${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:${HOSTINGER_BASE}/hbuilds/current/nodejs/"
+          rsync -az --delete newsplus-API/dist/ "${TARGET}dist/"
+          rsync -az newsplus-API/server.cjs newsplus-API/server.js newsplus-API/package.json newsplus-API/package-lock.json "${TARGET}"
+
+      - name: Sync deploy scripts
+        run: |
+          RSYNC_RSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_SSH_PORT }} -o StrictHostKeyChecking=yes"
+          export RSYNC_RSH
+          rsync -az scripts/hostinger-finish-deploy.sh scripts/hostinger-public.deepskyblue.htaccess scripts/hostinger-preload-timestamp.js \
+            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:${HOSTINGER_BASE}/repos/NewsPulse-AI/scripts/"
+
+      - name: Finish deploy on server
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.HOSTINGER_SSH_HOST }}
           username: ${{ secrets.HOSTINGER_SSH_USER }}
           port: ${{ secrets.HOSTINGER_SSH_PORT }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          command_timeout: 15m
+          command_timeout: 10m
           script: |
             set -euo pipefail
-            bash /home/u358087675/domains/deepskyblue-ibis-463603.hostingersite.com/repos/NewsPulse-AI/scripts/hostinger-post-deploy.sh
+            bash /home/u358087675/domains/deepskyblue-ibis-463603.hostingersite.com/repos/NewsPulse-AI/scripts/hostinger-finish-deploy.sh
 
       - name: Verify production health
         run: |
-          url="https://deepskyblue-ibis-463603.hostingersite.com/api/health"
+          url="https://${HOSTINGER_DOMAIN}/api/health"
           for attempt in 1 2 3 4 5 6; do
             if curl -fsS "$url" | grep -q '"status":"ok"'; then
               echo "Health check passed: $url"
