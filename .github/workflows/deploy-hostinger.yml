@@ -35,65 +35,27 @@ jobs:
           npm run build --workspace=newsplus-front
           npm run build --workspace=newsplus-API
 
-      - name: Upload frontend to public_html
-        uses: appleboy/scp-action@v1.0.0
+      - name: Create deploy bundle
+        run: |
+          rm -rf .deploy
+          mkdir -p .deploy/public .deploy/dist .deploy/scripts
+          cp -a newsplus-front/dist/. .deploy/public/
+          cp -a newsplus-API/dist/. .deploy/dist/
+          cp newsplus-API/server.cjs newsplus-API/server.js newsplus-API/package.json newsplus-API/package-lock.json .deploy/
+          cp scripts/hostinger-finish-deploy.sh scripts/hostinger-public.deepskyblue.htaccess scripts/hostinger-preload-timestamp.js .deploy/scripts/
+          tar -czf newsplus-deploy.tgz -C .deploy .
+
+      - name: Upload deploy bundle
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOSTINGER_SSH_HOST }}
           username: ${{ secrets.HOSTINGER_SSH_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          source: newsplus-front/dist/*
-          target: ${{ env.HOSTINGER_BASE }}/public_html/
-          rm: true
-          strip_components: 2
+          source: newsplus-deploy.tgz
+          target: /tmp/
 
-      - name: Upload frontend to Node public
-        uses: appleboy/scp-action@v1.0.0
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          source: newsplus-front/dist/*
-          target: ${{ env.HOSTINGER_BASE }}/hbuilds/current/nodejs/public/
-          rm: true
-          strip_components: 2
-
-      - name: Upload API dist
-        uses: appleboy/scp-action@v1.0.0
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          source: newsplus-API/dist/*
-          target: ${{ env.HOSTINGER_BASE }}/hbuilds/current/nodejs/dist/
-          rm: true
-          strip_components: 2
-
-      - name: Upload API entry files
-        uses: appleboy/scp-action@v1.0.0
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          source: newsplus-API/server.cjs,newsplus-API/server.js,newsplus-API/package.json,newsplus-API/package-lock.json
-          target: ${{ env.HOSTINGER_BASE }}/hbuilds/current/nodejs/
-          strip_components: 1
-
-      - name: Upload deploy scripts
-        uses: appleboy/scp-action@v1.0.0
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          source: scripts/hostinger-finish-deploy.sh,scripts/hostinger-public.deepskyblue.htaccess,scripts/hostinger-preload-timestamp.js
-          target: ${{ env.HOSTINGER_BASE }}/repos/NewsPulse-AI/scripts/
-          strip_components: 1
-
-      - name: Finish deploy on server
+      - name: Extract bundle and finish deploy
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.HOSTINGER_SSH_HOST }}
@@ -103,8 +65,20 @@ jobs:
           command_timeout: 10m
           script: |
             set -euo pipefail
-            sed -i 's/\r$//' '${{ env.HOSTINGER_BASE }}/repos/NewsPulse-AI/scripts/hostinger-finish-deploy.sh'
-            bash '${{ env.HOSTINGER_BASE }}/repos/NewsPulse-AI/scripts/hostinger-finish-deploy.sh'
+            BASE="${{ env.HOSTINGER_BASE }}"
+            NODE_APP="${BASE}/hbuilds/current/nodejs"
+            SCRIPTS="${BASE}/repos/NewsPulse-AI/scripts"
+            WORK="/tmp/newsplus-deploy-$$"
+            mkdir -p "${WORK}" "${NODE_APP}/public" "${NODE_APP}/dist" "${SCRIPTS}"
+            tar -xzf /tmp/newsplus-deploy.tgz -C "${WORK}"
+            rsync -a --delete "${WORK}/public/" "${BASE}/public_html/"
+            rsync -a --delete "${WORK}/public/" "${NODE_APP}/public/"
+            rsync -a --delete "${WORK}/dist/" "${NODE_APP}/dist/"
+            cp "${WORK}/server.cjs" "${WORK}/server.js" "${WORK}/package.json" "${WORK}/package-lock.json" "${NODE_APP}/"
+            cp "${WORK}/scripts/"* "${SCRIPTS}/"
+            sed -i 's/\r$//' "${SCRIPTS}/hostinger-finish-deploy.sh"
+            bash "${SCRIPTS}/hostinger-finish-deploy.sh"
+            rm -rf "${WORK}" /tmp/newsplus-deploy.tgz
 
       - name: Verify production health
         run: |
