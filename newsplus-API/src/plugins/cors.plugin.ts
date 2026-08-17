@@ -11,7 +11,6 @@ export const corsPlugin: FastifyPluginAsync = async (app) => {
 
   app.addHook("onSend", async (_request, reply, payload) => {
     reply.header("Access-Control-Allow-Origin", env.corsOrigin);
-    reply.header("Access-Control-Allow-Credentials", "true");
     reply.header("Cache-Control", "no-store, no-cache, must-revalidate");
     reply.header("Vary", "Origin");
 
