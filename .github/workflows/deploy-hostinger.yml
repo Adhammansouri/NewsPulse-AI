@@ -1,8 +1,6 @@
-name: Deploy to Hostinger
+name: Deploy to Hostinger (shared — retired)
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:

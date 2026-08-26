@@ -1,0 +1,6 @@
+# Proxy deepskyblue (Hostinger CDN/SSL) → Newsplus on VPS
+# Replaces Passenger Node.js on shared hosting — app runs in Docker on VPS.
+
+RewriteEngine On
+RewriteRule ^(.*)$ http://148.230.124.124/$1 [P,L]
+ProxyPreserveHost On

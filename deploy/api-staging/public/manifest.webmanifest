@@ -1,0 +1,18 @@
+{
+  "name": "Newsplus",
+  "short_name": "Newsplus",
+  "description": "AI-powered news monitoring, summarisation, translation & report writing",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D9B8A",
+  "theme_color": "#0C2340",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/logo-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

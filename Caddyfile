@@ -1,0 +1,4 @@
+xpayops.online, www.xpayops.online {
+	encode gzip zstd
+	reverse_proxy app:3001
+}

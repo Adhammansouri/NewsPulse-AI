@@ -1,0 +1,79 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: vps-deploy
+  cancel-in-progress: true
+
+env:
+  VPS_APP_DIR: /opt/newsplus
+  VPS_DOMAIN: srv1930800.hstgr.cloud
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create deploy bundle
+        run: |
+          tar -czf newsplus-vps.tgz \
+            --exclude=node_modules --exclude=.git --exclude=dist \
+            Dockerfile docker-compose.vps.yml .dockerignore .env.vps.example \
+            package.json package-lock.json packages design-system \
+            newsplus-API newsplus-front scripts/deploy-vps.sh deploy/nginx deploy/shared-hosting
+          ls -la newsplus-vps.tgz
+
+      - name: Upload bundle to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_SSH_HOST }}
+          username: ${{ secrets.VPS_SSH_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT }}
+          source: newsplus-vps.tgz
+          target: /tmp/
+          overwrite: true
+
+      - name: Extract and rebuild on VPS
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_SSH_HOST }}
+          username: ${{ secrets.VPS_SSH_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT }}
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+            APP_DIR="${{ env.VPS_APP_DIR }}"
+            mkdir -p "${APP_DIR}"
+            tar -xzf /tmp/newsplus-vps.tgz -C "${APP_DIR}"
+            rm -f /tmp/newsplus-vps.tgz
+            cd "${APP_DIR}"
+            if [ ! -f .env ] && [ -f .env.vps.example ]; then
+              cp .env.vps.example .env
+              JWT_SECRET="$(openssl rand -hex 32)"
+              sed -i "s/^JWT_SECRET=.*/JWT_SECRET=${JWT_SECRET}/" .env
+            fi
+            sed -i 's|^CORS_ORIGIN=.*|CORS_ORIGIN=https://srv1930800.hstgr.cloud|' .env
+            docker compose -f docker-compose.vps.yml up -d --build --remove-orphans
+
+      - name: Verify production health
+        run: |
+          url="https://${{ env.VPS_DOMAIN }}/api/health"
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsS "$url" | grep -q '"status":"ok"'; then
+              echo "Health check passed: $url"
+              exit 0
+            fi
+            echo "Waiting for API... ($attempt/6)"
+            sleep 10
+          done
+          echo "Health check failed: $url"
+          exit 1

@@ -69,3 +69,13 @@ npm run install:all  # Install all workspaces
 ## Design System
 
 See `design-system/newsplus-design-system.md`.
+
+## Production
+
+| | |
+|---|---|
+| **URL** | https://srv1930800.hstgr.cloud |
+| **Login** | https://srv1930800.hstgr.cloud/login |
+| **Deploy** | push to `main` → `.github/workflows/deploy-vps.yml` |
+
+See [docs/VPS-DEPLOY.md](./docs/VPS-DEPLOY.md).

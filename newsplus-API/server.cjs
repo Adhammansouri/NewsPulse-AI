@@ -60,7 +60,7 @@ function ensureProductionSecrets(hostedEnvPath) {
   }
 
   if (!process.env.CORS_ORIGIN) {
-    process.env.CORS_ORIGIN = "https://deepskyblue-ibis-463603.hostingersite.com";
+    process.env.CORS_ORIGIN = "https://srv1930800.hstgr.cloud";
   }
 }
 

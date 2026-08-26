@@ -1,0 +1,3 @@
+# deepskyblue retired — Newsplus primary URL is on VPS
+RewriteEngine On
+RewriteRule ^(.*)$ https://srv1930800.hstgr.cloud/$1 [R=301,L]

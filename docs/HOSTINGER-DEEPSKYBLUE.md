@@ -1,6 +1,12 @@
 # Hostinger — deepskyblue-ibis-463603.hostingersite.com
 
-Production URL: **https://deepskyblue-ibis-463603.hostingersite.com**
+## Production URL
+
+**https://srv1930800.hstgr.cloud**
+
+> `deepskyblue-ibis-463603.hostingersite.com` (استضافة مشتركة) متوقف — يعيد توجيه للـ VPS.
+
+## Path on server
 
 ## Why 503 after deploy?
 
