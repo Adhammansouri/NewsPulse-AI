@@ -7,6 +7,9 @@ services:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 3001
+      PUSH_STORE_PATH: /data/push-subscriptions.json
+    volumes:
+      - newsplus_data:/data
     expose:
       - "3001"
     healthcheck:
@@ -39,3 +42,4 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  newsplus_data:

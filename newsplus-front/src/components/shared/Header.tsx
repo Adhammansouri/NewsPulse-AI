@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
+import { PushOptInButton } from "@/components/brand/pwa/PushOptInButton";
+
 import { BrandMark } from "@/components/shared/BrandMark";
 
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
@@ -129,6 +131,8 @@ export function Header() {
         <div className="hidden shrink-0 items-center gap-2 md:flex">
 
           <ThemeToggle />
+
+          <PushOptInButton />
 
           {session ? (
 
@@ -263,8 +267,9 @@ export function Header() {
 
 
             <div className="mt-3 flex flex-col gap-2">
-              <div className="flex justify-center">
+              <div className="flex justify-center gap-2">
                 <ThemeToggle />
+                <PushOptInButton />
               </div>
               {session ? (
 

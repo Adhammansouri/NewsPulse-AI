@@ -1,4 +1,6 @@
 xpayops.online, www.xpayops.online {
 	encode gzip zstd
+	@pwa path_regexp ^/(sw\.js|workbox-.+\.js)$
+	header @pwa Cache-Control "no-cache, no-store, must-revalidate"
 	reverse_proxy app:3001
 }

@@ -36,6 +36,10 @@ NODE_ENV=production
 HOST=0.0.0.0
 CORS_ORIGIN=https://deepskyblue-ibis-463603.hostingersite.com
 JWT_SECRET=<openssl rand -hex 32>
+VAPID_PUBLIC_KEY=<npx web-push generate-vapid-keys>
+VAPID_PRIVATE_KEY=<private>
+VAPID_SUBJECT=mailto:newsplus@localhost
+PUSH_STORE_PATH=/home/u358087675/domains/deepskyblue-ibis-463603.hostingersite.com/hbuilds/config/push-subscriptions.json
 ```
 
 `server.cjs` copies this file into the running app as `.env` on each start.

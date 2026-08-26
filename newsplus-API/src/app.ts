@@ -5,6 +5,7 @@ import { errorHandlerPlugin } from "./plugins/errorHandler.plugin.js";
 import { jwtPlugin } from "./plugins/jwt.plugin.js";
 import { staticPlugin } from "./plugins/static.plugin.js";
 import { createApiRoutes } from "./routes/index.js";
+import { createPushService } from "./services/pushService.js";
 
 export async function buildApp() {
   const app = Fastify({ logger: true });
@@ -14,7 +15,8 @@ export async function buildApp() {
   await app.register(jwtPlugin);
 
   const authService = await createAuthService(app);
-  await app.register(createApiRoutes(authService), { prefix: "/api" });
+  const pushService = createPushService(app.log);
+  await app.register(createApiRoutes(authService, pushService), { prefix: "/api" });
   await app.register(staticPlugin);
 
   return app;

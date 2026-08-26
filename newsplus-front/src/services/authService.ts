@@ -7,6 +7,7 @@ import type {
   LoginRequest,
 } from "@newsplus/shared";
 import { apiRequest } from "./httpConfig";
+import { unsubscribeFromPush } from "./pushService";
 import { clearSession, saveSession } from "./sessionStore";
 import { API_URLS } from "./urls";
 
@@ -40,6 +41,12 @@ export async function getCurrentUser(): Promise<AuthUser> {
 }
 
 export async function logout(): Promise<void> {
+  try {
+    await unsubscribeFromPush();
+  } catch {
+    /* still log out locally */
+  }
+
   try {
     await apiRequest<ApiSuccessResponse<{ loggedOut: boolean }>>(API_URLS.AUTH.LOGOUT, {
       method: "POST",

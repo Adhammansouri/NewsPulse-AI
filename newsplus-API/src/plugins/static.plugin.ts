@@ -16,6 +16,14 @@ const staticPluginImpl: FastifyPluginAsync = async (app) => {
   await app.register(fastifyStatic, {
     root: publicDir,
     wildcard: false,
+    setHeaders(reply, filePath) {
+      if (filePath.endsWith(".webmanifest")) {
+        reply.header("Content-Type", "application/manifest+json");
+      }
+      if (/(?:^|[\\/])(?:sw\.js|workbox-.+\.js)$/.test(filePath)) {
+        reply.header("Cache-Control", "no-cache, no-store, must-revalidate");
+      }
+    },
   });
 
   app.setNotFoundHandler((request, reply) => {

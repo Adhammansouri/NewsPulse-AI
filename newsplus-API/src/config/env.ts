@@ -1,9 +1,23 @@
+import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+
 function requiredInProduction(name: string, value: string | undefined, fallback: string) {
   if (value) return value;
   if ((process.env.NODE_ENV ?? "development") === "production") {
     throw new Error(`${name} is required in production`);
   }
   return fallback;
+}
+
+function defaultPushStorePath() {
+  const candidates = [
+    join(process.cwd(), "../../config/push-subscriptions.json"),
+    join(process.cwd(), "../../../config/push-subscriptions.json"),
+  ];
+  for (const candidate of candidates) {
+    if (existsSync(dirname(candidate))) return candidate;
+  }
+  return join(process.cwd(), "data/push-subscriptions.json");
 }
 
 export const env = {
@@ -18,4 +32,8 @@ export const env = {
   authSeedEmail: process.env.AUTH_SEED_EMAIL ?? "adham@newsplus.local",
   authSeedPhone: process.env.AUTH_SEED_PHONE ?? "01000000000",
   authSeedDisplayName: process.env.AUTH_SEED_DISPLAY_NAME ?? "Adham",
+  vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? "",
+  vapidPrivateKey: process.env.VAPID_PRIVATE_KEY ?? "",
+  vapidSubject: process.env.VAPID_SUBJECT ?? "mailto:newsplus@localhost",
+  pushStorePath: process.env.PUSH_STORE_PATH ?? defaultPushStorePath(),
 } as const;

@@ -9,6 +9,9 @@ services:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 3001
+      PUSH_STORE_PATH: /data/push-subscriptions.json
+    volumes:
+      - newsplus_data:/data
     networks:
       - deploy_default
     healthcheck:
@@ -27,3 +30,6 @@ services:
 networks:
   deploy_default:
     external: true
+
+volumes:
+  newsplus_data:

@@ -19,4 +19,9 @@ export const API_URLS = {
   TRANSLATE: {
     TEXT: "/translate",
   },
+  PUSH: {
+    VAPID_KEY: "/push/vapid-key",
+    SUBSCRIBE: "/push/subscribe",
+    TEST: "/push/test",
+  },
 } as const;

@@ -61,6 +61,9 @@ docker compose up -d --build
 | `JWT_SECRET` | مفتاح عشوائي قوي (`openssl rand -hex 32`) |
 | `OPENAI_API_KEY` | مفتاح OpenAI (اختياري) |
 | `AUTH_SEED_*` | مستخدم أولي — غيّر كلمة المرور بعد أول دخول |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | مفاتيح Web Push (`npx web-push generate-vapid-keys`) |
+| `VAPID_SUBJECT` | `mailto:` أو رابط HTTPS |
+| `PUSH_STORE_PATH` | مسار ملف الاشتراكات — `/data/push-subscriptions.json` داخل Docker |
 
 ## البنية
 

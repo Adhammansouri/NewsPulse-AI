@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0C2340" />
+    <title>بدون اتصال — Newsplus</title>
+    <style>
+      :root {
+        --navy: #0c2340;
+        --teal: #0d9b8a;
+        --paper: #f8fafc;
+        --muted: #475569;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 1.5rem;
+        background: var(--paper);
+        color: var(--navy);
+        font-family: "IBM Plex Sans Arabic", "Noto Sans Arabic", system-ui, sans-serif;
+      }
+      main {
+        width: min(28rem, 100%);
+        text-align: center;
+      }
+      .mark {
+        width: 4.5rem;
+        height: 4.5rem;
+        margin-inline: auto 0;
+        margin-bottom: 1.25rem;
+        border-radius: 1.15rem;
+        object-fit: cover;
+      }
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.5rem;
+      }
+      p {
+        color: var(--muted);
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+      }
+      button {
+        min-height: 44px;
+        padding: 0.625rem 1.25rem;
+        border: 0;
+        border-radius: 999px;
+        background: var(--teal);
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.6;
+      }
+      .status {
+        margin-top: 1rem;
+        font-size: 0.875rem;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img class="mark" src="/pwa/apple-touch-icon.png" alt="" width="72" height="72" />
+      <h1>لا يوجد اتصال</h1>
+      <p>واجهة Newsplus متاحة كتطبيق، لكن الأخبار والتوليد والترجمة تحتاج إنترنت. أعد المحاولة بعد عودة الشبكة.</p>
+      <button type="button" id="retry">إعادة المحاولة</button>
+      <p class="status" id="status">بانتظار الاتصال…</p>
+    </main>
+    <script>
+      const statusEl = document.getElementById("status");
+      const retryBtn = document.getElementById("retry");
+
+      function retry() {
+        retryBtn.disabled = true;
+        statusEl.textContent = "جاري التحقق…";
+        fetch("/", { method: "HEAD", cache: "no-store" })
+          .then(function () {
+            window.location.href = "/";
+          })
+          .catch(function () {
+            retryBtn.disabled = false;
+            statusEl.textContent = "ما زال بدون اتصال.";
+          });
+      }
+
+      retryBtn.addEventListener("click", retry);
+      window.addEventListener("online", function () {
+        statusEl.textContent = "عاد الاتصال. جاري التحميل…";
+        window.location.href = "/";
+      });
+    </script>
+  </body>
+</html>

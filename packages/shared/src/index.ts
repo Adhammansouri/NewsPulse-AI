@@ -7,3 +7,11 @@ export type {
   LoginRequest,
   UserRole,
 } from "./types/auth.js";
+export type {
+  PushSubscribeData,
+  PushSubscribeRequest,
+  PushTestData,
+  PushUnsubscribeData,
+  PushUnsubscribeRequest,
+  PushVapidKeyData,
+} from "./types/push.js";
