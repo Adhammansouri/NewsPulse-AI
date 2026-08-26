@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:20-bookworm-slim AS builder
+FROM node:22-bookworm-slim AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -16,15 +16,15 @@ RUN rm -rf node_modules package-lock.json && \
 
 RUN npm run build -w newsplus-API && npm run build -w newsplus-front
 
-FROM node:20-bookworm-slim AS runner
+FROM node:22-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3001
 
-COPY newsplus-API/package.json newsplus-API/package-lock.json ./
-RUN npm ci --omit=dev
+COPY newsplus-API/package.json ./
+RUN npm install --omit=dev --no-audit --no-fund
 
 COPY --from=builder /app/newsplus-API/dist ./dist
 COPY --from=builder /app/newsplus-API/server.cjs ./
