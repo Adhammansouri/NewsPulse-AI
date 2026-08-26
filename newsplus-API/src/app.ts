@@ -1,5 +1,5 @@
 import Fastify from "fastify";
-import { createAuthService } from "./container.js";
+import { createAuthService, createToolServices } from "./container.js";
 import { corsPlugin } from "./plugins/cors.plugin.js";
 import { errorHandlerPlugin } from "./plugins/errorHandler.plugin.js";
 import { jwtPlugin } from "./plugins/jwt.plugin.js";
@@ -8,7 +8,11 @@ import { createApiRoutes } from "./routes/index.js";
 import { createPushService } from "./services/pushService.js";
 
 export async function buildApp() {
-  const app = Fastify({ logger: true });
+  const app = Fastify({
+    logger: true,
+    requestTimeout: 120_000,
+    connectionTimeout: 120_000,
+  });
 
   await app.register(corsPlugin);
   await app.register(errorHandlerPlugin);
@@ -16,7 +20,15 @@ export async function buildApp() {
 
   const authService = await createAuthService(app);
   const pushService = createPushService(app.log);
-  await app.register(createApiRoutes(authService, pushService), { prefix: "/api" });
+  const tools = createToolServices(app);
+  await app.register(
+    createApiRoutes({
+      authService,
+      pushService,
+      ...tools,
+    }),
+    { prefix: "/api" },
+  );
   await app.register(staticPlugin);
 
   return app;

@@ -9,7 +9,7 @@ AI-powered news assistant for monitoring, summarisation, translation, and report
 | **Frontend** | React 19 + Vite + TypeScript + Tailwind CSS 4 |
 | **Backend** | Node.js + Fastify + TypeScript |
 | **Shared** | `@newsplus/shared` — API types |
-| **AI** | OpenAI API (to be connected) |
+| **AI** | OpenAI GPT-5.6 (Responses API) |
 
 ## Project Structure
 

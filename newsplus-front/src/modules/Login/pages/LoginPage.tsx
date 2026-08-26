@@ -336,7 +336,10 @@ export default function LoginPage() {
       return;
     }
 
-    if (!password.trim()) {
+    const identifier = usernameOrPhone.trim();
+    const normalizedPassword = password.trim();
+
+    if (!normalizedPassword) {
       triggerFieldShake(["password"]);
       setError(copy.passwordRequired);
       return;
@@ -344,10 +347,10 @@ export default function LoginPage() {
 
     setLoading(true);
     setSubmitState("loading");
-    persistRememberPreference(usernameOrPhone.trim());
+    persistRememberPreference(identifier);
 
     try {
-      await loginWithCredentials(usernameOrPhone.trim(), password, rememberMe);
+      await loginWithCredentials(identifier, normalizedPassword, rememberMe);
       setSubmitState("success");
       await new Promise((resolve) => window.setTimeout(resolve, 750));
       const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname;

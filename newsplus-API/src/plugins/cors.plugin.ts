@@ -2,15 +2,28 @@ import cors from "@fastify/cors";
 import type { FastifyPluginAsync } from "fastify";
 import { env } from "../config/index.js";
 
+const DEV_ORIGIN_PATTERN = /^https?:\/\/(?:localhost|127\.0\.0\.1):\d+$/;
+
+function resolveCorsOrigin(requestOrigin: string | undefined) {
+  if (!requestOrigin) return env.corsOrigin;
+  if (requestOrigin === env.corsOrigin) return requestOrigin;
+  if (env.nodeEnv !== "production" && DEV_ORIGIN_PATTERN.test(requestOrigin)) {
+    return requestOrigin;
+  }
+  return env.corsOrigin;
+}
+
 export const corsPlugin: FastifyPluginAsync = async (app) => {
   await app.register(cors, {
-    origin: env.corsOrigin,
+    origin: (origin, callback) => {
+      callback(null, resolveCorsOrigin(origin));
+    },
     methods: ["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });
 
-  app.addHook("onSend", async (_request, reply, payload) => {
-    reply.header("Access-Control-Allow-Origin", env.corsOrigin);
+  app.addHook("onSend", async (request, reply, payload) => {
+    reply.header("Access-Control-Allow-Origin", resolveCorsOrigin(request.headers.origin));
     reply.header("Cache-Control", "no-store, no-cache, must-revalidate");
     reply.header("Vary", "Origin");
 

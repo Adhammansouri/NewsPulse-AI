@@ -1,4 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { env } from "../config/index.js";
 import { TooManyRequestsError } from "../utils/errors.js";
 
 type Bucket = {
@@ -15,6 +16,8 @@ function clientKey(request: FastifyRequest) {
 }
 
 export async function loginRateLimit(request: FastifyRequest, _reply: FastifyReply) {
+  if (env.nodeEnv !== "production") return;
+
   const now = Date.now();
   const key = clientKey(request);
   const current = buckets.get(key);

@@ -83,6 +83,7 @@ export default defineConfig({
       "/api": {
         target: "http://localhost:3001",
         changeOrigin: true,
+        timeout: 180_000,
       },
     },
   },
@@ -97,6 +98,7 @@ export default defineConfig({
       "/api": {
         target: "http://localhost:3001",
         changeOrigin: true,
+        timeout: 180_000,
       },
     },
   },

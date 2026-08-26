@@ -44,3 +44,17 @@ export class ServiceUnavailableError extends AppError {
     this.name = "ServiceUnavailableError";
   }
 }
+
+export class OpenAINotConfiguredError extends AppError {
+  constructor() {
+    super(503, "openai-not-configured");
+    this.name = "OpenAINotConfiguredError";
+  }
+}
+
+export class OpenAIUpstreamError extends AppError {
+  constructor(publicMessage = "openai-upstream") {
+    super(502, publicMessage);
+    this.name = "OpenAIUpstreamError";
+  }
+}

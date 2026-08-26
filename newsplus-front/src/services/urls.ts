@@ -12,6 +12,7 @@ export const API_URLS = {
   NEWS: {
     SUMMARIZE: "/news/summarize",
     SOURCES: "/news/sources",
+    FEED: "/news/feed",
   },
   GENERATE: {
     CONTENT: "/generate",

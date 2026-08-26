@@ -6,7 +6,7 @@ export function getHealth() {
     status: "ok",
     app: "Newsplus",
     version: "0.1.0",
-    phase: "foundation",
+    phase: "ai-tools",
     openai: Boolean(env.openaiApiKey),
   });
 }

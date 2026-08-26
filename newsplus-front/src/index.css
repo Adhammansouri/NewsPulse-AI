@@ -565,6 +565,98 @@ body {
     pointer-events: none;
   }
 
+  .nd-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 12px 24px;
+    border: 1px solid var(--nd-border-visible);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--nd-text-primary);
+    font-family: var(--font-nd-mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: opacity 200ms var(--ease-nd);
+  }
+
+  .nd-btn-secondary:hover {
+    opacity: 0.88;
+  }
+
+  .nd-btn-secondary:disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .nd-tag-active {
+    border-color: var(--nd-text-display);
+    color: var(--nd-text-display);
+  }
+
+  .nd-textarea {
+    width: 100%;
+    min-height: 10rem;
+    padding: 12px 0;
+    border: none;
+    border-bottom: 1px solid var(--nd-border-visible);
+    background: transparent;
+    color: var(--nd-text-primary);
+    font-family: var(--font-arabic), var(--font-nd-body);
+    font-size: 15px;
+    line-height: 1.7;
+    resize: vertical;
+  }
+
+  .nd-textarea:focus {
+    outline: none;
+    border-bottom-color: var(--nd-text-primary);
+  }
+
+  .nd-textarea:disabled {
+    opacity: 0.5;
+  }
+
+  .nd-seg {
+    display: inline-flex;
+    border: 1px solid var(--nd-border-visible);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .nd-seg-btn {
+    min-height: 40px;
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    color: var(--nd-text-secondary);
+    font-family: var(--font-nd-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .nd-seg-btn.is-active {
+    background: var(--nd-text-display);
+    color: var(--nd-black);
+  }
+
+  .nd-feed-item {
+    width: 100%;
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--nd-border);
+    background: transparent;
+    text-align: start;
+    color: inherit;
+  }
+
+  .nd-feed-item.is-active {
+    background: var(--nd-surface-raised);
+    box-shadow: inset 2px 0 0 var(--nd-accent);
+  }
+
   .nd-surface {
     background: var(--nd-surface);
     border: 1px solid var(--nd-border);
