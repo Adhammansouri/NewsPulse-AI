@@ -8,10 +8,14 @@ type Bucket = {
 };
 
 const WINDOW_MS = 15 * 60 * 1000;
-const MAX_ATTEMPTS = 8;
+const MAX_ATTEMPTS = 15;
 const buckets = new Map<string, Bucket>();
 
 function clientKey(request: FastifyRequest) {
+  const forwarded = request.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.trim()) {
+    return forwarded.split(",")[0]?.trim() || request.ip || "unknown";
+  }
   return request.ip || "unknown";
 }
 

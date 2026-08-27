@@ -12,6 +12,8 @@ export async function buildApp() {
     logger: true,
     requestTimeout: 120_000,
     connectionTimeout: 120_000,
+    // Behind nginx on VPS — use X-Forwarded-For for request.ip (login rate limit per client)
+    trustProxy: true,
   });
 
   await app.register(corsPlugin);
