@@ -1,0 +1,9 @@
+{
+    "timeMs":  2561,
+    "data":  {
+                 "sourceLanguage":  "en",
+                 "targetLanguage":  "ar",
+                 "original":  "The USS Abraham Lincoln docked in Thailand on Tuesday after more than nine months at sea. The carrier\u0027s crew had spent 270 consecutive days on deployment, one of the longest stretches in recent years, according to the U.S. Navy.",
+                 "translated":  "رست حاملة الطائرات الأميركية «يو إس إس أبراهام لينكولن» في تايلاند الثلاثاء، بعد أكثر من تسعة أشهر أمضتها في البحر. وقالت البحرية الأميركية إن طاقم الحاملة أمضى 270 يوماً متتالياً في الانتشار، في واحدة من أطول فترات الانتشار خلال السنوات الأخيرة."
+             }
+}

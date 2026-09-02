@@ -1,0 +1,424 @@
+{
+  "at": "2026-09-02T15:05:53.726Z",
+  "rawItems": 406,
+  "clusters": 100,
+  "multiSourceClusters": 11,
+  "sourcesOk": 22,
+  "sourcesFailed": 0,
+  "sourceResults": [
+    {
+      "id": "bbc-ar",
+      "name": "BBC Arabic",
+      "language": "ar",
+      "ok": true,
+      "ms": 323,
+      "rssTotal": 22,
+      "kept": 11,
+      "skippedDate": 11,
+      "newest": "2026-09-02T13:49:41.000Z",
+      "sample": "إيران تستهدف \"مصالح أمريكية\" في المنطقة، ومقتل بحارين في حادث ناقلة سع"
+    },
+    {
+      "id": "aljazeera",
+      "name": "Al Jazeera",
+      "language": "en",
+      "ok": true,
+      "ms": 302,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-01T15:02:23.000Z",
+      "sample": "Iran war live - Al Jazeera - aljazeera.com"
+    },
+    {
+      "id": "france24-ar",
+      "name": "France 24 عربي",
+      "language": "ar",
+      "ok": true,
+      "ms": 147,
+      "rssTotal": 24,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T14:51:32.000Z",
+      "sample": "مدارس القدس الشرقية.. إسرائيل تمنع وصول المعلمين من الضفة الغربية"
+    },
+    {
+      "id": "dw-ar",
+      "name": "DW عربي",
+      "language": "ar",
+      "ok": true,
+      "ms": 406,
+      "rssTotal": 52,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T13:28:00.000Z",
+      "sample": "أزمة فولكسفاغن.. كشف وثيقة سرية عن مستقبل الانتاج والمصانع في ألمانيا"
+    },
+    {
+      "id": "guardian-world",
+      "name": "The Guardian",
+      "language": "en",
+      "ok": true,
+      "ms": 443,
+      "rssTotal": 45,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T09:20:55.000Z",
+      "sample": "New constitution in Guinea-Bissau will undermine democracy, opponents "
+    },
+    {
+      "id": "npr",
+      "name": "NPR",
+      "language": "en",
+      "ok": true,
+      "ms": 257,
+      "rssTotal": 10,
+      "kept": 10,
+      "skippedDate": 0,
+      "newest": "2026-09-02T14:30:36.000Z",
+      "sample": "Greetings from the Royal Pavilion, a stunning reminder of India in sou"
+    },
+    {
+      "id": "sky-world",
+      "name": "Sky News",
+      "language": "en",
+      "ok": true,
+      "ms": 245,
+      "rssTotal": 8,
+      "kept": 7,
+      "skippedDate": 1,
+      "newest": "2026-09-02T05:56:00.000Z",
+      "sample": "22 people killed in bus crash in Egypt"
+    },
+    {
+      "id": "wapo",
+      "name": "The Washington Post",
+      "language": "en",
+      "ok": true,
+      "ms": 9366,
+      "rssTotal": 18,
+      "kept": 18,
+      "skippedDate": 0,
+      "newest": "2026-09-02T12:00:00.000Z",
+      "sample": "USS Abraham Lincoln docks in Thailand after 9 months at sea"
+    },
+    {
+      "id": "nytimes",
+      "name": "The New York Times",
+      "language": "en",
+      "ok": true,
+      "ms": 312,
+      "rssTotal": 56,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T15:01:41.000Z",
+      "sample": "U.S. and Iran Survey the Damage After a Night of Intense Strikes"
+    },
+    {
+      "id": "axios",
+      "name": "Axios",
+      "language": "en",
+      "ok": true,
+      "ms": 698,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T14:13:47.000Z",
+      "sample": "After Trump renamed Lake Ontario, Americans aren't buying his Canada f"
+    },
+    {
+      "id": "wsj",
+      "name": "The Wall Street Journal",
+      "language": "en",
+      "ok": true,
+      "ms": 281,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T14:00:00.000Z",
+      "sample": "Exclusive | Southwest Airlines Jumps Into the Airport Lounge Competiti"
+    },
+    {
+      "id": "ft",
+      "name": "Financial Times",
+      "language": "en",
+      "ok": true,
+      "ms": 294,
+      "rssTotal": 25,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T14:25:07.000Z",
+      "sample": "Uber to axe 10% of its workforce in biggest cuts since pandemic"
+    },
+    {
+      "id": "reuters",
+      "name": "Reuters",
+      "language": "en",
+      "ok": true,
+      "ms": 91,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T14:48:53.000Z",
+      "sample": "Uber to lay off 10% of staff in biggest cuts since COVID - Reuters"
+    },
+    {
+      "id": "afp",
+      "name": "AFP",
+      "language": "en",
+      "ok": true,
+      "ms": 73,
+      "rssTotal": 86,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-08-31T05:06:33.000Z",
+      "sample": "Footage of water rushing from glacier filmed in Alaska, not Nepal - Fa"
+    },
+    {
+      "id": "ap",
+      "name": "AP News",
+      "language": "en",
+      "ok": true,
+      "ms": 81,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T09:54:44.000Z",
+      "sample": "Explosion near German train station injures 2 - AP News"
+    },
+    {
+      "id": "aawsat",
+      "name": "الشرق الأوسط",
+      "language": "ar",
+      "ok": true,
+      "ms": 321,
+      "rssTotal": 300,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T15:02:21.000Z",
+      "sample": "خليل رباح يُعيد تركيب العالم بتجهيزاته التي حطَّت في بيروت"
+    },
+    {
+      "id": "al-ain",
+      "name": "العين الإخبارية",
+      "language": "ar",
+      "ok": true,
+      "ms": 75,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T05:30:54.000Z",
+      "sample": "«جز العشب».. ماذا تخفي واشنطن لإيران؟ - al-ain.com"
+    },
+    {
+      "id": "sky-arabia",
+      "name": "سكاي نيوز عربية",
+      "language": "ar",
+      "ok": true,
+      "ms": 117,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T12:14:06.000Z",
+      "sample": "القيادة تحت تأثير الكحول تورط نجم ريال مدريد - سكاي نيوز عربية"
+    },
+    {
+      "id": "bbc-world",
+      "name": "BBC World",
+      "language": "en",
+      "ok": true,
+      "ms": 213,
+      "rssTotal": 29,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T14:34:22.000Z",
+      "sample": "EU and Nato vow to step up pressure on Russia after 'new escalation' i"
+    },
+    {
+      "id": "cnn",
+      "name": "CNN",
+      "language": "en",
+      "ok": true,
+      "ms": 77,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T10:32:14.000Z",
+      "sample": "Ariana Grande bids fans tearful farewell in last concert before steppi"
+    },
+    {
+      "id": "youm7",
+      "name": "اليوم السابع",
+      "language": "ar",
+      "ok": true,
+      "ms": 239,
+      "rssTotal": 20,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T15:03:00.000Z",
+      "sample": "埃及-中国：文明的联盟.. مانشيت اليوم السابع بالصيني ترحيبا بزيارة شي جين بينج لم"
+    },
+    {
+      "id": "almasryalyoum",
+      "name": "المصري اليوم",
+      "language": "ar",
+      "ok": true,
+      "ms": 76,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-02T10:55:00.000Z",
+      "sample": "الطفل محمد رجب مُنقذ والده: «بابا حط راسه على الدركسيون.. والإسعاف فضل"
+    }
+  ],
+  "sourceInFeed": {
+    "bbc-ar": 2,
+    "aljazeera": 3,
+    "france24-ar": 13,
+    "dw-ar": 2,
+    "guardian-world": 5,
+    "npr": 3,
+    "sky-world": 3,
+    "wapo": 2,
+    "nytimes": 8,
+    "axios": 2,
+    "wsj": 2,
+    "ft": 5,
+    "reuters": 9,
+    "afp": 3,
+    "ap": 6,
+    "aawsat": 20,
+    "al-ain": 2,
+    "sky-arabia": 2,
+    "bbc-world": 4,
+    "cnn": 4,
+    "youm7": 18,
+    "almasryalyoum": 2
+  },
+  "sourcesWithZeroInFeed": [],
+  "clusterExamples": [
+    {
+      "title": "Uber to lay off 10% of staff in biggest cuts since COVID - Reuters",
+      "sourceCount": 2,
+      "sources": [
+        "Reuters",
+        "Financial Times"
+      ],
+      "titles": [
+        "Uber to lay off 10% of staff in biggest cuts since COVID - R",
+        "Uber to axe 10% of its workforce in biggest cuts since pande"
+      ]
+    },
+    {
+      "title": "بيان مشترك: مصر والصين ​تتفقان ​على توسيع التعاون ​في ‌التكنولوجيا المتقدمة",
+      "sourceCount": 2,
+      "sources": [
+        "France 24 عربي",
+        "العين الإخبارية"
+      ],
+      "titles": [
+        "بيان مشترك: مصر والصين ​تتفقان ​على توسيع التعاون ​في ‌التكن",
+        "مصر والصين تتفقان على توسيع التعاون في التكنولوجيا المتقدمة "
+      ]
+    },
+    {
+      "title": "Chevron to expand in Venezuela, days after the U.S. and Venezuela strike oil deal",
+      "sourceCount": 3,
+      "sources": [
+        "NPR",
+        "AP News",
+        "AP News"
+      ],
+      "titles": [
+        "Chevron to expand in Venezuela, days after the U.S. and Vene",
+        "US oil giant Chevron confirms it will expand operations in V",
+        "Days after Trump announces Venezuela oil deal, White House f"
+      ]
+    },
+    {
+      "title": "Ukraine tells airlines to stop using Russian airspace",
+      "sourceCount": 2,
+      "sources": [
+        "Financial Times",
+        "BBC World"
+      ],
+      "titles": [
+        "Ukraine tells airlines to stop using Russian airspace",
+        "Zelensky says airlines should avoid Russian airspace as Ukra"
+      ]
+    },
+    {
+      "title": "EU to hit back at Russia after drone attack as Germany probes new sabotage cases - Reuters",
+      "sourceCount": 4,
+      "sources": [
+        "Reuters",
+        "Financial Times",
+        "The New York Times",
+        "The Washington Post"
+      ],
+      "titles": [
+        "EU to hit back at Russia after drone attack as Germany probe",
+        "Germany blames Russia for Leipzig drone attack",
+        "Weeks After Failed Drone Attack, Germany Points Finger at Ru",
+        "Germany blames Russia for drone attack on airport, announces"
+      ]
+    },
+    {
+      "title": "الرئيس الصيني يزور مصر.. ما أهمية الزيارة وما أبعادها؟",
+      "sourceCount": 2,
+      "sources": [
+        "France 24 عربي",
+        "سكاي نيوز عربية"
+      ],
+      "titles": [
+        "الرئيس الصيني يزور مصر.. ما أهمية الزيارة وما أبعادها؟",
+        "الرئيس الصيني يزور مصر لبحث التعاون وتوقيع اتفاقيات عدة - سك"
+      ]
+    },
+    {
+      "title": "After more than 9 months at sea, the USS Abraham Lincoln arrives in Thailand - AP News",
+      "sourceCount": 5,
+      "sources": [
+        "AP News",
+        "The Washington Post",
+        "The Guardian",
+        "CNN",
+        "The Guardian"
+      ],
+      "titles": [
+        "After more than 9 months at sea, the USS Abraham Lincoln arr",
+        "USS Abraham Lincoln docks in Thailand after 9 months at sea",
+        "USS Abraham Lincoln arrives at Thai port after gruelling 270",
+        "Aircraft carrier USS Abraham Lincoln arrives in Thailand aft",
+        "Thai resort prepares to host USS Abraham Lincoln sailors aft"
+      ]
+    },
+    {
+      "title": "Bus crash on Egypt's Red Sea coast kills 22",
+      "sourceCount": 3,
+      "sources": [
+        "BBC World",
+        "The New York Times",
+        "Sky News"
+      ],
+      "titles": [
+        "Bus crash on Egypt's Red Sea coast kills 22",
+        "Bus Crash in Egypt Kills at Least 22",
+        "22 people killed in bus crash in Egypt"
+      ]
+    }
+  ],
+  "lincolnClusters": [
+    {
+      "title": "After more than 9 months at sea, the USS Abraham Lincoln arrives in Thailand - AP News",
+      "sourceCount": 5,
+      "sources": [
+        "AP News",
+        "The Washington Post",
+        "The Guardian",
+        "CNN",
+        "The Guardian"
+      ]
+    }
+  ]
+}

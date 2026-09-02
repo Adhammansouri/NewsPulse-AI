@@ -1,0 +1,37 @@
+{
+    "timeMs":  11146,
+    "data":  {
+                 "title":  "USS Abraham Lincoln arrives in Thailand after more than nine months at sea",
+                 "dek":  "The carrier’s port call followed 270 days at sea, according to the Guardian.",
+                 "summary":  "The USS Abraham Lincoln arrived in Thailand after more than nine months at sea, AP reported on Sept. 2. The Guardian put the deployment at 270 days. The Washington Post reported that the aircraft carrier docked in Thailand, while a Guardian report identified Pattaya in coverage published a day earlier. The supplied reports did not provide further details on the carrier’s operations, crew or itinerary.",
+                 "bullets":  [
+                                 "AP reported the USS Abraham Lincoln’s arrival in Thailand on Sept. 2.",
+                                 "The Guardian said the carrier had spent 270 days at sea.",
+                                 "The Washington Post reported that the carrier docked in Thailand.",
+                                 "The Guardian’s earlier report referred to Pattaya."
+                             ],
+                 "sources":  [
+                                 {
+                                     "name":  "AP News",
+                                     "url":  "https://news.google.com/rss/articles/CBMinAFBVV95cUxORUJNV2ppcE5ETW9HNWR6bUhBd0NqekJEY05jRi04WExCX1JNNndaU00zakp3YVpDZ2xkR2VmZ25ULWhHQ0E3XzluX0dVUnJ3bWZzUHNrb1ZBZFhjLXBhUHN1RXpEbzNUVEQzRVNTWXJ6OE13UXBYcnI5QnVzbkNIS0tZMHZDMnlIQ0phbV9aRTdUbDgzVUhMSl9tejU?oc=5"
+                                 },
+                                 {
+                                     "name":  "The Washington Post",
+                                     "url":  "https://www.washingtonpost.com/national-security/2026/09/02/uss-abraham-lincoln-docks-thailand-after-9-months-sea/"
+                                 },
+                                 {
+                                     "name":  "The Guardian",
+                                     "url":  "https://www.theguardian.com/world/2026/sep/02/uss-abraham-lincoln-arrives-thailand-after-270-days-at-sea"
+                                 },
+                                 {
+                                     "name":  "CNN",
+                                     "url":  "https://news.google.com/rss/articles/CBMilgFBVV95cUxQX0dseGJQb3Z2c3FjeXNyVGJLMTZrTGhaSDBMZlQtdlhKWlp3Zzk1SVJYR3RWU3RyY0JFaHRnTlRrLVJxNkNSMTA3ZjJLMWFVaV8xNGpXRmNkVzlrSGFEdm40cmtfOVdyS3ZpTXBhTFVJeFFHMDJWZUs0Q3lHMmxKTVpiSENpN0l6ZGdPWV9NM1o2RjBQaGc?oc=5"
+                                 },
+                                 {
+                                     "name":  "The Guardian",
+                                     "url":  "https://www.theguardian.com/world/2026/sep/01/thailand-pattaya-uss-abraham-lincoln-sailors-marines"
+                                 }
+                             ],
+                 "language":  "en"
+             }
+}

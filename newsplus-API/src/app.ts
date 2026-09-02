@@ -22,16 +22,23 @@ export async function buildApp() {
 
   const authService = await createAuthService(app);
   const pushService = createPushService(app.log);
-  const tools = createToolServices(app);
+  const { aggregator, ...toolServices } = createToolServices(app);
   await app.register(
     createApiRoutes({
       authService,
       pushService,
-      ...tools,
+      ...toolServices,
     }),
     { prefix: "/api" },
   );
   await app.register(staticPlugin);
+
+  app.addHook("onReady", async () => {
+    void aggregator.start();
+  });
+  app.addHook("onClose", async () => {
+    aggregator.stop();
+  });
 
   return app;
 }

@@ -32,11 +32,12 @@ export async function createAuthService(app: FastifyInstance): Promise<AuthServi
 
 export function createToolServices(app: FastifyInstance) {
   const openai = new OpenAIClient();
+  const aggregator = new NewsAggregator(app.log);
   const newsService = new NewsService({
-    aggregator: new NewsAggregator(app.log),
+    aggregator,
     openai,
   });
   const generateService = new GenerateService(openai);
   const translateService = new TranslateService(openai);
-  return { newsService, generateService, translateService };
+  return { aggregator, newsService, generateService, translateService };
 }

@@ -30,10 +30,14 @@ export type NewsFeedData = {
   items: NewsFeedItem[];
 };
 
+export type NewsStoryFormat = "desk" | "bulletin" | "facts" | "context" | "social";
+export type NewsSummaryFormat = NewsStoryFormat | "briefing";
+
 export type NewsSummarizeRequest = {
   input?: string;
   itemId?: string;
   briefing?: boolean;
+  format?: NewsStoryFormat;
   language?: NewsLanguage;
 };
 
@@ -49,4 +53,5 @@ export type NewsSummarizeData = {
   bullets: string[];
   sources: NewsSummarySource[];
   language: NewsLanguage;
+  format: NewsSummaryFormat;
 };

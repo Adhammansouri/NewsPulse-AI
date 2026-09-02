@@ -1,0 +1,51 @@
+{
+    "timeMs":  31483,
+    "data":  {
+                 "title":  "موجز الأخبار الدولية: حاملة أميركية في تايلاند وحكم مرتقب بحق ناشط من هونغ كونغ",
+                 "dek":  "تشمل التطورات اتهام برلين موسكو بهجوم مسيّرات، وحادث حافلة أوقع قتلى في جنوب سيناء، وتوسعاً نفطياً لشيفرون في فنزويلا.",
+                 "summary":  "1. وصلت حاملة الطائرات الأميركية «يو إس إس أبراهام لينكولن» إلى تايلاند بعد أكثر من تسعة أشهر في البحر، بحسب وكالة أسوشييتد برس. وقالت الغارديان إن السفينة أمضت 270 يوماً في البحر قبل وصولها.\n\n2. اتهمت ألمانيا روسيا بالوقوف وراء هجوم بمسيّرات في لايبزيغ. وقال وزير الداخلية ألكسندر دوبريندت إن بلاده ليست في حرب، لكنها «هدف يومي لحرب هجينة»، وفق فايننشال تايمز.\n\n3. أقر الناشط المؤيد للديمقراطية في هونغ كونغ جوشوا وونغ بالذنب في تهمة التواطؤ، بحسب نيويورك تايمز. وتتهمه السلطات بالسعي إلى دفع سياسيين غربيين، بينهم نانسي بيلوسي وماركو روبيو، لفرض عقوبات على المدينة.\n\n4. قتل 22 شخصاً في حادث حافلة على ساحل البحر الأحمر في جنوب سيناء، وفق بي بي سي، التي قالت إن أردنيين بين الضحايا. وأفادت سكاي نيوز بمقتل 21 شخصاً، في حصيلة تختلف عن تقرير بي بي سي.\n\n5. قالت وكالة فرانس برس إن مقطعاً لانهيار جليدي في بيرو نُشر زيفاً على أنه يوثق كارثة فيضانات في نيبال.\n\n6. تعتزم شيفرون توسيع عملياتها في فنزويلا بعد أيام من اتفاق نفطي بين واشنطن وكاراكاس، بحسب NPR. وتعد الشركة أكبر مشغل نفطي أجنبي في فنزويلا.\n\n7. تحقق شرطة نيو ساوث ويلز في مقتل رجل بالرصاص في ميريلاندز ويست في سيدني، وقالت إن القضية قد تكون حالة أخرى من الخطأ في تحديد الهوية، وفق الغارديان.\n\n8. أحال قاضٍ قضية قتل تشارلي كيرك إلى المحاكمة، فيما يواجه المتهم احتمال الحكم بالإعدام، بحسب أسوشييتد برس.",
+                 "bullets":  [
+                                 "وصلت «أبراهام لينكولن» إلى تايلاند بعد أكثر من تسعة أشهر في البحر.",
+                                 "قالت برلين إن روسيا تقف وراء هجوم مسيّرات في لايبزيغ.",
+                                 "أقر جوشوا وونغ بالذنب في تهمة التواطؤ في هونغ كونغ.",
+                                 "تباينت حصيلة قتلى حادث الحافلة في جنوب سيناء بين 22 وفق بي بي سي و21 وفق سكاي نيوز.",
+                                 "تحققت فرانس برس من أن فيديو الانهيار الجليدي المتداول ليس من نيبال بل من بيرو.",
+                                 "تخطط شيفرون لتوسيع أعمالها في فنزويلا بعد اتفاق نفطي بين الولايات المتحدة وفنزويلا."
+                             ],
+                 "sources":  [
+                                 {
+                                     "name":  "AP News",
+                                     "url":  "https://news.google.com/rss/articles/CBMinAFBVV95cUxORUJNV2ppcE5ETW9HNWR6bUhBd0NqekJEY05jRi04WExCX1JNNndaU00zakp3YVpDZ2xkR2VmZ25ULWhHQ0E3XzluX0dVUnJ3bWZzUHNrb1ZBZFhjLXBhUHN1RXpEbzNUVEQzRVNTWXJ6OE13UXBYcnI5QnVzbkNIS0tZMHZDMnlIQ0phbV9aRTdUbDgzVUhMSl9tejU?oc=5"
+                                 },
+                                 {
+                                     "name":  "Financial Times",
+                                     "url":  "https://www.ft.com/content/2ca5dfbf-f48b-4ffb-9ce9-9ff3e787a75e"
+                                 },
+                                 {
+                                     "name":  "The New York Times",
+                                     "url":  "https://www.nytimes.com/2026/09/02/world/asia/hong-kong-joshua-wong-activist-guilty.html"
+                                 },
+                                 {
+                                     "name":  "BBC News",
+                                     "url":  "https://www.bbc.co.uk/news/articles/cn8mr1myy2ko"
+                                 },
+                                 {
+                                     "name":  "AFP Fact Check",
+                                     "url":  "https://news.google.com/rss/articles/CBMiWEFVX3lxTE11RE8xVTVkMWkzTGR2V0NzT0doeWpPcVlyUXdnNFpsaWE3U2FQVmVaY2h5SS1jMzZzUWFnXzhRUnl2WmFNYWNtdmEtejNNZ2xQV3FLWFoxdkc?oc=5"
+                                 },
+                                 {
+                                     "name":  "NPR",
+                                     "url":  "https://www.npr.org/2026/09/02/nx-s1-5952190/chevron-venezuela-oil-deal"
+                                 },
+                                 {
+                                     "name":  "The Guardian",
+                                     "url":  "https://www.theguardian.com/australia-news/2026/sep/02/sydney-fatal-shooting-merrylands-west-possible-mistaken-identity-police-say-ntwnfb"
+                                 },
+                                 {
+                                     "name":  "AP News",
+                                     "url":  "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNckxjUEVsX3F2VW1nN0JOdHRxQ1pQdVA3SjZsTy02ZEswUG4tRGdIWmtNMGpjUS13LUNKRUh6ajhzVUlLTlIzUkp3VGQyQzJHTlpWOTZacmtVR3RCbFdMaHhwcU92eElNRXNmSFRFUW9tZ3IxS0xxSmZOaHh1VG1PYzZNTWNCUjQ2LVJIMG55ZWRDS3dDQ3VNZW0tSThmNnUxdncwRFNEdTNNanc?oc=5"
+                                 }
+                             ],
+                 "language":  "ar"
+             }
+}

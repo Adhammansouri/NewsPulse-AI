@@ -1,6 +1,8 @@
 import { env } from "../config/index.js";
 import { ValidationError } from "../utils/errors.js";
+import { DESK_ASSIGNMENT_FOOTER } from "../ai/prompts/editorial.js";
 import { TRANSLATE_INSTRUCTIONS } from "../ai/prompts/translate.js";
+import { scrubDeskProse } from "../ai/sanitize.js";
 import { translateJsonSchema, translateOutputSchema } from "../ai/outputSchemas.js";
 import type { OpenAIClient } from "../ai/openaiClient.js";
 import { fetchPublicText, looksLikeHttpUrl } from "./urlFetcher.js";
@@ -11,17 +13,23 @@ export class TranslateService {
 
   async translate(body: TranslateBody, userId: string) {
     const source = await this.resolveSource(body);
-    const input = `Target language: ${body.target}\n\nTranslate the following:\n${source}`;
+    const input = `Desk assignment: translate the following into ${body.target}. Keep register and every material fact. Do not summarise or improve.\n\n${source}\n\n${DESK_ASSIGNMENT_FOOTER}`;
 
     return this.openai.completeJson({
       model: env.openaiModelTranslate,
-      effort: "none",
+      effort: "low",
       verbosity: "medium",
       instructions: TRANSLATE_INSTRUCTIONS,
       input,
       schemaName: "translation",
       schema: translateJsonSchema,
-      parse: (value) => translateOutputSchema.parse(value),
+      parse: (value) => {
+        const parsed = translateOutputSchema.parse(value);
+        return {
+          ...parsed,
+          translated: scrubDeskProse(parsed.translated),
+        };
+      },
       webSearch: false,
       userId,
     });

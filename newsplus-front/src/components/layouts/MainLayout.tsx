@@ -13,12 +13,18 @@ export default function MainLayout() {
   const toolsTheme = isToolRoute(pathname);
 
   return (
-    <div className="flex min-h-[100dvh] flex-col antialiased">
+    <div
+      className={
+        toolsTheme
+          ? "flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden antialiased"
+          : "flex min-h-[100dvh] flex-col antialiased"
+      }
+    >
       <Header />
-      <main className={toolsTheme ? "theme-tools flex-1" : "flex-1"}>
+      <main className={toolsTheme ? "theme-tools layout-main--tools flex-1" : "flex-1"}>
         <Outlet />
       </main>
-      <Footer />
+      {!toolsTheme && <Footer />}
     </div>
   );
 }

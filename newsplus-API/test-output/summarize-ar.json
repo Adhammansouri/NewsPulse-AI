@@ -1,0 +1,29 @@
+{
+    "timeMs":  44579,
+    "data":  {
+                 "title":  "«يو إس إس أبراهام لينكولن» تصل إلى تايلاند بعد أكثر من 9 أشهر في البحر",
+                 "dek":  "قالت الغارديان إن رحلة السفينة الأميركية البحرية استمرت 270 يوماً.",
+                 "summary":  "وصلت السفينة الأميركية «يو إس إس أبراهام لينكولن» إلى تايلاند بعد أكثر من تسعة أشهر في البحر، وفقاً لوكالة أسوشيتد برس. وقالت صحيفة الغارديان إن مدة الرحلة بلغت 270 يوماً. كما نشرت واشنطن بوست تقريراً في 2 سبتمبر/أيلول 2026 عن رسو السفينة في تايلاند، ونشرت الغارديان تقريراً في التاريخ نفسه عن وصولها. ولا تظهر في العناوين والمقتطفات المرفقة معلومات عن مسار الرحلة أو المهمة أو الميناء الذي رست فيه السفينة. ويقتصر المؤكد في هذه المواد على وصولها إلى تايلاند ومدة بقائها في البحر، من دون تأكيد سبب الزيارة أو الخطوة التالية.",
+                 "bullets":  [
+                                 "أسوشيتد برس قالت إن السفينة وصلت إلى تايلاند بعد أكثر من تسعة أشهر في البحر.",
+                                 "الغارديان قدّرت مدة الرحلة البحرية بـ270 يوماً.",
+                                 "واشنطن بوست نشرت تقريراً عن رسو السفينة في تايلاند في 2 سبتمبر/أيلول 2026.",
+                                 "لا تتضمن المواد المرفقة تفاصيل عن المهمة أو الميناء أو مدة الإقامة."
+                             ],
+                 "sources":  [
+                                 {
+                                     "name":  "AP News",
+                                     "url":  "https://news.google.com/rss/articles/CBMinAFBVV95cUxORUJNV2ppcE5ETW9HNWR6bUhBd0NqekJEY05jRi04WExCX1JNNndaU00zakp3YVpDZ2xkR2VmZ25ULWhHQ0E3XzluX0dVUnJ3bWZzUHNrb1ZBZFhjLXBhUHN1RXpEbzNUVEQzRVNTWXJ6OE13UXBYcnI5QnVzbkNIS0tZMHZDMnlIQ0phbV9aRTdUbDgzVUhMSl9tejU"
+                                 },
+                                 {
+                                     "name":  "The Washington Post",
+                                     "url":  "https://www.washingtonpost.com/national-security/2026/09/02/uss-abraham-lincoln-docks-thailand-after-9-months-sea/"
+                                 },
+                                 {
+                                     "name":  "The Guardian",
+                                     "url":  "https://www.theguardian.com/world/2026/sep/02/uss-abraham-lincoln-arrives-thailand-after-270-days-at-sea"
+                                 }
+                             ],
+                 "language":  "ar"
+             }
+}

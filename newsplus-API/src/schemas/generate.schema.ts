@@ -5,6 +5,8 @@ export const generateBodySchema = z.object({
   style: z.enum(["brief", "article", "report"]),
   language: z.enum(["ar", "en"]),
   angle: z.string().trim().max(240).optional(),
+  length: z.enum(["short", "standard", "long"]).optional(),
+  tone: z.enum(["desk", "formal", "explainer"]).optional(),
 });
 
 export type GenerateBody = z.infer<typeof generateBodySchema>;

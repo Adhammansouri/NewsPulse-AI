@@ -1,48 +1,146 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ToolShell, ToolStatus } from "@/components/shared/ToolShell";
-import { getNewsFeed, getNewsSources, summarizeNews } from "@/services/newsService";
+import {
+  ArrowClockwise,
+  ArrowLeft,
+  ArrowSquareOut,
+  Check,
+  CircleNotch,
+  Copy,
+  LinkSimple,
+  MagnifyingGlass,
+  FileText,
+  Newspaper,
+  WarningCircle,
+  X,
+} from "@phosphor-icons/react";
+import { useNewsFeed } from "@/hooks/useNewsFeed";
+import { readDeskHandoff } from "@/services/deskHandoff";
+import { getNewsSources, summarizeNews } from "@/services/newsService";
 import { copyText, toolErrorMessage } from "@/services/toolErrors";
-import type { NewsFeedItem, NewsSummarizeData } from "@newsplus/shared";
+import type { NewsFeedItem, NewsLanguage, NewsSource, NewsStoryFormat, NewsSummarizeData } from "@newsplus/shared";
+import { SourceMark, SourceMarkStack } from "../SourceMark";
+import { hostFromUrl } from "../sourceLogos";
+import {
+  formatRelative,
+  formatStamp,
+  hasArabic,
+  matchesTimeFilter,
+  newsRecency,
+  splitSocialBullets,
+  STORY_FORMATS,
+  storyFormatMeta,
+  TIME_FILTERS,
+  timeFilterCounts,
+  type TimeFilter,
+} from "../newsFormat";
 
-function formatStamp(iso: string) {
-  try {
-    return new Date(iso).toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" });
-  } catch {
-    return iso;
-  }
-}
+type LangFilter = "all" | NewsLanguage;
+type MobilePane = "feed" | "desk";
 
 export default function NewsPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const handoff = readDeskHandoff(location.state);
   const [sourceId, setSourceId] = useState("all");
+  const [langFilter, setLangFilter] = useState<LangFilter>("all");
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [customInput, setCustomInput] = useState("");
+  const [mobilePane, setMobilePane] = useState<MobilePane>("feed");
+  const [selectedId, setSelectedId] = useState<string | null>(
+    () => handoff?.itemId ?? searchParams.get("item"),
+  );
   const [copied, setCopied] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState<NewsSummarizeData["format"]>("desk");
+  const [newIds, setNewIds] = useState<string[]>([]);
+  const feedScrollRef = useRef<HTMLDivElement>(null);
+  const seenIdsRef = useRef<Set<string>>(new Set());
+  const snapshotKeyRef = useRef("all|all|all|");
 
   const sourcesQuery = useQuery({
     queryKey: ["news-sources"],
     queryFn: getNewsSources,
   });
 
-  const feedQuery = useQuery({
-    queryKey: ["news-feed", sourceId, query],
-    queryFn: () => getNewsFeed(sourceId, query || undefined),
-  });
+  const feedQuery = useNewsFeed(sourceId, query);
 
   const summarizeMutation = useMutation({
     mutationFn: summarizeNews,
   });
 
-  const items = feedQuery.data?.items ?? [];
-  const selected = useMemo(
-    () => items.find((item) => item.id === selectedId) ?? items[0] ?? null,
-    [items, selectedId],
+  const sources = sourcesQuery.data?.sources ?? [];
+  const arabicSources = sources.filter((source) => source.language === "ar");
+  const englishSources = sources.filter((source) => source.language === "en");
+  const visibleSources = langFilter === "ar" ? arabicSources : langFilter === "en" ? englishSources : [];
+
+  const scopedItems = useMemo(() => {
+    const all = feedQuery.data?.items ?? [];
+    if (sourceId !== "all" || langFilter === "all") return all;
+    const allowed = new Set(visibleSources.map((source) => source.id));
+    return all.filter((item) => item.sources.some((source) => allowed.has(source.id)));
+  }, [feedQuery.data?.items, langFilter, sourceId, visibleSources]);
+
+  const timeCounts = useMemo(() => timeFilterCounts(scopedItems), [scopedItems]);
+
+  const items = useMemo(
+    () => scopedItems.filter((item) => matchesTimeFilter(item.publishedAt, timeFilter)),
+    [scopedItems, timeFilter],
   );
+
+  const selected = useMemo(() => {
+    const match = items.find((item) => item.id === selectedId);
+    if (match) return match;
+    if (summarizeMutation.isPending) return null;
+    return items[0] ?? null;
+  }, [items, selectedId, summarizeMutation.isPending]);
 
   const summary = summarizeMutation.data;
   const busy = summarizeMutation.isPending;
   const error = sourcesQuery.error ?? feedQuery.error ?? summarizeMutation.error;
+  const snapshotKey = `${sourceId}|${langFilter}|${timeFilter}|${query}`;
+  const resultFormat = summary?.format ?? (summarizeMutation.variables?.briefing ? "briefing" : selectedFormat);
+
+  useEffect(() => {
+    if (!handoff?.input) return;
+    navigate("/generate", {
+      replace: true,
+      state: { prompt: handoff.input, source: "news", style: "brief" },
+    });
+  }, [handoff?.input, navigate]);
+
+  useEffect(() => {
+    if (busy || selectedId || items.length === 0) return;
+    setSelectedId(items[0].id);
+  }, [busy, items, selectedId]);
+
+  useEffect(() => {
+    const ids = items.map((item) => item.id);
+    if (snapshotKeyRef.current !== snapshotKey) {
+      snapshotKeyRef.current = snapshotKey;
+      seenIdsRef.current = new Set(ids);
+      setNewIds([]);
+      return;
+    }
+    if (ids.length === 0) return;
+    if (seenIdsRef.current.size === 0) {
+      seenIdsRef.current = new Set(ids);
+      return;
+    }
+    const incoming = ids.filter((id) => !seenIdsRef.current.has(id));
+    if (incoming.length === 0) return;
+    for (const id of incoming) seenIdsRef.current.add(id);
+    setNewIds((prev) => [...incoming, ...prev.filter((id) => ids.includes(id) && !incoming.includes(id))]);
+  }, [items, snapshotKey]);
+
+  function revealNewHeadlines() {
+    const first = newIds[0];
+    setNewIds([]);
+    if (!first) return;
+    const node = feedScrollRef.current?.querySelector(`[data-headline-id="${CSS.escape(first)}"]`);
+    node?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
 
   function runSummarize(body: Parameters<typeof summarizeNews>[0]) {
     setCopied(false);
@@ -50,218 +148,665 @@ export default function NewsPage() {
   }
 
   async function onCopy(data: NewsSummarizeData) {
-    const text = [data.title, data.dek, data.summary, ...data.bullets.map((item) => `• ${item}`)].join("\n\n");
-    await copyText(text);
+    if (data.format === "social") {
+      const { tags } = splitSocialBullets(data.bullets);
+      await copyText([data.title, data.summary, tags.join(" ")].filter(Boolean).join("\n\n"));
+      setCopied(true);
+      return;
+    }
+    const meta = storyFormatMeta(data.format);
+    const lines =
+      data.format === "facts"
+        ? [data.title, data.dek, ...data.bullets.map((item) => `• ${item}`)]
+        : data.format === "bulletin"
+          ? [data.title, data.dek, data.summary]
+          : [data.title, data.dek, data.summary, ...data.bullets.map((item) => `• ${item}`)];
+    await copyText([meta.ready, ...lines.filter(Boolean)].join("\n\n"));
     setCopied(true);
   }
 
+  function selectFormat(format: NewsSummarizeData["format"]) {
+    setSelectedFormat(format);
+    setCopied(false);
+  }
+
+  function generateSummary() {
+    if (!selected) return;
+    setCopied(false);
+    if (selectedFormat === "briefing") {
+      runSummarize({ briefing: true, language: "ar" });
+    } else {
+      runSummarize({ itemId: selected.id, language: "ar", format: selectedFormat });
+    }
+  }
+
+  function runStoryFormat(format: NewsStoryFormat) {
+    if (!selected) return;
+    setSelectedFormat(format);
+    runSummarize({ itemId: selected.id, language: "ar", format });
+  }
+
+  function selectLanguage(next: LangFilter) {
+    setLangFilter(next);
+    setSourceId("all");
+  }
+
+  function selectSource(id: string, language: NewsLanguage) {
+    setSourceId(id);
+    setLangFilter(language);
+  }
+
+  function selectHeadline(id: string) {
+    setSelectedId(id);
+    setNewIds((prev) => prev.filter((itemId) => itemId !== id));
+    summarizeMutation.reset();
+    setMobilePane("desk");
+    setSelectedFormat((current) => (current === "briefing" ? "desk" : current));
+  }
+
   return (
-    <ToolShell
-      badge="MONITOR"
-      title="ملخص الأخبار"
-      description="تابع العناوين من مصادر عربية ودولية، ثم اطلب ملخصاً تحريرياً لخبر محدد أو لموضوع."
-    >
-      <div className="mb-6 flex flex-wrap gap-2">
-        <button
-          type="button"
-          className={`nd-tag ${sourceId === "all" ? "nd-tag-active" : ""}`}
-          onClick={() => setSourceId("all")}
-        >
-          الكل
-        </button>
-        {(sourcesQuery.data?.sources ?? []).map((source) => (
-          <button
-            key={source.id}
-            type="button"
-            className={`nd-tag ${sourceId === source.id ? "nd-tag-active" : ""}`}
-            onClick={() => setSourceId(source.id)}
-          >
-            {source.name}
-          </button>
-        ))}
+    <div className="news-desk">
+      <header className="news-desk-head">
+        <div className="news-kicker">
+          <span className="news-pulse" aria-hidden="true" />
+          <Newspaper size={16} weight="regular" aria-hidden="true" />
+          <span>غرفة الأخبار</span>
+        </div>
+        <div className="news-desk-head-row">
+          <div>
+            <h1 className="news-title">ملخص الأخبار</h1>
+            <p className="news-lede">اختر خبراً أو موضوعاً، واطلب ملخصاً تحريرياً جاهزاً للنشر.</p>
+          </div>
+          <div className="news-live">
+            <p className="news-count" aria-live="polite">
+              {feedQuery.isFetching && !feedQuery.isLoading ? (
+                <CircleNotch className="news-spin" size={14} aria-hidden="true" />
+              ) : null}
+              {feedQuery.isLoading ? "جاري التحميل" : `${items.length} عنوان`}
+            </p>
+            {feedQuery.dataUpdatedAt ? (
+              <p className="news-updated" title={feedQuery.data?.fetchedAt ? formatStamp(feedQuery.data.fetchedAt) : undefined}>
+                {feedQuery.data?.fetchedAt
+                  ? formatRelative(feedQuery.data.fetchedAt)
+                  : "—"}
+              </p>
+            ) : null}
+            <button
+              type="button"
+              className="news-refresh"
+              disabled={feedQuery.isFetching}
+              aria-label="حدّث الآن"
+              onClick={() => void feedQuery.refetch()}
+            >
+              <ArrowClockwise className={feedQuery.isFetching ? "news-spin" : undefined} size={15} aria-hidden="true" />
+              <span className="news-refresh-label">تحديث</span>
+            </button>
+            {newIds.length > 0 ? (
+              <button type="button" className="news-new-badge" onClick={revealNewHeadlines}>
+                {newIds.length} جديدة
+              </button>
+            ) : null}
+          </div>
+        </div>
+      </header>
+
+      <div className="news-toolbar">
+        <div className="news-filter-bar">
+          <div className="news-seg news-seg--lang" role="group" aria-label="تصفية اللغة">
+            {(
+              [
+                { id: "all", label: "الكل" },
+                { id: "ar", label: "عربي" },
+                { id: "en", label: "English" },
+              ] as const
+            ).map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={`news-seg-btn ${langFilter === option.id ? "is-active" : ""}`}
+                aria-pressed={langFilter === option.id}
+                onClick={() => selectLanguage(option.id)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+
+          <label className="news-search" htmlFor="news-query">
+            <MagnifyingGlass size={16} weight="regular" aria-hidden="true" />
+            <span className="sr-only">بحث في العناوين</span>
+            <input
+              id="news-query"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="ابحث في العناوين..."
+            />
+            {query ? (
+              <button type="button" className="news-icon-btn" aria-label="مسح البحث" onClick={() => setQuery("")}>
+                <X size={14} weight="bold" />
+              </button>
+            ) : null}
+          </label>
+        </div>
+
+        <div className="news-seg news-seg--time" role="group" aria-label="تصفية الوقت">
+          {TIME_FILTERS.map((option) => {
+            const count = timeCounts[option.id];
+            const empty = option.id !== "all" && count === 0;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                className={`news-seg-btn ${timeFilter === option.id ? "is-active" : ""} ${empty ? "is-empty" : ""}`}
+                aria-pressed={timeFilter === option.id}
+                aria-label={`${option.hint}، ${count} عنوان`}
+                title={option.hint}
+                onClick={() => setTimeFilter(option.id)}
+              >
+                {option.label}
+                <span className="news-seg-count">{count}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <label className="nd-label mb-2 block" htmlFor="news-query">
-        FILTER
-      </label>
-      <input
-        id="news-query"
-        className="nd-input mb-8"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="ابحث في العناوين..."
-      />
+      {visibleSources.length > 0 && (
+        <div className="news-source-rail max-md:hidden" role="listbox" aria-label="المصادر">
+          <button
+            type="button"
+            className={`news-chip ${sourceId === "all" ? "is-active" : ""}`}
+            aria-pressed={sourceId === "all"}
+            onClick={() => setSourceId("all")}
+          >
+            كل المصادر
+          </button>
+          {visibleSources.map((source) => (
+            <SourceChip
+              key={source.id}
+              source={source}
+              active={sourceId === source.id}
+              onSelect={() => selectSource(source.id, source.language)}
+            />
+          ))}
+        </div>
+      )}
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-        <section className="nd-surface overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4">
-            <p className="nd-label">HEADLINES</p>
-            <p className="nd-status-inline">{items.length} ITEM</p>
+      <div className="news-pane-tabs md:hidden" role="tablist" aria-label="أقسام الغرفة">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mobilePane === "feed"}
+          className={mobilePane === "feed" ? "is-active" : ""}
+          onClick={() => setMobilePane("feed")}
+        >
+          <Newspaper size={16} aria-hidden="true" />
+          العناوين
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mobilePane === "desk"}
+          className={mobilePane === "desk" ? "is-active" : ""}
+          onClick={() => setMobilePane("desk")}
+        >
+          <FileText size={16} aria-hidden="true" />
+          الملخص
+        </button>
+      </div>
+
+      <div className="news-panes">
+        <section className={`news-pane ${mobilePane === "feed" ? "" : "max-md:hidden"}`} aria-label="العناوين">
+          <div className="news-pane-bar">
+            <p className="news-pane-label">العناوين</p>
+            <p className="news-pane-meta">
+              {items.length}
+              {timeFilter !== "all"
+                ? ` · ${TIME_FILTERS.find((option) => option.id === timeFilter)?.label}`
+                : ""}
+            </p>
           </div>
-          <div className="max-h-[640px] overflow-y-auto">
+          <div className="news-pane-scroll" ref={feedScrollRef}>
             {feedQuery.isLoading && (
-              <p className="nd-status-inline px-5 py-8">[ LOADING ] جاري جلب المصادر...</p>
+              <p className="news-state">
+                <CircleNotch className="news-spin" size={18} aria-hidden="true" />
+                جاري جلب العناوين...
+              </p>
             )}
             {!feedQuery.isLoading && items.length === 0 && (
-              <p className="nd-status-inline px-5 py-8">[ EMPTY ] لا توجد عناوين في هذه النافذة.</p>
+              <div className="news-state news-state--empty">
+                <p>لا توجد عناوين في هذه النافذة. غيّر الوقت أو المصدر أو كلمة البحث.</p>
+                {timeFilter !== "all" ? (
+                  <button type="button" className="news-chip" onClick={() => setTimeFilter("all")}>
+                    عرض كل الأوقات
+                  </button>
+                ) : null}
+              </div>
             )}
             {items.map((item) => (
               <HeadlineRow
                 key={item.id}
                 item={item}
                 active={selected?.id === item.id}
-                onSelect={() => {
-                  setSelectedId(item.id);
-                  summarizeMutation.reset();
-                }}
+                justArrived={newIds.includes(item.id)}
+                onSelect={() => selectHeadline(item.id)}
               />
             ))}
           </div>
         </section>
 
-        <section className="nd-surface flex min-h-[360px] flex-col p-6 sm:p-8">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-            <p className="nd-label">SUMMARIES</p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="nd-btn-secondary"
-                disabled={!selected || busy}
-                onClick={() => selected && runSummarize({ itemId: selected.id, language: "ar" })}
-              >
-                تلخيص المحدد
-              </button>
-              <button
-                type="button"
-                className="nd-btn-secondary"
-                disabled={busy || items.length === 0}
-                onClick={() => runSummarize({ briefing: true, language: "ar" })}
-              >
-                موجز عاجل
-              </button>
-            </div>
+        <section className={`news-pane news-desk-pane ${mobilePane === "desk" ? "" : "max-md:hidden"}`} aria-label="الملخص">
+          <div className="news-pane-bar news-desk-bar">
+            <p className="news-pane-label">الملخص</p>
+            {busy ? (
+              <p className="news-desk-busy" aria-live="polite">
+                <CircleNotch className="news-spin" size={14} aria-hidden="true" />
+                جاري الكتابة...
+              </p>
+            ) : null}
           </div>
 
-          {selected && !summary && (
-            <div className="mb-6">
-              <div className="mb-3 flex flex-wrap gap-2">
-                {selected.breaking && <span className="nd-tag nd-tag-active">BREAKING</span>}
-                {selected.sources.map((source) => (
-                  <span key={`${source.id}-${source.url}`} className="nd-tag">
-                    {source.name}
-                  </span>
-                ))}
-              </div>
-              <h2 className="text-xl font-medium text-[var(--nd-text-display)]">{selected.title}</h2>
-              <p className="mt-3 text-sm leading-7 text-[var(--nd-text-secondary)]">{selected.excerpt || "—"}</p>
-              <p className="nd-status-inline mt-4">{formatStamp(selected.publishedAt)}</p>
+          <div className="news-desk-main">
+            <div className="news-pane-scroll news-desk-body">
+              {summary ? (
+                <SummaryPane
+                  data={summary}
+                  format={resultFormat}
+                  busy={busy}
+                  copied={copied}
+                  onCopy={() => void onCopy(summary)}
+                  onBack={() => {
+                    summarizeMutation.reset();
+                    setCopied(false);
+                  }}
+                  onStoryFormat={runStoryFormat}
+                  onBriefing={() => runSummarize({ briefing: true, language: "ar" })}
+                />
+              ) : (
+                <>
+                  {error ? (
+                    <p className="news-state is-error">
+                      <WarningCircle size={18} aria-hidden="true" />
+                      {toolErrorMessage(error)}
+                    </p>
+                  ) : null}
+
+                  {selected ? (
+                    <article
+                      className={[
+                        "news-story-card",
+                        `is-${newsRecency(selected.publishedAt)}`,
+                      ].join(" ")}
+                    >
+                      <div className="news-story-copy">
+                        <div className="news-story-card-meta">
+                          <div className="news-feed-source">
+                            <SourceMarkStack sources={selected.sources} size={18} />
+                            {selected.sources[0] ? (
+                              <span className="news-source-name">{selected.sources[0].name}</span>
+                            ) : null}
+                            {selected.sources.length > 1 ? (
+                              <span className="news-cluster">+{selected.sources.length - 1}</span>
+                            ) : null}
+                          </div>
+                          <div className="news-feed-meta">
+                            <time
+                              className={`news-time is-${newsRecency(selected.publishedAt)}`}
+                              dateTime={selected.publishedAt}
+                              title={formatStamp(selected.publishedAt)}
+                            >
+                              {formatRelative(selected.publishedAt)}
+                            </time>
+                          </div>
+                        </div>
+
+                        <h2 className="news-story-title" dir={hasArabic(selected.title) ? "rtl" : "ltr"}>
+                          {selected.title}
+                        </h2>
+
+                        {selected.excerpt ? (
+                          <div className="news-story-brief">
+                            <p className="news-story-kicker">عن الخبر</p>
+                            <p className="news-story-excerpt" dir={hasArabic(selected.excerpt) ? "rtl" : "ltr"}>
+                              {selected.excerpt}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="news-story-excerpt is-empty">لا يتوفر موجز من المصدر. افتح الرابط الأصلي.</p>
+                        )}
+
+                        {selected.sources.length > 0 ? (
+                          <ul className="news-story-origin">
+                            {selected.sources.map((source) => {
+                              const host = hostFromUrl(source.url);
+                              return (
+                                <li key={`${source.id}-${source.url}`}>
+                                  <a href={source.url} target="_blank" rel="noreferrer">
+                                    <SourceMark id={source.id} name={source.name} url={source.url} size={16} />
+                                    <span className="news-story-origin-copy">
+                                      <span>اقرأ في {source.name}</span>
+                                      {host ? <span className="news-story-origin-host">{host}</span> : null}
+                                    </span>
+                                    <ArrowSquareOut size={14} weight="regular" aria-hidden="true" />
+                                  </a>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        ) : null}
+                      </div>
+
+                      <div className="news-desk-actions">
+                        <DeskFormatBar
+                          mode="picker"
+                          selected={selectedFormat}
+                          busy={busy}
+                          briefingDisabled={busy || items.length === 0}
+                          showHint
+                          onSelectFormat={selectFormat}
+                          onGenerate={generateSummary}
+                        />
+                      </div>
+                    </article>
+                  ) : (
+                    !busy &&
+                    !error && (
+                      <div className="news-desk-empty">
+                        <p>اختر خبراً من العناوين لعرضه هنا ثم اطلب ملخصاً تحريرياً.</p>
+                      </div>
+                    )
+                  )}
+                </>
+              )}
             </div>
-          )}
 
-          {busy && <ToolStatus tone="busy">[ WORKING ] جاري كتابة الملخص...</ToolStatus>}
-          {error && <ToolStatus tone="error">[ ERROR ] {toolErrorMessage(error)}</ToolStatus>}
-
-          {summary && (
-            <SummaryPane
-              data={summary}
-              copied={copied}
-              onCopy={() => void onCopy(summary)}
-            />
-          )}
-
-          {!summary && !busy && selected && (
-            <ToolStatus>[ READY ] اختر خبراً ثم اطلب التلخيص، أو الصق رابطاً بالأسفل.</ToolStatus>
-          )}
-
-          <form
-            className="mt-auto pt-8"
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (!customInput.trim()) return;
-              runSummarize({ input: customInput.trim(), language: "ar" });
-            }}
-          >
-            <label className="nd-label mb-3 block" htmlFor="news-custom">
-              URL / TOPIC
-            </label>
-            <textarea
-              id="news-custom"
-              className="nd-textarea mb-6"
-              rows={4}
-              value={customInput}
-              onChange={(event) => setCustomInput(event.target.value)}
-              placeholder="الصق رابط خبر أو اكتب موضوعاً للمتابعة..."
-            />
-            <button type="submit" className="nd-btn-primary w-full" disabled={busy || !customInput.trim()}>
-              تلخيص الأخبار
-            </button>
-          </form>
+            <Link
+              to="/generate"
+              state={{
+                prompt: selected?.sources[0]?.url ?? "",
+                source: "news",
+                style: "brief",
+              }}
+              className="news-compose-link"
+            >
+              <span className="news-compose-toggle-label">
+                <LinkSimple size={14} aria-hidden="true" />
+                لصق رابط وتوليد ملخص
+              </span>
+              <ArrowLeft size={16} weight="bold" aria-hidden="true" />
+            </Link>
+          </div>
         </section>
       </div>
-    </ToolShell>
+    </div>
+  );
+}
+
+function DeskFormatBar({
+  mode,
+  selected,
+  busy,
+  briefingDisabled,
+  showHint = false,
+  onSelectFormat,
+  onGenerate,
+}: {
+  mode: "picker" | "switch";
+  selected: NewsSummarizeData["format"];
+  busy: boolean;
+  briefingDisabled: boolean;
+  showHint?: boolean;
+  onSelectFormat: (format: NewsSummarizeData["format"]) => void;
+  onGenerate?: () => void;
+}) {
+  const hintId = showHint ? "news-format-hint-story" : "news-format-hint-result";
+  const meta = storyFormatMeta(selected);
+  const isPicker = mode === "picker";
+  const choices = [
+    ...STORY_FORMATS,
+    { id: "briefing" as const, label: "موجز", hint: "أعلى 8 عناوين في الغرفة" },
+  ];
+
+  return (
+    <div className={`news-format-bar ${showHint ? "" : "is-compact"} ${isPicker ? "is-picker" : "is-switch"}`}>
+      {showHint ? (
+        <p className="news-format-caption" id={hintId}>
+          <span>شكل التلخيص</span>
+          <span>{meta.hint}</span>
+        </p>
+      ) : (
+        <span className="sr-only" id={hintId}>
+          {meta.hint}
+        </span>
+      )}
+
+      <div className="news-format-toolbar">
+        <div className="news-seg news-seg--formats" role="group" aria-label="شكل التلخيص" aria-describedby={hintId}>
+          {choices.map((option) => {
+            const active = selected === option.id;
+            const isBriefing = option.id === "briefing";
+            return (
+              <button
+                key={option.id}
+                type="button"
+                className={`news-seg-btn ${isBriefing ? "news-seg-btn--split" : ""} ${active ? "is-active" : ""}`}
+                disabled={isBriefing ? briefingDisabled : busy}
+                aria-pressed={active}
+                title={option.hint}
+                onClick={() => onSelectFormat(option.id)}
+              >
+                {busy && active ? <CircleNotch className="news-spin" size={12} aria-hidden="true" /> : null}
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {isPicker && onGenerate ? (
+          <button
+            type="button"
+            className="news-btn-primary news-format-generate"
+            disabled={busy || (selected === "briefing" && briefingDisabled)}
+            onClick={onGenerate}
+          >
+            {busy ? <CircleNotch className="news-spin" size={16} aria-hidden="true" /> : null}
+            {busy ? "جاري التوليد..." : "توليد"}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function SourceChip({
+  source,
+  active,
+  onSelect,
+}: {
+  source: NewsSource;
+  active: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={`news-chip ${active ? "is-active" : ""}`}
+      aria-pressed={active}
+      onClick={onSelect}
+    >
+      <SourceMark id={source.id} name={source.name} size={16} />
+      {source.name}
+    </button>
+  );
+}
+
+function RecencyMarks({ justArrived = false }: { justArrived?: boolean }) {
+  if (!justArrived) return null;
+
+  return (
+    <span className="news-feed-badges">
+      <span className="news-arrived">ظهر الآن</span>
+    </span>
   );
 }
 
 function HeadlineRow({
   item,
   active,
+  justArrived,
   onSelect,
 }: {
   item: NewsFeedItem;
   active: boolean;
+  justArrived: boolean;
   onSelect: () => void;
 }) {
+  const recency = newsRecency(item.publishedAt);
+  const primarySource = item.sources[0];
+
   return (
-    <button type="button" className={`nd-feed-item ${active ? "is-active" : ""}`} onClick={onSelect}>
-      <div className="mb-2 flex flex-wrap items-center gap-2">
-        {item.breaking && <span className="nd-tag nd-tag-active">BREAKING</span>}
-        <span className="nd-tag">{item.sources[0]?.name}</span>
-        {item.sources.length > 1 && <span className="nd-tag">+{item.sources.length - 1}</span>}
+    <button
+      type="button"
+      id={`news-headline-${item.id}`}
+      data-headline-id={item.id}
+      className={[
+        "news-feed-item",
+        `is-${recency}`,
+        active ? "is-active" : "",
+        justArrived ? "is-arrived" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      onClick={onSelect}
+    >
+      <div className="news-feed-row">
+        <div className="news-feed-source">
+          <SourceMarkStack sources={item.sources} size={16} />
+          {primarySource ? (
+            <span className="news-source-name">{primarySource.name}</span>
+          ) : null}
+          {item.sources.length > 1 ? (
+            <span className="news-cluster">+{item.sources.length - 1}</span>
+          ) : null}
+        </div>
+        <div className="news-feed-meta">
+          <RecencyMarks justArrived={justArrived} />
+          <time
+            className={`news-time is-${recency}`}
+            dateTime={item.publishedAt}
+            title={formatStamp(item.publishedAt)}
+          >
+            {formatRelative(item.publishedAt)}
+          </time>
+        </div>
       </div>
-      <p className="text-start text-[15px] leading-6 text-[var(--nd-text-primary)]">{item.title}</p>
-      <p className="nd-status-inline mt-2">{formatStamp(item.publishedAt)}</p>
+
+      <p className="news-feed-title" dir={hasArabic(item.title) ? "rtl" : "ltr"}>
+        {item.title}
+      </p>
     </button>
   );
 }
 
 function SummaryPane({
   data,
+  format,
+  busy,
   copied,
   onCopy,
+  onBack,
+  onStoryFormat,
+  onBriefing,
 }: {
   data: NewsSummarizeData;
+  format: NewsSummarizeData["format"];
+  busy: boolean;
   copied: boolean;
   onCopy: () => void;
+  onBack: () => void;
+  onStoryFormat: (format: NewsStoryFormat) => void;
+  onBriefing: () => void;
 }) {
+  const meta = storyFormatMeta(format);
+  const factsFirst = format === "facts";
+  const isSocial = format === "social";
+  const { tags, alts } = isSocial ? splitSocialBullets(data.bullets) : { tags: [] as string[], alts: data.bullets };
+  const hideBody = format === "facts" && data.summary.length < 40;
+  const bodyBeforeBullets = !factsFirst;
+  const listItems = isSocial ? alts : data.bullets;
+
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <ToolStatus tone="ready">[ READY ] ملخص جاهز</ToolStatus>
-        <button type="button" className="nd-btn-secondary" onClick={onCopy}>
-          {copied ? "تم النسخ" : "نسخ"}
-        </button>
+    <div className={`news-summary is-${format}`}>
+      <div className="news-summary-bar">
+        <p className="news-state is-ready">
+          <Check size={16} aria-hidden="true" />
+          {meta.ready}
+        </p>
+        <div className="news-summary-tools">
+          <button type="button" className="news-btn-secondary" onClick={onCopy} disabled={busy}>
+            {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
+            {copied ? "تم النسخ" : "نسخ"}
+          </button>
+          <button type="button" className="news-btn-secondary" onClick={onBack} disabled={busy}>
+            خبر آخر
+          </button>
+        </div>
       </div>
-      <h2 className="text-xl font-medium text-[var(--nd-text-display)]">{data.title}</h2>
-      {data.dek && <p className="mt-2 text-sm text-[var(--nd-text-secondary)]">{data.dek}</p>}
-      <p className="mt-4 whitespace-pre-wrap text-[15px] leading-8">{data.summary}</p>
-      {data.bullets.length > 0 && (
-        <ul className="mt-5 list-disc space-y-2 ps-5 text-[15px] leading-7">
-          {data.bullets.map((bullet) => (
-            <li key={bullet}>{bullet}</li>
+
+      <DeskFormatBar
+        mode="switch"
+        selected={format}
+        busy={busy}
+        briefingDisabled={busy}
+        onSelectFormat={(next) => {
+          if (next === "briefing") onBriefing();
+          else onStoryFormat(next);
+        }}
+      />
+
+      <h2 className="news-story-title" dir={hasArabic(data.title) ? "rtl" : "ltr"}>
+        {data.title}
+      </h2>
+      {data.dek && (
+        <p className="news-story-excerpt" dir={hasArabic(data.dek) ? "rtl" : "ltr"}>
+          {data.dek}
+        </p>
+      )}
+      {bodyBeforeBullets && data.summary ? (
+        <p className="news-summary-body" dir={hasArabic(data.summary) ? "rtl" : "ltr"}>
+          {data.summary}
+        </p>
+      ) : null}
+      {isSocial && tags.length > 0 ? (
+        <ul className="news-social-tags" aria-label="وسوم">
+          {tags.map((tag) => (
+            <li key={tag} dir="ltr">
+              {tag}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {isSocial && alts.length > 0 ? <p className="news-field-label">صياغات أخرى</p> : null}
+      {listItems.length > 0 && (
+        <ul className={`news-bullets ${factsFirst ? "is-facts" : ""}`}>
+          {listItems.map((bullet) => (
+            <li key={bullet} dir={hasArabic(bullet) ? "rtl" : "ltr"}>
+              {bullet}
+            </li>
           ))}
         </ul>
       )}
+      {!bodyBeforeBullets && !hideBody && data.summary ? (
+        <p className="news-summary-body" dir={hasArabic(data.summary) ? "rtl" : "ltr"}>
+          {data.summary}
+        </p>
+      ) : null}
       {data.sources.length > 0 && (
-        <div className="mt-6 space-y-2">
-          <p className="nd-label">SOURCES</p>
+        <div className="news-links">
+          <p className="news-field-label">المصادر</p>
           {data.sources.map((source) => (
-            <a
-              key={`${source.name}-${source.url}`}
-              href={source.url}
-              target="_blank"
-              rel="noreferrer"
-              className="block text-sm text-[var(--nd-interactive)] underline-offset-4 hover:underline"
-            >
+            <a key={`${source.name}-${source.url}`} href={source.url} target="_blank" rel="noreferrer">
+              <SourceMark id="" name={source.name} url={source.url} size={14} />
               {source.name}
             </a>
           ))}

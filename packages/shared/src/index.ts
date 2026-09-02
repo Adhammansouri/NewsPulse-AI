@@ -22,15 +22,20 @@ export type {
   NewsLanguage,
   NewsSource,
   NewsSourcesData,
+  NewsStoryFormat,
   NewsSummarizeData,
   NewsSummarizeRequest,
+  NewsSummaryFormat,
   NewsSummarySource,
 } from "./types/news.js";
 export type {
   GenerateData,
   GenerateLanguage,
+  GenerateLength,
   GenerateRequest,
+  GenerateSourceMode,
   GenerateStyle,
+  GenerateTone,
 } from "./types/generate.js";
 export type {
   TranslateData,
