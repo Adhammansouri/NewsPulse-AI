@@ -19,16 +19,10 @@ export function DeskGreeting({ displayName }: DeskGreetingProps) {
   const date = formatDeskDate();
 
   return (
-    <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <p className="brand-text-secondary text-sm">{date}</p>
-        <h1 className="brand-text-primary mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
-          مرحباً {displayName}
-        </h1>
-      </div>
-      <p className="brand-text-secondary max-w-sm text-sm leading-6">
-        مكتب التحرير — راقب العناوين، ثم لخّص أو ولّد أو ترجم من نفس المكان.
-      </p>
+    <header className="desk-masthead">
+      {date ? <p className="desk-masthead__date">{date}</p> : null}
+      <h1 className="desk-masthead__hello">مرحباً {displayName}</h1>
+      <p className="desk-masthead__line">راقب العناوين، ثم لخّص أو ولّد أو ترجم من نفس المكان.</p>
     </header>
   );
 }

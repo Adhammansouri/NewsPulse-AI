@@ -1,24 +1,35 @@
-import { FeatureCard } from "@/components/brand/FeatureCard";
+import { Link } from "react-router-dom";
+import { CaretLeft, Newspaper, PencilSimple, Translate } from "@phosphor-icons/react";
 import { HOME_FEATURES } from "@/utils/constants";
 
+const TOOL_ICONS = {
+  "/news": Newspaper,
+  "/generate": PencilSimple,
+  "/translate": Translate,
+} as const;
+
 export function DeskTools() {
-  const [featured, ...rest] = HOME_FEATURES;
-
   return (
-    <section aria-labelledby="desk-tools-title">
-      <h2 id="desk-tools-title" className="brand-text-primary text-sm font-semibold">
-        أدوات المكتب
+    <section className="desk-tools" aria-labelledby="desk-tools-title">
+      <h2 id="desk-tools-title" className="desk-tools__title">
+        الأدوات
       </h2>
-      <p className="brand-text-secondary mt-1 mb-4 text-sm">افتح الأداة المناسبة لسير العمل.</p>
 
-      <div className="flex flex-col gap-3">
-        <FeatureCard {...featured} variant="featured" showArt={false} index={0} />
-        <div className="grid gap-3 sm:grid-cols-2">
-          {rest.map((feature, i) => (
-            <FeatureCard key={feature.href} {...feature} index={i + 1} />
-          ))}
-        </div>
-      </div>
+      {HOME_FEATURES.map((feature) => {
+        const Icon = TOOL_ICONS[feature.href];
+        return (
+          <Link key={feature.href} to={feature.href} className="desk-tool">
+            <span className="desk-tool__icon" aria-hidden="true">
+              <Icon size={18} weight="regular" />
+            </span>
+            <span>
+              <span className="desk-tool__name">{feature.title}</span>
+              <span className="desk-tool__desc">{feature.description}</span>
+            </span>
+            <CaretLeft className="desk-tool__go" size={16} weight="bold" aria-hidden="true" />
+          </Link>
+        );
+      })}
     </section>
   );
 }

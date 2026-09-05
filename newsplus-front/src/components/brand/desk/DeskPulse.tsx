@@ -9,7 +9,7 @@ type DeskPulseProps = {
 };
 
 function formatFetchedAt(iso?: string) {
-  if (!iso) return "—";
+  if (!iso) return "غير متاح";
   try {
     return new Date(iso).toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" });
   } catch {
@@ -22,36 +22,34 @@ export function DeskPulse({ sources, fetchedAt, health, healthLoading, healthErr
   const english = sources.filter((source) => source.language === "en").length;
 
   return (
-    <section className="brand-panel p-5 sm:p-6" aria-labelledby="desk-pulse-title" aria-live="polite">
-      <h2 id="desk-pulse-title" className="brand-text-primary text-sm font-semibold">
-        نبض المكتب
+    <section className="desk-pulse" aria-labelledby="desk-pulse-title" aria-live="polite">
+      <h2 id="desk-pulse-title" className="desk-pulse__title">
+        حالة المكتب
       </h2>
-      <p className="brand-text-secondary mt-1 text-sm">المصادر الحية وحالة الخدمات — بدون أرقام مختلقة.</p>
 
-      <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="desk-pulse__grid">
         <div>
-          <dt className="brand-text-secondary text-xs">المصادر</dt>
-          <dd className="brand-text-primary mt-1 font-medium">
-            {sources.length} — {arabic} عربي / {english} English
+          <dt>المصادر</dt>
+          <dd>
+            {sources.length} مصدر
+            {sources.length > 0 ? ` (${arabic} عربي، ${english} English)` : ""}
           </dd>
         </div>
         <div>
-          <dt className="brand-text-secondary text-xs">آخر جلب</dt>
-          <dd className="brand-text-primary mt-1 font-medium">{formatFetchedAt(fetchedAt)}</dd>
+          <dt>آخر جلب</dt>
+          <dd>{formatFetchedAt(fetchedAt)}</dd>
         </div>
         <div>
-          <dt className="brand-text-secondary text-xs">الخادم</dt>
-          <dd className="mt-1 font-medium">
+          <dt>الخادم</dt>
+          <dd>
             {healthLoading && <span className="brand-text-secondary">جاري التحقق...</span>}
             {healthError && <span className="text-coral-500">غير متصل</span>}
             {health && <span className="text-teal-600">{health.status}</span>}
           </dd>
         </div>
         <div>
-          <dt className="brand-text-secondary text-xs">OpenAI</dt>
-          <dd className="brand-text-primary mt-1 font-medium">
-            {health ? (health.openai ? "متصل" : "غير مُعدّ") : "—"}
-          </dd>
+          <dt>OpenAI</dt>
+          <dd>{health ? (health.openai ? "متصل" : "غير مُعدّ") : "غير معروف"}</dd>
         </div>
       </dl>
     </section>

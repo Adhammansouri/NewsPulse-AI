@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { CaretLeft } from "@phosphor-icons/react";
 import type { NewsFeedItem } from "@newsplus/shared";
 import { SourceMarkStack } from "@/modules/News/SourceMark";
 import { formatRelative, formatStamp, newsRecency } from "@/modules/News/newsFormat";
@@ -9,76 +10,82 @@ type DeskHeadlinesProps = {
   isError: boolean;
 };
 
-export function DeskHeadlines({ items, isLoading, isError }: DeskHeadlinesProps) {
+function HeadlineRow({ item, lead = false }: { item: NewsFeedItem; lead?: boolean }) {
+  const recency = newsRecency(item.publishedAt);
+  const aging = recency === "aging";
+  const breaking = Boolean(item.breaking && recency === "now");
+  const fresh = !breaking && (recency === "now" || recency === "fresh");
+
   return (
-    <section className="brand-panel overflow-hidden" aria-labelledby="desk-headlines-title">
-      <div className="flex items-center justify-between gap-3 border-b brand-border-default px-5 py-4">
-        <h2 id="desk-headlines-title" className="brand-text-primary text-sm font-semibold">
+    <Link
+      to={`/news?item=${encodeURIComponent(item.id)}`}
+      state={{ itemId: item.id }}
+      className={["desk-wire__row", lead ? "is-lead" : "", aging ? "is-aging" : ""].filter(Boolean).join(" ")}
+    >
+      <div className="desk-wire__meta">
+        <SourceMarkStack sources={item.sources} size={lead ? 18 : 16} />
+        {breaking ? <span className="brand-badge bg-coral-500/10 text-coral-500">عاجل</span> : null}
+        {fresh ? <span className="brand-badge bg-teal-600/10 text-teal-600">جديد</span> : null}
+        <span>{item.sources[0]?.name}</span>
+        {item.sources.length > 1 ? <span>+{item.sources.length - 1}</span> : null}
+        <span title={formatStamp(item.publishedAt)}>{formatRelative(item.publishedAt)}</span>
+      </div>
+      <p className="desk-wire__headline">{item.title}</p>
+    </Link>
+  );
+}
+
+function HeadlinesSkeleton() {
+  return (
+    <div className="desk-skel" aria-hidden="true">
+      {[92, 78, 84, 70, 76, 64].map((width, index) => (
+        <div key={index} className="desk-skel__row">
+          <span className="desk-skel__meta" />
+          <span className="desk-skel__title" style={{ width: `${width}%` }} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function DeskHeadlines({ items, isLoading, isError }: DeskHeadlinesProps) {
+  const [lead, ...rest] = items;
+
+  return (
+    <section className="desk-wire" aria-labelledby="desk-headlines-title" aria-busy={isLoading}>
+      <div className="desk-wire__head">
+        <h2 id="desk-headlines-title" className="desk-wire__title">
           عناوين المكتب
         </h2>
-        <Link to="/news" className="brand-accent-text text-sm font-medium">
+        <Link to="/news" className="desk-wire__all">
           كل العناوين
-          <span className="me-1" aria-hidden="true">
-            ←
-          </span>
+          <CaretLeft size={14} weight="bold" aria-hidden="true" />
         </Link>
       </div>
 
-      {isLoading && (
-        <p className="brand-text-secondary px-5 py-8 text-sm">جاري جلب العناوين من المصادر...</p>
-      )}
+      {isLoading ? <HeadlinesSkeleton /> : null}
 
-      {isError && (
-        <p className="px-5 py-8 text-sm font-medium text-coral-500">تعذّر جلب العناوين. حاول تحديث الصفحة.</p>
-      )}
+      {isError ? (
+        <p className="desk-wire__status is-error">تعذّر جلب العناوين. حدّث الصفحة ثم حاول مرة أخرى.</p>
+      ) : null}
 
-      {!isLoading && !isError && items.length === 0 && (
-        <p className="brand-text-secondary px-5 py-8 text-sm">لا توجد عناوين في هذه النافذة.</p>
-      )}
+      {!isLoading && !isError && items.length === 0 ? (
+        <p className="desk-wire__status">
+          لا توجد عناوين في هذه النافذة.{" "}
+          <Link to="/news" className="brand-accent-text font-medium">
+            افتح صفحة الأخبار
+          </Link>
+        </p>
+      ) : null}
 
-      {!isLoading && !isError && items.length > 0 && (
-        <ul className="divide-y divide-[var(--border-default)]">
-          {items.map((item) => {
-            const recency = newsRecency(item.publishedAt);
-            return (
-              <li key={item.id}>
-                <Link
-                  to={`/news?item=${encodeURIComponent(item.id)}`}
-                  state={{ itemId: item.id }}
-                  className="block px-5 py-4 transition-colors hover:bg-[color-mix(in_srgb,var(--color-teal-600)_5%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-600/30"
-                >
-                  <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <SourceMarkStack sources={item.sources} size={16} />
-                    {item.breaking && recency === "now" ? (
-                      <span className="brand-badge bg-coral-500/10 text-coral-500">عاجل</span>
-                    ) : recency === "now" || recency === "fresh" ? (
-                      <span className="brand-badge bg-teal-600/10 text-teal-600">جديد</span>
-                    ) : recency === "aging" ? (
-                      <span className="brand-text-secondary text-xs">أقدم</span>
-                    ) : null}
-                    <span className="brand-text-secondary text-xs">{item.sources[0]?.name}</span>
-                    {item.sources.length > 1 && (
-                      <span className="brand-text-secondary text-xs">+{item.sources.length - 1}</span>
-                    )}
-                  </div>
-                  <p
-                    className={
-                      recency === "aging"
-                        ? "brand-text-secondary text-[15px] leading-6 font-medium"
-                        : "brand-text-primary text-[15px] leading-6 font-medium"
-                    }
-                  >
-                    {item.title}
-                  </p>
-                  <p className="brand-text-secondary mt-1 text-xs" title={formatStamp(item.publishedAt)}>
-                    {formatRelative(item.publishedAt)}
-                  </p>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      {!isLoading && !isError && lead ? (
+        <div>
+          <HeadlineRow item={lead} lead />
+          {rest.map((item) => (
+            <HeadlineRow key={item.id} item={item} />
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -23,28 +23,24 @@ export default function HomePage() {
   const headlines = (feedQuery.data?.items ?? []).slice(0, 8);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="desk-page">
       <DeskGreeting displayName={session?.user.displayName ?? session?.user.identifier ?? "محرر"} />
 
-      <div className="mt-8 flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-start lg:gap-10">
-        <div className="order-2 lg:order-1">
-          <DeskHeadlines items={headlines} isLoading={feedQuery.isLoading} isError={feedQuery.isError} />
-        </div>
-        <div className="order-1 flex flex-col gap-6 lg:order-2">
+      <div className="desk-layout">
+        <div className="desk-rail">
           <DeskCompose />
           <DeskTools />
         </div>
+        <DeskHeadlines items={headlines} isLoading={feedQuery.isLoading} isError={feedQuery.isError} />
       </div>
 
-      <div className="mt-10">
-        <DeskPulse
-          sources={sourcesQuery.data?.sources ?? []}
-          fetchedAt={feedQuery.data?.fetchedAt}
-          health={healthQuery.data}
-          healthLoading={healthQuery.isLoading}
-          healthError={healthQuery.isError}
-        />
-      </div>
+      <DeskPulse
+        sources={sourcesQuery.data?.sources ?? []}
+        fetchedAt={feedQuery.data?.fetchedAt}
+        health={healthQuery.data}
+        healthLoading={healthQuery.isLoading}
+        healthError={healthQuery.isError}
+      />
     </div>
   );
 }
