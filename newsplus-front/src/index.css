@@ -1692,6 +1692,20 @@ body {
     scrollbar-width: thin;
   }
 
+  .news-topic-rail {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 0.15rem 0.25rem;
+    scrollbar-width: thin;
+  }
+
+  .news-topic-rail .news-chip.is-empty {
+    opacity: 0.4;
+    cursor: default;
+  }
+
   .news-chip,
   .news-source-pill,
   .news-cluster,

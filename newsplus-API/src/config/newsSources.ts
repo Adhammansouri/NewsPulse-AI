@@ -16,18 +16,69 @@ function gnewsAr(site: string) {
 }
 
 export const NEWS_SOURCES: NewsSourceConfig[] = [
+  // Arabic — pan-Arab
   {
     id: "bbc-ar",
-    name: "BBC Arabic",
+    name: "BBC News عربي",
     language: "ar",
     rssUrl: "https://feeds.bbci.co.uk/arabic/rss.xml",
   },
   {
-    id: "aljazeera",
-    name: "Al Jazeera",
-    language: "en",
-    rssUrl: gnewsEn("aljazeera.com"),
+    id: "aljazeera-ar",
+    name: "الجزيرة نت",
+    language: "ar",
+    rssUrl: gnewsAr("aljazeera.net"),
   },
+  {
+    id: "alarabiya",
+    name: "العربية",
+    language: "ar",
+    rssUrl: gnewsAr("alarabiya.net"),
+  },
+  {
+    id: "asharq",
+    name: "الشرق للأخبار",
+    language: "ar",
+    rssUrl: gnewsAr("asharq.com"),
+  },
+  {
+    id: "sky-arabia",
+    name: "سكاي نيوز عربية",
+    language: "ar",
+    rssUrl: gnewsAr("skynewsarabia.com"),
+  },
+  {
+    id: "al-ain",
+    name: "العين الإخبارية",
+    language: "ar",
+    rssUrl: gnewsAr("al-ain.com"),
+  },
+  {
+    id: "alaraby",
+    name: "العربي الجديد",
+    language: "ar",
+    rssUrl: gnewsAr("alaraby.co.uk"),
+  },
+  {
+    id: "independent-ar",
+    name: "إندبندنت عربية",
+    language: "ar",
+    rssUrl: "https://www.independentarabia.com/rss.xml",
+  },
+  {
+    id: "aawsat",
+    name: "الشرق الأوسط",
+    language: "ar",
+    rssUrl: "https://aawsat.com/feed",
+  },
+  {
+    id: "alquds-ar",
+    name: "القدس العربي",
+    language: "ar",
+    rssUrl: gnewsAr("alquds.co.uk"),
+  },
+
+  // Arabic — international
   {
     id: "france24-ar",
     name: "France 24 عربي",
@@ -39,6 +90,94 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
     name: "DW عربي",
     language: "ar",
     rssUrl: "https://rss.dw.com/rdf/rss-ar-all",
+  },
+  {
+    id: "cnn-ar",
+    name: "CNN بالعربية",
+    language: "ar",
+    rssUrl: "https://arabic.cnn.com/rss",
+  },
+  {
+    id: "euronews-ar",
+    name: "Euronews عربي",
+    language: "ar",
+    rssUrl: "https://arabic.euronews.com/rss",
+  },
+  {
+    id: "rt-ar",
+    name: "RT Arabic",
+    language: "ar",
+    rssUrl: "https://arabic.rt.com/rss/",
+  },
+  {
+    id: "trt-ar",
+    name: "TRT عربي",
+    language: "ar",
+    rssUrl: gnewsAr("trtarabi.com"),
+  },
+  {
+    id: "alhurra",
+    name: "الحرة",
+    language: "ar",
+    rssUrl: "https://www.alhurra.com/rss",
+  },
+  {
+    id: "monte-carlo",
+    name: "مونت كارلو الدولية",
+    language: "ar",
+    rssUrl: gnewsAr("mc-doualiya.com"),
+  },
+  {
+    id: "swissinfo-ar",
+    name: "SWI swissinfo عربي",
+    language: "ar",
+    rssUrl: gnewsAr("swissinfo.ch/ara"),
+  },
+  {
+    id: "anadolu-ar",
+    name: "الأناضول العربية",
+    language: "ar",
+    rssUrl: gnewsAr("aa.com.tr/ar"),
+  },
+  {
+    id: "sputnik-ar",
+    name: "سبوتنيك عربي",
+    language: "ar",
+    rssUrl: "https://sputnikarabic.ae/export/rss2/archive/index.xml",
+  },
+  {
+    id: "cgtn-ar",
+    name: "CGTN العربية",
+    language: "ar",
+    rssUrl: gnewsAr("arabic.cgtn.com"),
+  },
+
+  // Arabic — local
+  {
+    id: "youm7",
+    name: "اليوم السابع",
+    language: "ar",
+    rssUrl: "https://www.youm7.com/rss/SectionRss?SectionID=65",
+  },
+  {
+    id: "almasryalyoum",
+    name: "المصري اليوم",
+    language: "ar",
+    rssUrl: gnewsAr("almasryalyoum.com"),
+  },
+  {
+    id: "hespress",
+    name: "هسبريس",
+    language: "ar",
+    rssUrl: "https://www.hespress.com/feed",
+  },
+
+  // English
+  {
+    id: "aljazeera",
+    name: "Al Jazeera",
+    language: "en",
+    rssUrl: gnewsEn("aljazeera.com"),
   },
   {
     id: "guardian-world",
@@ -107,24 +246,6 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
     rssUrl: gnewsEn("apnews.com"),
   },
   {
-    id: "aawsat",
-    name: "الشرق الأوسط",
-    language: "ar",
-    rssUrl: "https://aawsat.com/feed",
-  },
-  {
-    id: "al-ain",
-    name: "العين الإخبارية",
-    language: "ar",
-    rssUrl: gnewsAr("al-ain.com"),
-  },
-  {
-    id: "sky-arabia",
-    name: "سكاي نيوز عربية",
-    language: "ar",
-    rssUrl: gnewsAr("skynewsarabia.com"),
-  },
-  {
     id: "bbc-world",
     name: "BBC World",
     language: "en",
@@ -135,17 +256,5 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
     name: "CNN",
     language: "en",
     rssUrl: gnewsEn("cnn.com"),
-  },
-  {
-    id: "youm7",
-    name: "اليوم السابع",
-    language: "ar",
-    rssUrl: "https://www.youm7.com/rss/SectionRss?SectionID=65",
-  },
-  {
-    id: "almasryalyoum",
-    name: "المصري اليوم",
-    language: "ar",
-    rssUrl: gnewsAr("almasryalyoum.com"),
   },
 ];

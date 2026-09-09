@@ -15,6 +15,7 @@ export type {
   PushUnsubscribeRequest,
   PushVapidKeyData,
 } from "./types/push.js";
+export { NEWS_TOPICS } from "./types/news.js";
 export type {
   NewsFeedData,
   NewsFeedItem,
@@ -27,6 +28,7 @@ export type {
   NewsSummarizeRequest,
   NewsSummaryFormat,
   NewsSummarySource,
+  NewsTopic,
 } from "./types/news.js";
 export type {
   GenerateData,

@@ -1,424 +1,623 @@
 {
-  "at": "2026-09-02T15:05:53.726Z",
-  "rawItems": 406,
+  "at": "2026-09-09T17:32:03.893Z",
+  "rawItems": 721,
   "clusters": 100,
-  "multiSourceClusters": 11,
-  "sourcesOk": 22,
+  "multiSourceClusters": 18,
+  "sourcesOk": 39,
   "sourcesFailed": 0,
   "sourceResults": [
     {
       "id": "bbc-ar",
-      "name": "BBC Arabic",
+      "name": "BBC News عربي",
       "language": "ar",
       "ok": true,
-      "ms": 323,
+      "ms": 319,
       "rssTotal": 22,
-      "kept": 11,
-      "skippedDate": 11,
-      "newest": "2026-09-02T13:49:41.000Z",
-      "sample": "إيران تستهدف \"مصالح أمريكية\" في المنطقة، ومقتل بحارين في حادث ناقلة سع"
+      "kept": 14,
+      "skippedDate": 8,
+      "newest": "2026-09-09T16:46:22.000Z",
+      "sample": "إيران تعلن استهداف حظائر عسكرية أمريكية في الأردن، وتكشف عن منطقة حظر "
     },
     {
-      "id": "aljazeera",
-      "name": "Al Jazeera",
-      "language": "en",
-      "ok": true,
-      "ms": 302,
-      "rssTotal": 100,
-      "kept": 20,
-      "skippedDate": 0,
-      "newest": "2026-09-01T15:02:23.000Z",
-      "sample": "Iran war live - Al Jazeera - aljazeera.com"
-    },
-    {
-      "id": "france24-ar",
-      "name": "France 24 عربي",
+      "id": "aljazeera-ar",
+      "name": "الجزيرة نت",
       "language": "ar",
       "ok": true,
-      "ms": 147,
-      "rssTotal": 24,
+      "ms": 329,
+      "rssTotal": 100,
       "kept": 20,
       "skippedDate": 0,
-      "newest": "2026-09-02T14:51:32.000Z",
-      "sample": "مدارس القدس الشرقية.. إسرائيل تمنع وصول المعلمين من الضفة الغربية"
+      "newest": "2026-09-09T01:06:59.000Z",
+      "sample": "الجمهوريون يضعون المسلمين في قلب معركة انتخابات التجديد النصفي - الجزي"
     },
     {
-      "id": "dw-ar",
-      "name": "DW عربي",
+      "id": "alarabiya",
+      "name": "العربية",
       "language": "ar",
       "ok": true,
-      "ms": 406,
-      "rssTotal": 52,
-      "kept": 20,
-      "skippedDate": 0,
-      "newest": "2026-09-02T13:28:00.000Z",
-      "sample": "أزمة فولكسفاغن.. كشف وثيقة سرية عن مستقبل الانتاج والمصانع في ألمانيا"
-    },
-    {
-      "id": "guardian-world",
-      "name": "The Guardian",
-      "language": "en",
-      "ok": true,
-      "ms": 443,
-      "rssTotal": 45,
-      "kept": 20,
-      "skippedDate": 0,
-      "newest": "2026-09-02T09:20:55.000Z",
-      "sample": "New constitution in Guinea-Bissau will undermine democracy, opponents "
-    },
-    {
-      "id": "npr",
-      "name": "NPR",
-      "language": "en",
-      "ok": true,
-      "ms": 257,
-      "rssTotal": 10,
-      "kept": 10,
-      "skippedDate": 0,
-      "newest": "2026-09-02T14:30:36.000Z",
-      "sample": "Greetings from the Royal Pavilion, a stunning reminder of India in sou"
-    },
-    {
-      "id": "sky-world",
-      "name": "Sky News",
-      "language": "en",
-      "ok": true,
-      "ms": 245,
-      "rssTotal": 8,
-      "kept": 7,
-      "skippedDate": 1,
-      "newest": "2026-09-02T05:56:00.000Z",
-      "sample": "22 people killed in bus crash in Egypt"
-    },
-    {
-      "id": "wapo",
-      "name": "The Washington Post",
-      "language": "en",
-      "ok": true,
-      "ms": 9366,
-      "rssTotal": 18,
-      "kept": 18,
-      "skippedDate": 0,
-      "newest": "2026-09-02T12:00:00.000Z",
-      "sample": "USS Abraham Lincoln docks in Thailand after 9 months at sea"
-    },
-    {
-      "id": "nytimes",
-      "name": "The New York Times",
-      "language": "en",
-      "ok": true,
-      "ms": 312,
-      "rssTotal": 56,
-      "kept": 20,
-      "skippedDate": 0,
-      "newest": "2026-09-02T15:01:41.000Z",
-      "sample": "U.S. and Iran Survey the Damage After a Night of Intense Strikes"
-    },
-    {
-      "id": "axios",
-      "name": "Axios",
-      "language": "en",
-      "ok": true,
-      "ms": 698,
+      "ms": 130,
       "rssTotal": 100,
       "kept": 20,
       "skippedDate": 0,
-      "newest": "2026-09-02T14:13:47.000Z",
-      "sample": "After Trump renamed Lake Ontario, Americans aren't buying his Canada f"
+      "newest": "2026-09-09T03:05:00.000Z",
+      "sample": "بسبب \"الليكوبين\"... دراسة تكشف فوائد مفاجئة للطماطم على الدماغ - العرب"
     },
     {
-      "id": "wsj",
-      "name": "The Wall Street Journal",
-      "language": "en",
-      "ok": true,
-      "ms": 281,
-      "rssTotal": 100,
-      "kept": 20,
-      "skippedDate": 0,
-      "newest": "2026-09-02T14:00:00.000Z",
-      "sample": "Exclusive | Southwest Airlines Jumps Into the Airport Lounge Competiti"
-    },
-    {
-      "id": "ft",
-      "name": "Financial Times",
-      "language": "en",
-      "ok": true,
-      "ms": 294,
-      "rssTotal": 25,
-      "kept": 20,
-      "skippedDate": 0,
-      "newest": "2026-09-02T14:25:07.000Z",
-      "sample": "Uber to axe 10% of its workforce in biggest cuts since pandemic"
-    },
-    {
-      "id": "reuters",
-      "name": "Reuters",
-      "language": "en",
-      "ok": true,
-      "ms": 91,
-      "rssTotal": 100,
-      "kept": 20,
-      "skippedDate": 0,
-      "newest": "2026-09-02T14:48:53.000Z",
-      "sample": "Uber to lay off 10% of staff in biggest cuts since COVID - Reuters"
-    },
-    {
-      "id": "afp",
-      "name": "AFP",
-      "language": "en",
-      "ok": true,
-      "ms": 73,
-      "rssTotal": 86,
-      "kept": 20,
-      "skippedDate": 0,
-      "newest": "2026-08-31T05:06:33.000Z",
-      "sample": "Footage of water rushing from glacier filmed in Alaska, not Nepal - Fa"
-    },
-    {
-      "id": "ap",
-      "name": "AP News",
-      "language": "en",
-      "ok": true,
-      "ms": 81,
-      "rssTotal": 100,
-      "kept": 20,
-      "skippedDate": 0,
-      "newest": "2026-09-02T09:54:44.000Z",
-      "sample": "Explosion near German train station injures 2 - AP News"
-    },
-    {
-      "id": "aawsat",
-      "name": "الشرق الأوسط",
+      "id": "asharq",
+      "name": "الشرق للأخبار",
       "language": "ar",
       "ok": true,
-      "ms": 321,
-      "rssTotal": 300,
-      "kept": 20,
-      "skippedDate": 0,
-      "newest": "2026-09-02T15:02:21.000Z",
-      "sample": "خليل رباح يُعيد تركيب العالم بتجهيزاته التي حطَّت في بيروت"
-    },
-    {
-      "id": "al-ain",
-      "name": "العين الإخبارية",
-      "language": "ar",
-      "ok": true,
-      "ms": 75,
+      "ms": 121,
       "rssTotal": 100,
       "kept": 20,
       "skippedDate": 0,
-      "newest": "2026-09-02T05:30:54.000Z",
-      "sample": "«جز العشب».. ماذا تخفي واشنطن لإيران؟ - al-ain.com"
+      "newest": "2026-09-08T21:14:04.000Z",
+      "sample": "رداً على عقوبات لندن.. إسرائيل تغلق القنصلية البريطانية في القدس - ash"
     },
     {
       "id": "sky-arabia",
       "name": "سكاي نيوز عربية",
       "language": "ar",
       "ok": true,
-      "ms": 117,
+      "ms": 631,
       "rssTotal": 100,
       "kept": 20,
       "skippedDate": 0,
-      "newest": "2026-09-02T12:14:06.000Z",
-      "sample": "القيادة تحت تأثير الكحول تورط نجم ريال مدريد - سكاي نيوز عربية"
+      "newest": "2026-09-07T16:46:00.000Z",
+      "sample": "صواريخ \"باتريوت\" تنفد.. سماء أوكرانيا مكشوفة أمام الباليستي - سكاي نيو"
     },
     {
-      "id": "bbc-world",
-      "name": "BBC World",
-      "language": "en",
+      "id": "al-ain",
+      "name": "العين الإخبارية",
+      "language": "ar",
       "ok": true,
-      "ms": 213,
-      "rssTotal": 29,
-      "kept": 20,
-      "skippedDate": 0,
-      "newest": "2026-09-02T14:34:22.000Z",
-      "sample": "EU and Nato vow to step up pressure on Russia after 'new escalation' i"
-    },
-    {
-      "id": "cnn",
-      "name": "CNN",
-      "language": "en",
-      "ok": true,
-      "ms": 77,
+      "ms": 517,
       "rssTotal": 100,
       "kept": 20,
       "skippedDate": 0,
-      "newest": "2026-09-02T10:32:14.000Z",
-      "sample": "Ariana Grande bids fans tearful farewell in last concert before steppi"
+      "newest": "2026-09-08T13:11:49.000Z",
+      "sample": "مسؤول بالاتحاد الأوروبي: لا أمن إقليميا مستداما دون دول الخليج - العين"
+    },
+    {
+      "id": "alaraby",
+      "name": "العربي الجديد",
+      "language": "ar",
+      "ok": true,
+      "ms": 109,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-08T00:26:58.000Z",
+      "sample": "أيّ خريطة طريق يحتاجها الفلسطينيون؟ - العربي الجديد"
+    },
+    {
+      "id": "independent-ar",
+      "name": "إندبندنت عربية",
+      "language": "ar",
+      "ok": true,
+      "ms": 264,
+      "rssTotal": 100,
+      "kept": 10,
+      "skippedDate": 89,
+      "newest": "2026-09-09T12:40:38.000Z",
+      "sample": "ماك أليستر مطالب بإثبات استحقاقه لعقد جديد مع ليفربول"
+    },
+    {
+      "id": "aawsat",
+      "name": "الشرق الأوسط",
+      "language": "ar",
+      "ok": true,
+      "ms": 324,
+      "rssTotal": 300,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T17:26:20.000Z",
+      "sample": "السعودية تؤكد التزامها بحماية الأمن الغذائي العالمي"
+    },
+    {
+      "id": "alquds-ar",
+      "name": "القدس العربي",
+      "language": "ar",
+      "ok": true,
+      "ms": 164,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-08T20:11:00.000Z",
+      "sample": "هل حفظت اليونيفيل السلام حتى نخشى رحيلها؟ | لمياء موسى - alquds.co.uk"
+    },
+    {
+      "id": "france24-ar",
+      "name": "France 24 عربي",
+      "language": "ar",
+      "ok": true,
+      "ms": 185,
+      "rssTotal": 21,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T16:20:24.000Z",
+      "sample": "كيف أعادت الحرب بين إيران والولايات المتحدة إحياء الصراع في اليمن؟"
+    },
+    {
+      "id": "dw-ar",
+      "name": "DW عربي",
+      "language": "ar",
+      "ok": true,
+      "ms": 254,
+      "rssTotal": 50,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T16:07:00.000Z",
+      "sample": "الزيدي في ورطة.. لماذا يعجز العراق عن نزع سلاح الفصائل الموالية لإيران"
+    },
+    {
+      "id": "cnn-ar",
+      "name": "CNN بالعربية",
+      "language": "ar",
+      "ok": true,
+      "ms": 428,
+      "rssTotal": 20,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T17:18:43.000Z",
+      "sample": "\"خط أحمر\".. وزير التعليم في مصر يكرم مديري مدرستين وبّخهما محافظ"
+    },
+    {
+      "id": "euronews-ar",
+      "name": "Euronews عربي",
+      "language": "ar",
+      "ok": true,
+      "ms": 286,
+      "rssTotal": 50,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T17:00:54.000Z",
+      "sample": "Qatar in Motion | التغلب على الحرارة: كيف تواجه قطر أشهر الصيف"
+    },
+    {
+      "id": "rt-ar",
+      "name": "RT Arabic",
+      "language": "ar",
+      "ok": true,
+      "ms": 762,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T17:26:49.000Z",
+      "sample": "مجلس محافظي الوكالة الدولية للطاقة الذرية يتبنى قرارا بإحالة الملف الإ"
+    },
+    {
+      "id": "trt-ar",
+      "name": "TRT عربي",
+      "language": "ar",
+      "ok": true,
+      "ms": 65,
+      "rssTotal": 63,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-08T21:35:37.000Z",
+      "sample": "انفجارات تهز قلب النفط الإيراني.. والحرس الثوري يهدد بالرد - TRT عربي"
+    },
+    {
+      "id": "alhurra",
+      "name": "الحرة",
+      "language": "ar",
+      "ok": true,
+      "ms": 814,
+      "rssTotal": 10,
+      "kept": 10,
+      "skippedDate": 0,
+      "newest": "2026-09-09T17:03:24.000Z",
+      "sample": "عقوبات المستوطنات تشعل مواجهة إسرائيلية-أوروبية  المواجهة الجديدة تعكس"
+    },
+    {
+      "id": "monte-carlo",
+      "name": "مونت كارلو الدولية",
+      "language": "ar",
+      "ok": true,
+      "ms": 139,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-08T08:08:08.000Z",
+      "sample": "ألمانيا: صعود حزب البديل يهز \"جدار العزل\" ضد اليمين المتطرف.. ويضع حكو"
+    },
+    {
+      "id": "swissinfo-ar",
+      "name": "SWI swissinfo عربي",
+      "language": "ar",
+      "ok": true,
+      "ms": 121,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-08T22:10:38.000Z",
+      "sample": "كارني: خفض العلاقات الاقتصادية مع الولايات المتحدة سيكون له ثمن - SWI "
+    },
+    {
+      "id": "anadolu-ar",
+      "name": "الأناضول العربية",
+      "language": "ar",
+      "ok": true,
+      "ms": 151,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-07T15:18:29.000Z",
+      "sample": "علييف وبوتين يبحثان التعاون الاقتصادي ويتفقان على تعزيز العلاقات - Ana"
+    },
+    {
+      "id": "sputnik-ar",
+      "name": "سبوتنيك عربي",
+      "language": "ar",
+      "ok": true,
+      "ms": 2068,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T17:28:58.000Z",
+      "sample": "ماذا يحدث للعقل بعد شهرين من العزلة؟"
+    },
+    {
+      "id": "cgtn-ar",
+      "name": "CGTN العربية",
+      "language": "ar",
+      "ok": true,
+      "ms": 67,
+      "rssTotal": 51,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T02:39:00.000Z",
+      "sample": "استطلاع CGTN | ما يقرب من 90% من المستطلعين يقولون إن معرض CIFTIS يعكس"
     },
     {
       "id": "youm7",
       "name": "اليوم السابع",
       "language": "ar",
       "ok": true,
-      "ms": 239,
+      "ms": 241,
       "rssTotal": 20,
       "kept": 20,
       "skippedDate": 0,
-      "newest": "2026-09-02T15:03:00.000Z",
-      "sample": "埃及-中国：文明的联盟.. مانشيت اليوم السابع بالصيني ترحيبا بزيارة شي جين بينج لم"
+      "newest": "2026-09-09T17:25:00.000Z",
+      "sample": "الجامعات تشارك فى مؤتمر ومعرض EAIE 2026 بجلاسكو لتعزيز حضورها الدولى"
     },
     {
       "id": "almasryalyoum",
       "name": "المصري اليوم",
       "language": "ar",
       "ok": true,
-      "ms": 76,
+      "ms": 1024,
       "rssTotal": 100,
       "kept": 20,
       "skippedDate": 0,
-      "newest": "2026-09-02T10:55:00.000Z",
-      "sample": "الطفل محمد رجب مُنقذ والده: «بابا حط راسه على الدركسيون.. والإسعاف فضل"
+      "newest": "2026-09-09T15:36:00.000Z",
+      "sample": "مباشر الآن.. مباراة برشلونة ضد فينورد (1-0) في دوري أبطال أوروبا (لحظة"
+    },
+    {
+      "id": "hespress",
+      "name": "هسبريس",
+      "language": "ar",
+      "ok": true,
+      "ms": 256,
+      "rssTotal": 12,
+      "kept": 12,
+      "skippedDate": 0,
+      "newest": "2026-09-09T17:26:15.000Z",
+      "sample": "\"الأخضر\" يلون تداولات بورصة البيضاء"
+    },
+    {
+      "id": "aljazeera",
+      "name": "Al Jazeera",
+      "language": "en",
+      "ok": true,
+      "ms": 91,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T07:20:42.000Z",
+      "sample": "Medicine shortages grow in Iran as US tightens sanctions, blockade - A"
+    },
+    {
+      "id": "guardian-world",
+      "name": "The Guardian",
+      "language": "en",
+      "ok": true,
+      "ms": 367,
+      "rssTotal": 45,
+      "kept": 20,
+      "skippedDate": 4,
+      "newest": "2026-09-09T04:00:58.000Z",
+      "sample": "Babies born to anaemic mothers have smaller brains, study finds"
+    },
+    {
+      "id": "npr",
+      "name": "NPR",
+      "language": "en",
+      "ok": true,
+      "ms": 359,
+      "rssTotal": 10,
+      "kept": 10,
+      "skippedDate": 0,
+      "newest": "2026-09-09T17:23:15.000Z",
+      "sample": "Andrew Tate is denied bail and will remain in jail during his extradit"
+    },
+    {
+      "id": "sky-world",
+      "name": "Sky News",
+      "language": "en",
+      "ok": true,
+      "ms": 336,
+      "rssTotal": 9,
+      "kept": 9,
+      "skippedDate": 0,
+      "newest": "2026-09-09T10:43:00.000Z",
+      "sample": "More than 10% chance AI 'could kill all humans', insider warns"
+    },
+    {
+      "id": "wapo",
+      "name": "The Washington Post",
+      "language": "en",
+      "ok": true,
+      "ms": 9345,
+      "rssTotal": 16,
+      "kept": 16,
+      "skippedDate": 0,
+      "newest": "2026-09-09T14:31:50.000Z",
+      "sample": "AP says it will refer to Lake Ontario by its original name, despite Tr"
+    },
+    {
+      "id": "nytimes",
+      "name": "The New York Times",
+      "language": "en",
+      "ok": true,
+      "ms": 308,
+      "rssTotal": 52,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T13:53:07.000Z",
+      "sample": "How a Driver’s Sudden Death Triggered Ebola Panic in Congo"
+    },
+    {
+      "id": "axios",
+      "name": "Axios",
+      "language": "en",
+      "ok": true,
+      "ms": 1895,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T16:15:39.000Z",
+      "sample": "Here's how AI could kill us all (if the worst fears come true)"
+    },
+    {
+      "id": "wsj",
+      "name": "The Wall Street Journal",
+      "language": "en",
+      "ok": true,
+      "ms": 725,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T13:23:00.000Z",
+      "sample": "Sydney Sweeney Brings Star Power to Prediction Market Push - wsj.com"
+    },
+    {
+      "id": "ft",
+      "name": "Financial Times",
+      "language": "en",
+      "ok": true,
+      "ms": 380,
+      "rssTotal": 25,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T16:55:20.000Z",
+      "sample": "Oil hits $100 for first time since July"
+    },
+    {
+      "id": "reuters",
+      "name": "Reuters",
+      "language": "en",
+      "ok": true,
+      "ms": 501,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T17:05:32.000Z",
+      "sample": "EXCLUSIVE: OpenAI’s rogue agents used at least 10 more sites for unaut"
+    },
+    {
+      "id": "afp",
+      "name": "AFP",
+      "language": "en",
+      "ok": true,
+      "ms": 346,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-07T03:55:16.000Z",
+      "sample": "Video of young girl rescued days after Nepal-Tibet disaster is AI-gene"
+    },
+    {
+      "id": "ap",
+      "name": "AP News",
+      "language": "en",
+      "ok": true,
+      "ms": 593,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T11:22:00.000Z",
+      "sample": "Oil rises past $100 a barrel after the latest wave of Middle East atta"
+    },
+    {
+      "id": "bbc-world",
+      "name": "BBC World",
+      "language": "en",
+      "ok": true,
+      "ms": 261,
+      "rssTotal": 28,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T13:29:33.000Z",
+      "sample": "Germany's Merz attacks AfD in stormy debate after far-right election w"
+    },
+    {
+      "id": "cnn",
+      "name": "CNN",
+      "language": "en",
+      "ok": true,
+      "ms": 474,
+      "rssTotal": 100,
+      "kept": 20,
+      "skippedDate": 0,
+      "newest": "2026-09-09T04:28:31.000Z",
+      "sample": "Ukraine’s battlefield optimism is ebbing as Russia threatens its ‘fort"
     }
   ],
   "sourceInFeed": {
     "bbc-ar": 2,
-    "aljazeera": 3,
-    "france24-ar": 13,
-    "dw-ar": 2,
-    "guardian-world": 5,
-    "npr": 3,
-    "sky-world": 3,
-    "wapo": 2,
-    "nytimes": 8,
-    "axios": 2,
-    "wsj": 2,
-    "ft": 5,
-    "reuters": 9,
-    "afp": 3,
-    "ap": 6,
-    "aawsat": 20,
-    "al-ain": 2,
+    "aljazeera-ar": 2,
+    "alarabiya": 3,
+    "asharq": 2,
     "sky-arabia": 2,
-    "bbc-world": 4,
-    "cnn": 4,
-    "youm7": 18,
-    "almasryalyoum": 2
+    "al-ain": 3,
+    "alaraby": 2,
+    "independent-ar": 2,
+    "aawsat": 15,
+    "alquds-ar": 2,
+    "france24-ar": 3,
+    "dw-ar": 2,
+    "cnn-ar": 3,
+    "euronews-ar": 2,
+    "rt-ar": 6,
+    "trt-ar": 3,
+    "alhurra": 3,
+    "monte-carlo": 3,
+    "swissinfo-ar": 6,
+    "anadolu-ar": 2,
+    "sputnik-ar": 4,
+    "cgtn-ar": 3,
+    "youm7": 5,
+    "almasryalyoum": 2,
+    "hespress": 3,
+    "aljazeera": 2,
+    "guardian-world": 3,
+    "npr": 2,
+    "sky-world": 2,
+    "wapo": 2,
+    "nytimes": 3,
+    "axios": 3,
+    "wsj": 3,
+    "ft": 2,
+    "reuters": 4,
+    "afp": 2,
+    "ap": 2,
+    "bbc-world": 5,
+    "cnn": 2
   },
   "sourcesWithZeroInFeed": [],
   "clusterExamples": [
     {
-      "title": "Uber to lay off 10% of staff in biggest cuts since COVID - Reuters",
+      "title": "مجلس محافظي الوكالة الدولية للطاقة الذرية يتبنى قرارا بإحالة الملف الإيراني إلى مجلس الأمن",
+      "sourceCount": 2,
+      "sources": [
+        "RT Arabic",
+        "SWI swissinfo عربي"
+      ],
+      "titles": [
+        "مجلس محافظي الوكالة الدولية للطاقة الذرية يتبنى قرارا بإحالة",
+        "مجلس محافظي وكالة الطاقة الذرية يحيل إيران لمجلس الأمن - SWI"
+      ]
+    },
+    {
+      "title": "انطلاق دورة الألعاب الأفريقية الثانية عشرة للجامعات بحضور رئيس الوزراء",
+      "sourceCount": 2,
+      "sources": [
+        "اليوم السابع",
+        "اليوم السابع"
+      ],
+      "titles": [
+        "انطلاق دورة الألعاب الأفريقية الثانية عشرة للجامعات بحضور رئ",
+        "رئيس الوزراء يحضر حفل افتتاح الدورة الثانية عشرة للألعاب الأ"
+      ]
+    },
+    {
+      "title": "US Treasury to buy up to $6 billion in Sept 10 buyback operation - Reuters",
       "sourceCount": 2,
       "sources": [
         "Reuters",
-        "Financial Times"
+        "The Wall Street Journal"
       ],
       "titles": [
-        "Uber to lay off 10% of staff in biggest cuts since COVID - R",
-        "Uber to axe 10% of its workforce in biggest cuts since pande"
+        "US Treasury to buy up to $6 billion in Sept 10 buyback opera",
+        "U.S. Treasury Plans $6 Billion 10- to 20-Year Bond Buyback -"
       ]
     },
     {
-      "title": "بيان مشترك: مصر والصين ​تتفقان ​على توسيع التعاون ​في ‌التكنولوجيا المتقدمة",
-      "sourceCount": 2,
-      "sources": [
-        "France 24 عربي",
-        "العين الإخبارية"
-      ],
-      "titles": [
-        "بيان مشترك: مصر والصين ​تتفقان ​على توسيع التعاون ​في ‌التكن",
-        "مصر والصين تتفقان على توسيع التعاون في التكنولوجيا المتقدمة "
-      ]
-    },
-    {
-      "title": "Chevron to expand in Venezuela, days after the U.S. and Venezuela strike oil deal",
-      "sourceCount": 3,
-      "sources": [
-        "NPR",
-        "AP News",
-        "AP News"
-      ],
-      "titles": [
-        "Chevron to expand in Venezuela, days after the U.S. and Vene",
-        "US oil giant Chevron confirms it will expand operations in V",
-        "Days after Trump announces Venezuela oil deal, White House f"
-      ]
-    },
-    {
-      "title": "Ukraine tells airlines to stop using Russian airspace",
+      "title": "Oil hits $100 for first time since July",
       "sourceCount": 2,
       "sources": [
         "Financial Times",
         "BBC World"
       ],
       "titles": [
-        "Ukraine tells airlines to stop using Russian airspace",
-        "Zelensky says airlines should avoid Russian airspace as Ukra"
+        "Oil hits $100 for first time since July",
+        "Oil hits $100 a barrel for first time since July after US an"
       ]
     },
     {
-      "title": "EU to hit back at Russia after drone attack as Germany probes new sabotage cases - Reuters",
-      "sourceCount": 4,
-      "sources": [
-        "Reuters",
-        "Financial Times",
-        "The New York Times",
-        "The Washington Post"
-      ],
-      "titles": [
-        "EU to hit back at Russia after drone attack as Germany probe",
-        "Germany blames Russia for Leipzig drone attack",
-        "Weeks After Failed Drone Attack, Germany Points Finger at Ru",
-        "Germany blames Russia for drone attack on airport, announces"
-      ]
-    },
-    {
-      "title": "الرئيس الصيني يزور مصر.. ما أهمية الزيارة وما أبعادها؟",
+      "title": "45 ألف دولار لكل واحدة... هدايا ترمب النقدية لمساعداته تثير الانتباه",
       "sourceCount": 2,
       "sources": [
-        "France 24 عربي",
-        "سكاي نيوز عربية"
+        "الشرق الأوسط",
+        "مونت كارلو الدولية"
       ],
       "titles": [
-        "الرئيس الصيني يزور مصر.. ما أهمية الزيارة وما أبعادها؟",
-        "الرئيس الصيني يزور مصر لبحث التعاون وتوقيع اتفاقيات عدة - سك"
+        "45 ألف دولار لكل واحدة... هدايا ترمب النقدية لمساعداته تثير ",
+        "45 ألف دولار لكل منهن.. هدايا ترامب لمساعداته المقربات تثير "
       ]
     },
     {
-      "title": "After more than 9 months at sea, the USS Abraham Lincoln arrives in Thailand - AP News",
-      "sourceCount": 5,
+      "title": "8 دول ترحب بقرار بريطانيا حظر الواردات من مستوطنات الضفة الغربية",
+      "sourceCount": 4,
       "sources": [
-        "AP News",
-        "The Washington Post",
-        "The Guardian",
-        "CNN",
-        "The Guardian"
+        "الشرق الأوسط",
+        "SWI swissinfo عربي",
+        "TRT عربي",
+        "DW عربي"
       ],
       "titles": [
-        "After more than 9 months at sea, the USS Abraham Lincoln arr",
-        "USS Abraham Lincoln docks in Thailand after 9 months at sea",
-        "USS Abraham Lincoln arrives at Thai port after gruelling 270",
-        "Aircraft carrier USS Abraham Lincoln arrives in Thailand aft",
-        "Thai resort prepares to host USS Abraham Lincoln sailors aft"
+        "8 دول ترحب بقرار بريطانيا حظر الواردات من مستوطنات الضفة الغ",
+        "بيرنام: على بريطانيا \"الوقوف في وجه ظلم\" مستوطنات الضفة الغر",
+        "تركيا ترحب بقرار 12 دولة حظر التجارة مع المستوطنات غير القان",
+        "بريطانيا تشدد الخناق الاقتصادي على مستوطنات الضفة الغربية"
       ]
     },
     {
-      "title": "Bus crash on Egypt's Red Sea coast kills 22",
-      "sourceCount": 3,
+      "title": "سماء زرقاء إلى حدّ مريب  هذا المقال جزء من سلسلة مقالات بمناسبة الذكرى الخامسة والعشرين له",
+      "sourceCount": 2,
       "sources": [
-        "BBC World",
-        "The New York Times",
-        "Sky News"
+        "الحرة",
+        "الحرة"
       ],
       "titles": [
-        "Bus crash on Egypt's Red Sea coast kills 22",
-        "Bus Crash in Egypt Kills at Least 22",
-        "22 people killed in bus crash in Egypt"
+        "سماء زرقاء إلى حدّ مريب  هذا المقال جزء من سلسلة مقالات بمنا",
+        "هذا ما حدث لي في 11 سبتمبر  هذا المقال ضمن سلسلة خاصة أُعدّت"
+      ]
+    },
+    {
+      "title": "النروج تودع \"جد الأمة\" الملك هارالد الخامس - SWI swissinfo.ch",
+      "sourceCount": 2,
+      "sources": [
+        "SWI swissinfo عربي",
+        "العربي الجديد"
+      ],
+      "titles": [
+        "النروج تودع \"جد الأمة\" الملك هارالد الخامس - SWI swissinfo.c",
+        "النرويج تودّع الملك هارالد الخامس بمشاركة دولية - العربي الج"
       ]
     }
   ],
-  "lincolnClusters": [
-    {
-      "title": "After more than 9 months at sea, the USS Abraham Lincoln arrives in Thailand - AP News",
-      "sourceCount": 5,
-      "sources": [
-        "AP News",
-        "The Washington Post",
-        "The Guardian",
-        "CNN",
-        "The Guardian"
-      ]
-    }
-  ]
+  "lincolnClusters": []
 }

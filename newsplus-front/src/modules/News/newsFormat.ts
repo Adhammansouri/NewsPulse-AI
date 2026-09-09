@@ -1,4 +1,5 @@
-import type { NewsStoryFormat, NewsSummaryFormat } from "@newsplus/shared";
+import type { NewsStoryFormat, NewsSummaryFormat, NewsTopic } from "@newsplus/shared";
+import { NEWS_TOPICS } from "@newsplus/shared";
 
 const SOURCE_TONES = [
   "var(--color-teal-600)",
@@ -112,6 +113,45 @@ export function timeFilterCounts(items: Array<{ publishedAt: string }>) {
     if (matchesTimeFilter(item.publishedAt, "hour")) counts.hour += 1;
     if (matchesTimeFilter(item.publishedAt, "three")) counts.three += 1;
     if (matchesTimeFilter(item.publishedAt, "today")) counts.today += 1;
+  }
+  return counts;
+}
+
+export type TopicFilter = "all" | NewsTopic;
+
+export const TOPIC_FILTERS: Array<{ id: TopicFilter; label: string }> = [
+  { id: "all", label: "الكل" },
+  { id: "politics", label: "سياسة" },
+  { id: "economy", label: "اقتصاد" },
+  { id: "health", label: "صحة" },
+  { id: "sports", label: "رياضة" },
+  { id: "tech", label: "تكنولوجيا" },
+  { id: "science", label: "علوم" },
+  { id: "culture", label: "ثقافة" },
+  { id: "other", label: "أخرى" },
+];
+
+export function matchesTopicFilter(topic: NewsTopic | undefined, filter: TopicFilter) {
+  if (filter === "all") return true;
+  const resolved = topic && NEWS_TOPICS.includes(topic) ? topic : "other";
+  return resolved === filter;
+}
+
+export function topicFilterCounts(items: Array<{ topic?: NewsTopic }>) {
+  const counts: Record<TopicFilter, number> = {
+    all: items.length,
+    politics: 0,
+    economy: 0,
+    health: 0,
+    sports: 0,
+    tech: 0,
+    science: 0,
+    culture: 0,
+    other: 0,
+  };
+  for (const item of items) {
+    const topic = item.topic && NEWS_TOPICS.includes(item.topic) ? item.topic : "other";
+    counts[topic] += 1;
   }
   return counts;
 }

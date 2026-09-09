@@ -27,13 +27,17 @@ import {
   formatStamp,
   hasArabic,
   matchesTimeFilter,
+  matchesTopicFilter,
   newsRecency,
   splitSocialBullets,
   STORY_FORMATS,
   storyFormatMeta,
   TIME_FILTERS,
   timeFilterCounts,
+  TOPIC_FILTERS,
+  topicFilterCounts,
   type TimeFilter,
+  type TopicFilter,
 } from "../newsFormat";
 
 type LangFilter = "all" | NewsLanguage;
@@ -47,6 +51,7 @@ export default function NewsPage() {
   const [sourceId, setSourceId] = useState("all");
   const [langFilter, setLangFilter] = useState<LangFilter>("all");
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
+  const [topicFilter, setTopicFilter] = useState<TopicFilter>("all");
   const [query, setQuery] = useState("");
   const [mobilePane, setMobilePane] = useState<MobilePane>("feed");
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -57,7 +62,7 @@ export default function NewsPage() {
   const [newIds, setNewIds] = useState<string[]>([]);
   const feedScrollRef = useRef<HTMLDivElement>(null);
   const seenIdsRef = useRef<Set<string>>(new Set());
-  const snapshotKeyRef = useRef("all|all|all|");
+  const snapshotKeyRef = useRef("all|all|all|all|");
 
   const sourcesQuery = useQuery({
     queryKey: ["news-sources"],
@@ -83,10 +88,15 @@ export default function NewsPage() {
   }, [feedQuery.data?.items, langFilter, sourceId, visibleSources]);
 
   const timeCounts = useMemo(() => timeFilterCounts(scopedItems), [scopedItems]);
-
-  const items = useMemo(
+  const timedItems = useMemo(
     () => scopedItems.filter((item) => matchesTimeFilter(item.publishedAt, timeFilter)),
     [scopedItems, timeFilter],
+  );
+  const topicCounts = useMemo(() => topicFilterCounts(timedItems), [timedItems]);
+
+  const items = useMemo(
+    () => timedItems.filter((item) => matchesTopicFilter(item.topic, topicFilter)),
+    [timedItems, topicFilter],
   );
 
   const selected = useMemo(() => {
@@ -99,7 +109,7 @@ export default function NewsPage() {
   const summary = summarizeMutation.data;
   const busy = summarizeMutation.isPending;
   const error = sourcesQuery.error ?? feedQuery.error ?? summarizeMutation.error;
-  const snapshotKey = `${sourceId}|${langFilter}|${timeFilter}|${query}`;
+  const snapshotKey = `${sourceId}|${langFilter}|${timeFilter}|${topicFilter}|${query}`;
   const resultFormat = summary?.format ?? (summarizeMutation.variables?.briefing ? "briefing" : selectedFormat);
 
   useEffect(() => {
@@ -309,6 +319,27 @@ export default function NewsPage() {
             );
           })}
         </div>
+
+        <div className="news-topic-rail" role="listbox" aria-label="تصفية الموضوع">
+          {TOPIC_FILTERS.map((option) => {
+            const count = topicCounts[option.id];
+            const empty = option.id !== "all" && count === 0;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                className={`news-chip ${topicFilter === option.id ? "is-active" : ""} ${empty ? "is-empty" : ""}`}
+                aria-pressed={topicFilter === option.id}
+                aria-label={`${option.label}، ${count} عنوان`}
+                disabled={empty}
+                onClick={() => setTopicFilter(option.id)}
+              >
+                {option.label}
+                <span className="news-seg-count">{count}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {visibleSources.length > 0 && (
@@ -364,6 +395,9 @@ export default function NewsPage() {
               {timeFilter !== "all"
                 ? ` · ${TIME_FILTERS.find((option) => option.id === timeFilter)?.label}`
                 : ""}
+              {topicFilter !== "all"
+                ? ` · ${TOPIC_FILTERS.find((option) => option.id === topicFilter)?.label}`
+                : ""}
             </p>
           </div>
           <div className="news-pane-scroll" ref={feedScrollRef}>
@@ -375,10 +409,15 @@ export default function NewsPage() {
             )}
             {!feedQuery.isLoading && items.length === 0 && (
               <div className="news-state news-state--empty">
-                <p>لا توجد عناوين في هذه النافذة. غيّر الوقت أو المصدر أو كلمة البحث.</p>
+                <p>لا توجد عناوين في هذه النافذة. غيّر الوقت أو الموضوع أو المصدر أو كلمة البحث.</p>
                 {timeFilter !== "all" ? (
                   <button type="button" className="news-chip" onClick={() => setTimeFilter("all")}>
                     عرض كل الأوقات
+                  </button>
+                ) : null}
+                {topicFilter !== "all" ? (
+                  <button type="button" className="news-chip" onClick={() => setTopicFilter("all")}>
+                    عرض كل المواضيع
                   </button>
                 ) : null}
               </div>

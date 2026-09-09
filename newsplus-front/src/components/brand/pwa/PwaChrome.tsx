@@ -3,7 +3,7 @@ import { IosInstallHint } from "./IosInstallHint";
 import { PwaInstallBanner } from "./PwaInstallBanner";
 import { PwaUpdateToast } from "./PwaUpdateToast";
 
-export function PwaChrome() {
+function PwaServiceWorker() {
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
@@ -16,18 +16,24 @@ export function PwaChrome() {
     },
   });
 
+  return needRefresh ? (
+    <PwaUpdateToast
+      onUpdate={() => {
+        void updateServiceWorker(true);
+      }}
+      onDismiss={() => setNeedRefresh(false)}
+    />
+  ) : null;
+}
+
+export function PwaChrome() {
+  if (import.meta.env.DEV) return null;
+
   return (
     <>
       <PwaInstallBanner />
       <IosInstallHint />
-      {needRefresh ? (
-        <PwaUpdateToast
-          onUpdate={() => {
-            void updateServiceWorker(true);
-          }}
-          onDismiss={() => setNeedRefresh(false)}
-        />
-      ) : null}
+      <PwaServiceWorker />
     </>
   );
 }

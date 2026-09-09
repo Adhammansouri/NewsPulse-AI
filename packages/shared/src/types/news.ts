@@ -1,5 +1,18 @@
 export type NewsLanguage = "ar" | "en";
 
+export const NEWS_TOPICS = [
+  "politics",
+  "economy",
+  "health",
+  "sports",
+  "tech",
+  "science",
+  "culture",
+  "other",
+] as const;
+
+export type NewsTopic = (typeof NEWS_TOPICS)[number];
+
 export type NewsSource = {
   id: string;
   name: string;
@@ -18,6 +31,7 @@ export type NewsFeedItem = {
   excerpt: string;
   publishedAt: string;
   breaking: boolean;
+  topic: NewsTopic;
   sources: NewsFeedSourceLink[];
 };
 

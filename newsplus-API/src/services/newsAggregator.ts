@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import Parser from "rss-parser";
 import type { FastifyBaseLogger } from "fastify";
 import { NEWS_SOURCES, type NewsSourceConfig } from "../config/newsSources.js";
+import { classifyNewsTopic, type NewsTopic } from "./newsTopics.js";
 
 const REFRESH_MS = 2 * 60 * 1000;
 const WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
@@ -78,6 +79,7 @@ export type AggregatedItem = {
   excerpt: string;
   publishedAt: string;
   breaking: boolean;
+  topic: NewsTopic;
   sources: AggregatedSourceLink[];
 };
 
@@ -173,6 +175,7 @@ function cluster(items: RawItem[]): AggregatedItem[] {
       excerpt: primary.excerpt,
       publishedAt,
       breaking: Date.now() - primary.publishedAt < BREAKING_MS,
+      topic: classifyNewsTopic(primary.title, primary.excerpt),
       sources: dedupeSourceLinks(
         members.map((member) => ({
           id: member.source.id,
