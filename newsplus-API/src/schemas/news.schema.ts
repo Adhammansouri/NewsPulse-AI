@@ -5,7 +5,7 @@ export const newsFeedQuerySchema = z.object({
   q: z.string().trim().max(120).optional(),
 });
 
-export const newsStoryFormatSchema = z.enum(["desk", "bulletin", "facts", "context", "social"]);
+export const newsStoryFormatSchema = z.enum(["desk", "bulletin", "facts", "context", "social", "video"]);
 
 export const newsSummarizeBodySchema = z
   .object({

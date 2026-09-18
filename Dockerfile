@@ -22,6 +22,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3001
+ENV NODE_OPTIONS=--experimental-sqlite
 
 COPY newsplus-API/package.json ./
 RUN npm install --omit=dev --no-audit --no-fund

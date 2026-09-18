@@ -9,15 +9,24 @@ function requiredInProduction(name: string, value: string | undefined, fallback:
   return fallback;
 }
 
-function defaultPushStorePath() {
+function defaultDataFile(fileName: string) {
   const candidates = [
-    join(process.cwd(), "../../config/push-subscriptions.json"),
-    join(process.cwd(), "../../../config/push-subscriptions.json"),
+    join("/data", fileName),
+    join(process.cwd(), "../../config", fileName),
+    join(process.cwd(), "../../../config", fileName),
   ];
   for (const candidate of candidates) {
     if (existsSync(dirname(candidate))) return candidate;
   }
-  return join(process.cwd(), "data/push-subscriptions.json");
+  return join(process.cwd(), "data", fileName);
+}
+
+function defaultPushStorePath() {
+  return defaultDataFile("push-subscriptions.json");
+}
+
+function defaultEditorialStorePath() {
+  return defaultDataFile("editorial.sqlite");
 }
 
 export const env = {
@@ -39,4 +48,5 @@ export const env = {
   vapidPrivateKey: process.env.VAPID_PRIVATE_KEY ?? "",
   vapidSubject: process.env.VAPID_SUBJECT ?? "mailto:newsplus@localhost",
   pushStorePath: process.env.PUSH_STORE_PATH ?? defaultPushStorePath(),
+  editorialStorePath: process.env.EDITORIAL_STORE_PATH ?? defaultEditorialStorePath(),
 } as const;

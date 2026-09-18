@@ -21,8 +21,29 @@ function urlBase64ToUint8Array(base64String: string) {
   return output;
 }
 
+async function getPushRegistration(timeoutMs = 5000) {
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
+  const existing = await navigator.serviceWorker.getRegistration();
+  if (existing) return existing;
+
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<null>((resolve) => {
+      window.setTimeout(() => resolve(null), timeoutMs);
+    }),
+  ]);
+}
+
 export async function getVapidKey(): Promise<PushVapidKeyData> {
   const response = await apiRequest<ApiSuccessResponse<PushVapidKeyData>>(API_URLS.PUSH.VAPID_KEY, {
+    auth: true,
+  });
+  return response.data;
+}
+
+export async function sendTestPush(): Promise<PushTestData> {
+  const response = await apiRequest<ApiSuccessResponse<PushTestData>>(API_URLS.PUSH.TEST, {
+    method: "POST",
     auth: true,
   });
   return response.data;
@@ -37,7 +58,11 @@ export async function subscribeToPush(): Promise<PushSubscription | null> {
   const permission = await Notification.requestPermission();
   if (permission !== "granted") return null;
 
-  const registration = await navigator.serviceWorker.ready;
+  const registration = await getPushRegistration();
+  if (!registration) {
+    throw new Error("service-worker-unavailable");
+  }
+
   const existing = await registration.pushManager.getSubscription();
   const subscription =
     existing ??
@@ -63,19 +88,17 @@ export async function subscribeToPush(): Promise<PushSubscription | null> {
     body: JSON.stringify(body),
   });
 
-  await apiRequest<ApiSuccessResponse<PushTestData>>(API_URLS.PUSH.TEST, {
-    method: "POST",
-    auth: true,
-  });
+  await sendTestPush();
 
   return subscription;
 }
 
 export async function unsubscribeFromPush(): Promise<void> {
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
-  if (!navigator.serviceWorker.controller) return;
 
-  const registration = await navigator.serviceWorker.ready;
+  const registration = await getPushRegistration();
+  if (!registration) return;
+
   const subscription = await registration.pushManager.getSubscription();
   if (!subscription) return;
 
@@ -94,6 +117,7 @@ export async function unsubscribeFromPush(): Promise<void> {
 
 export async function getExistingPushSubscription() {
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
-  const registration = await navigator.serviceWorker.ready;
+  const registration = await navigator.serviceWorker.getRegistration();
+  if (!registration) return null;
   return registration.pushManager.getSubscription();
 }

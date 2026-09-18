@@ -8,6 +8,8 @@ import { ScryptPasswordHasher } from "./utils/passwordHasher.js";
 import { OpenAIClient } from "./ai/openaiClient.js";
 import { NewsAggregator } from "./services/newsAggregator.js";
 import { NewsService } from "./services/newsService.js";
+import { EditorialWorkspaceStore } from "./services/editorialWorkspaceStore.js";
+import { EditorialConversationService } from "./services/editorialConversationService.js";
 import { GenerateService } from "./services/generateService.js";
 import { TranslateService } from "./services/translateService.js";
 
@@ -33,11 +35,14 @@ export async function createAuthService(app: FastifyInstance): Promise<AuthServi
 export function createToolServices(app: FastifyInstance) {
   const openai = new OpenAIClient();
   const aggregator = new NewsAggregator(app.log);
+  const workspace = new EditorialWorkspaceStore(env.editorialStorePath);
   const newsService = new NewsService({
     aggregator,
     openai,
+    workspace,
   });
+  const editorialService = new EditorialConversationService({ openai, workspace });
   const generateService = new GenerateService(openai);
   const translateService = new TranslateService(openai);
-  return { aggregator, newsService, generateService, translateService };
+  return { aggregator, workspace, newsService, editorialService, generateService, translateService };
 }

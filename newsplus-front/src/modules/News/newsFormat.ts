@@ -1,4 +1,4 @@
-import type { NewsStoryFormat, NewsSummaryFormat, NewsTopic } from "@newsplus/shared";
+import type { NewsStoryFormat, NewsSummarizeData, NewsSummaryFormat, NewsTopic } from "@newsplus/shared";
 import { NEWS_TOPICS } from "@newsplus/shared";
 
 const SOURCE_TONES = [
@@ -167,6 +167,7 @@ export const STORY_FORMATS: {
   { id: "facts", label: "حقائق", hint: "أرقام وأسماء للإسناد", ready: "ملف حقائق" },
   { id: "context", label: "سياق", hint: "لماذا يهم الآن", ready: "سياق الخبر" },
   { id: "social", label: "سوشيال", hint: "ملخص سوشيال ميديا · 40–70 كلمة", ready: "منشور سوشيال" },
+  { id: "video", label: "فيديو", hint: "سكريبت فيديو اجتماعي · هوك وحبكة", ready: "سكريبت فيديو" },
 ];
 
 export function splitSocialBullets(bullets: string[]) {
@@ -184,6 +185,32 @@ export function splitSocialBullets(bullets: string[]) {
     }
   }
   return { tags, alts };
+}
+
+export function formatSummaryClipboard(data: NewsSummarizeData) {
+  if (data.format === "social") {
+    const { tags } = splitSocialBullets(data.bullets);
+    return [data.title, data.summary, tags.join(" ")].filter(Boolean).join("\n\n");
+  }
+  if (data.format === "video") {
+    const shots = data.bullets.filter(Boolean);
+    return [
+      `عنوان النشر\n${data.title}`,
+      data.dek ? `الكوفر\n${data.dek}` : "",
+      data.summary ? `النص\n${data.summary}` : "",
+      shots.length ? `لقطات\n${shots.map((item) => `• ${item}`).join("\n")}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+  }
+  const meta = storyFormatMeta(data.format);
+  const lines =
+    data.format === "facts"
+      ? [data.title, data.dek, ...data.bullets.map((item) => `• ${item}`)]
+      : data.format === "bulletin"
+        ? [data.title, data.dek, data.summary]
+        : [data.title, data.dek, data.summary, ...data.bullets.map((item) => `• ${item}`)];
+  return [meta.ready, ...lines.filter(Boolean)].join("\n\n");
 }
 
 export function storyFormatMeta(format: NewsSummaryFormat) {

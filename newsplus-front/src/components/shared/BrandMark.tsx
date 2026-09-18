@@ -1,6 +1,7 @@
 type BrandMarkProps = {
   showTagline?: boolean;
   size?: "sm" | "md";
+  iconOnly?: boolean;
 };
 
 const sizeStyles = {
@@ -18,11 +19,11 @@ const sizeStyles = {
   },
 } as const;
 
-export function BrandMark({ showTagline = false, size = "md" }: BrandMarkProps) {
+export function BrandMark({ showTagline = false, size = "md", iconOnly = false }: BrandMarkProps) {
   const styles = sizeStyles[size];
 
   return (
-    <div className={`flex items-center ${styles.gap}`}>
+    <div className={`flex items-center ${iconOnly ? "justify-center" : styles.gap}`}>
       <img
         src="/icons/logo-icon.png"
         alt=""
@@ -31,8 +32,9 @@ export function BrandMark({ showTagline = false, size = "md" }: BrandMarkProps) 
         className="rounded-lg shadow-sm ring-1 ring-[color-mix(in_srgb,var(--border-default)_60%,transparent)]"
       />
 
-      <div className="flex flex-col leading-none">
-        <span className={`${styles.title} font-bold tracking-tight`}>
+      {iconOnly ? null : (
+      <div className="brand-mark-copy flex flex-col leading-none">
+        <span className={`${styles.title} font-bold tracking-tight`} translate="no">
           <span className="brand-logo-n">News</span>
           <span className="brand-logo-p">plus</span>
         </span>
@@ -42,6 +44,7 @@ export function BrandMark({ showTagline = false, size = "md" }: BrandMarkProps) 
           </span>
         )}
       </div>
+      )}
     </div>
   );
 }

@@ -1,137 +1,194 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { Bell, CaretLeft, List, X } from "@phosphor-icons/react";
 import { Link, useLocation } from "react-router-dom";
-import { PushOptInButton } from "@/components/brand/pwa/PushOptInButton";
 import { BrandMark } from "@/components/shared/BrandMark";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { useSession } from "@/hooks/useSession";
+import { BRAND_NAV_ICONS, isActiveNavPath } from "@/utils/brandNav";
 import { HEADER_LOGIN, NAV_ITEMS } from "@/utils/constants";
-
-function isActivePath(pathname: string, href: string) {
-  if (href === "/") return pathname === "/";
-  return pathname.startsWith(href);
-}
 
 export function Header() {
   const { pathname } = useLocation();
   const session = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [drawerMounted, setDrawerMounted] = useState(false);
+  const [drawerEntered, setDrawerEntered] = useState(false);
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
+  const sheetRef = useRef<HTMLElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const mobileNavId = useId();
 
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    if (!mobileOpen) {
+      setDrawerEntered(false);
+      return;
+    }
+
+    setDrawerMounted(true);
+    let cancelled = false;
+    const frame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!cancelled) setDrawerEntered(true);
+      });
+    });
+
     return () => {
-      document.body.style.overflow = "";
+      cancelled = true;
+      cancelAnimationFrame(frame);
     };
   }, [mobileOpen]);
 
+  useEffect(() => {
+    if (mobileOpen || !drawerMounted) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timeout = window.setTimeout(() => setDrawerMounted(false), reduceMotion ? 0 : 360);
+
+    return () => window.clearTimeout(timeout);
+  }, [drawerMounted, mobileOpen]);
+
+  useEffect(() => {
+    document.body.style.overflow = drawerMounted ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [drawerMounted]);
+
+  useEffect(() => {
+    if (!mobileOpen || !drawerEntered) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    const current = sheetRef.current?.querySelector<HTMLElement>("[aria-current='page']");
+    (current ?? closeBtnRef.current)?.focus();
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      menuBtnRef.current?.focus();
+    };
+  }, [drawerEntered, mobileOpen]);
+
+  const drawerClass = drawerEntered ? "brand-header-drawer is-open" : "brand-header-drawer";
+  const scrimClass = drawerEntered ? "brand-header-scrim is-open" : "brand-header-scrim";
+
   return (
     <header className="brand-header-sticky">
+      <a href="#main-content" className="brand-skip-link">
+        تخطي إلى المحتوى
+      </a>
+
       <div className="brand-header-shell">
-        <Link
-          to="/"
-          className="shrink-0 rounded-full transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/40 focus-visible:ring-offset-2"
-          aria-label="Newsplus — الصفحة الرئيسية"
-        >
+        <Link to="/" className="brand-header-mark" aria-label="Newsplus الصفحة الرئيسية">
           <BrandMark size="sm" />
         </Link>
 
-        <nav className="hidden flex-1 items-center justify-center md:flex" aria-label="التنقل الرئيسي">
-          <div className="brand-header-nav">
-            {NAV_ITEMS.map((item) => {
-              const active = isActivePath(pathname, item.href);
-              return (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={active ? "brand-header-nav-link brand-header-nav-link--active" : "brand-header-nav-link"}
-                  aria-current={active ? "page" : undefined}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
-
-        <div className="hidden shrink-0 items-center gap-2 md:flex">
-          <ThemeToggle />
-          <PushOptInButton />
-          {!session ? (
-            <Link to={HEADER_LOGIN.href} className="brand-header-ghost-btn">
-              {HEADER_LOGIN.label}
-            </Link>
-          ) : null}
-        </div>
-
         <button
+          ref={menuBtnRef}
           type="button"
-          className="brand-header-icon-btn brand-header-icon-btn--neutral ms-auto md:hidden"
+          className="brand-header-icon-btn brand-header-menu-btn"
           aria-label={mobileOpen ? "إغلاق القائمة" : "فتح القائمة"}
           aria-expanded={mobileOpen}
-          aria-controls="mobile-nav"
+          aria-controls={mobileNavId}
           onClick={() => setMobileOpen((open) => !open)}
         >
-          {mobileOpen ? (
-            <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          ) : (
-            <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-              <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          )}
+          <List size={20} weight="bold" aria-hidden="true" />
         </button>
       </div>
 
-      {mobileOpen && (
+      {drawerMounted ? (
         <>
-          <button
-            type="button"
-            className="fixed inset-0 z-40 bg-[color-mix(in_srgb,var(--color-navy-900)_18%,transparent)] md:hidden"
-            aria-label="إغلاق القائمة"
-            onClick={() => setMobileOpen(false)}
-          />
+          <button type="button" className={scrimClass} aria-label="إغلاق القائمة" onClick={() => setMobileOpen(false)} />
           <nav
-            id="mobile-nav"
-            className="brand-header-mobile-sheet relative z-50 md:hidden"
-            aria-label="التنقل الرئيسي"
+            ref={sheetRef}
+            id={mobileNavId}
+            className={drawerClass}
+            aria-label="القائمة"
+            role="dialog"
+            aria-modal="true"
           >
-            <div className="brand-header-nav w-full flex-col gap-1">
-              {NAV_ITEMS.map((item) => {
-                const active = isActivePath(pathname, item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    className={[
-                      "brand-header-nav-link w-full justify-start",
-                      active ? "brand-header-nav-link--active" : "",
-                    ].join(" ")}
-                    aria-current={active ? "page" : undefined}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
+            <div className="brand-header-drawer__accent" aria-hidden="true" />
+
+            <div className="brand-header-drawer__top">
+              <Link to="/" className="brand-header-mark" aria-label="Newsplus الصفحة الرئيسية">
+                <BrandMark size="sm" />
+              </Link>
+              <button
+                ref={closeBtnRef}
+                type="button"
+                className="brand-header-icon-btn brand-header-drawer__close"
+                aria-label="إغلاق القائمة"
+                onClick={() => setMobileOpen(false)}
+              >
+                <X size={20} weight="bold" aria-hidden="true" />
+              </button>
             </div>
 
-            <div className="mt-3 flex flex-col gap-2">
-              <div className="flex justify-center gap-2">
-                <ThemeToggle />
-                <PushOptInButton />
+            <div className="brand-header-drawer__body">
+              <div className="brand-header-drawer__menu">
+                {NAV_ITEMS.map((item, index) => {
+                  const active = isActiveNavPath(pathname, item.href);
+                  const Icon = BRAND_NAV_ICONS[item.href];
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      className={[
+                        "brand-header-drawer-link",
+                        active ? "brand-header-drawer-link--active" : "",
+                      ].join(" ")}
+                      style={{ "--i": index } as React.CSSProperties}
+                      aria-current={active ? "page" : undefined}
+                    >
+                      <span className="brand-header-drawer-link__icon" aria-hidden="true">
+                        <Icon size={20} weight={active ? "fill" : "regular"} />
+                      </span>
+                      <span className="brand-header-drawer-link__label">{item.label}</span>
+                      <CaretLeft className="brand-header-drawer-link__chevron" size={16} weight="bold" aria-hidden="true" />
+                    </Link>
+                  );
+                })}
               </div>
+            </div>
+
+            <div className="brand-header-drawer__footer">
+              <div className="brand-header-drawer__prefs">
+                <span className="brand-header-drawer__prefs-label">المظهر</span>
+                <div className="brand-header-drawer__prefs-actions">
+                  <ThemeToggle />
+                </div>
+              </div>
+              {session ? (
+                <Link
+                  to="/notifications"
+                  className={[
+                    "brand-header-drawer-link",
+                    pathname === "/notifications" ? "brand-header-drawer-link--active" : "",
+                  ].join(" ")}
+                  aria-current={pathname === "/notifications" ? "page" : undefined}
+                >
+                  <span className="brand-header-drawer-link__icon" aria-hidden="true">
+                    <Bell size={20} weight={pathname === "/notifications" ? "fill" : "regular"} />
+                  </span>
+                  <span className="brand-header-drawer-link__label">إدارة الإشعارات</span>
+                  <CaretLeft className="brand-header-drawer-link__chevron" size={16} weight="bold" aria-hidden="true" />
+                </Link>
+              ) : null}
               {!session ? (
-                <Link to={HEADER_LOGIN.href} className="brand-header-ghost-btn w-full">
+                <Link to={HEADER_LOGIN.href} className="brand-header-ghost-btn brand-header-ghost-btn--block">
                   {HEADER_LOGIN.label}
                 </Link>
               ) : null}
             </div>
           </nav>
         </>
-      )}
+      ) : null}
     </header>
   );
 }

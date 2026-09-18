@@ -5,9 +5,10 @@
   "type": "module",
   "main": "server.cjs",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "node --experimental-sqlite --import tsx --watch src/index.ts",
     "build": "tsc",
-    "start": "node server.cjs",
+    "start": "node --experimental-sqlite server.cjs",
+    "test": "node --experimental-sqlite --import tsx --test src/services/editorialWorkspaceStore.test.ts src/ai/editorialRevision.test.ts src/ai/prompts/socialVideo.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

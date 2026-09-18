@@ -17,6 +17,20 @@ export type {
 } from "./types/push.js";
 export { NEWS_TOPICS } from "./types/news.js";
 export type {
+  EditorialConversationDetail,
+  EditorialConversationListData,
+  EditorialConversationSummary,
+  EditorialMemoryCandidate,
+  EditorialMemoryListData,
+  EditorialMemoryRule,
+  EditorialMemoryStatus,
+  EditorialMemoryUpdateRequest,
+  EditorialMessage,
+  EditorialMessageRole,
+  EditorialRestoreRequest,
+  EditorialReviseData,
+  EditorialReviseRequest,
+  EditorialVersion,
   NewsFeedData,
   NewsFeedItem,
   NewsFeedSourceLink,

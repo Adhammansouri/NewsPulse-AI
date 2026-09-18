@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowClockwise,
   ArrowLeft,
   ArrowSquareOut,
+  Chats,
   Check,
   CircleNotch,
   Copy,
@@ -18,6 +19,14 @@ import {
 import { useNewsFeed } from "@/hooks/useNewsFeed";
 import { readDeskHandoff } from "@/services/deskHandoff";
 import { getNewsSources, summarizeNews } from "@/services/newsService";
+import {
+  getEditorialConversation,
+  listEditorialConversations,
+  listEditorialMemory,
+  restoreEditorialVersion,
+  reviseEditorialConversation,
+  updateEditorialMemory,
+} from "@/services/editorialService";
 import { copyText, toolErrorMessage } from "@/services/toolErrors";
 import type { NewsFeedItem, NewsLanguage, NewsSource, NewsStoryFormat, NewsSummarizeData } from "@newsplus/shared";
 import { SourceMark, SourceMarkStack } from "../SourceMark";
@@ -25,11 +34,11 @@ import { hostFromUrl } from "../sourceLogos";
 import {
   formatRelative,
   formatStamp,
+  formatSummaryClipboard,
   hasArabic,
   matchesTimeFilter,
   matchesTopicFilter,
   newsRecency,
-  splitSocialBullets,
   STORY_FORMATS,
   storyFormatMeta,
   TIME_FILTERS,
@@ -39,6 +48,9 @@ import {
   type TimeFilter,
   type TopicFilter,
 } from "../newsFormat";
+import { ConversationDrawer } from "../components/editorial/ConversationDrawer";
+import { EditorialDraft } from "../components/editorial/EditorialDraft";
+import { RevisionThread } from "../components/editorial/RevisionThread";
 
 type LangFilter = "all" | NewsLanguage;
 type MobilePane = "feed" | "desk";
@@ -46,6 +58,7 @@ type MobilePane = "feed" | "desk";
 export default function NewsPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const handoff = readDeskHandoff(location.state);
   const [sourceId, setSourceId] = useState("all");
@@ -59,6 +72,10 @@ export default function NewsPage() {
   );
   const [copied, setCopied] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<NewsSummarizeData["format"]>("desk");
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [instruction, setInstruction] = useState("");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [conversationQuery, setConversationQuery] = useState("");
   const [newIds, setNewIds] = useState<string[]>([]);
   const feedScrollRef = useRef<HTMLDivElement>(null);
   const seenIdsRef = useRef<Set<string>>(new Set());
@@ -73,6 +90,59 @@ export default function NewsPage() {
 
   const summarizeMutation = useMutation({
     mutationFn: summarizeNews,
+    onSuccess(data) {
+      if (!data.conversationId) return;
+      setConversationId(data.conversationId);
+      void queryClient.invalidateQueries({ queryKey: ["editorial-conversations"] });
+      void queryClient.invalidateQueries({ queryKey: ["editorial-conversation", data.conversationId] });
+    },
+  });
+
+  const conversationDetailQuery = useQuery({
+    queryKey: ["editorial-conversation", conversationId],
+    queryFn: () => getEditorialConversation(conversationId as string),
+    enabled: Boolean(conversationId),
+  });
+
+  const conversationListQuery = useQuery({
+    queryKey: ["editorial-conversations", conversationQuery],
+    queryFn: () => listEditorialConversations(conversationQuery),
+    enabled: drawerOpen || Boolean(conversationId),
+  });
+
+  const memoryQuery = useQuery({
+    queryKey: ["editorial-memory"],
+    queryFn: () => listEditorialMemory("approved"),
+    enabled: drawerOpen || Boolean(conversationId),
+  });
+
+  const reviseMutation = useMutation({
+    mutationFn: ({ id, text }: { id: string; text: string }) => reviseEditorialConversation(id, text),
+    onSuccess(data) {
+      setInstruction("");
+      setCopied(false);
+      queryClient.setQueryData(["editorial-conversation", data.conversation.id], data.conversation);
+      void queryClient.invalidateQueries({ queryKey: ["editorial-conversations"] });
+      void queryClient.invalidateQueries({ queryKey: ["editorial-memory"] });
+    },
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: ({ id, versionId }: { id: string; versionId: string }) => restoreEditorialVersion(id, versionId),
+    onSuccess(data) {
+      setCopied(false);
+      queryClient.setQueryData(["editorial-conversation", data.conversation.id], data.conversation);
+      void queryClient.invalidateQueries({ queryKey: ["editorial-conversations"] });
+    },
+  });
+
+  const memoryMutation = useMutation({
+    mutationFn: ({ id, status, instruction: next }: { id: string; status?: "approved" | "rejected" | "disabled"; instruction?: string }) =>
+      updateEditorialMemory(id, { status, instruction: next }),
+    onSuccess() {
+      void queryClient.invalidateQueries({ queryKey: ["editorial-conversation", conversationId] });
+      void queryClient.invalidateQueries({ queryKey: ["editorial-memory"] });
+    },
   });
 
   const sources = sourcesQuery.data?.sources ?? [];
@@ -106,9 +176,23 @@ export default function NewsPage() {
     return items[0] ?? null;
   }, [items, selectedId, summarizeMutation.isPending]);
 
-  const summary = summarizeMutation.data;
-  const busy = summarizeMutation.isPending;
-  const error = sourcesQuery.error ?? feedQuery.error ?? summarizeMutation.error;
+  const summary = conversationDetailQuery.data?.copy ?? summarizeMutation.data;
+  const conversationLoading =
+    Boolean(conversationId) && conversationDetailQuery.isFetching && !conversationDetailQuery.data?.copy;
+  const showEditorial = Boolean(summary) || conversationLoading;
+  const busy =
+    summarizeMutation.isPending ||
+    reviseMutation.isPending ||
+    restoreMutation.isPending ||
+    memoryMutation.isPending;
+  const error =
+    sourcesQuery.error ??
+    feedQuery.error ??
+    summarizeMutation.error ??
+    conversationDetailQuery.error ??
+    reviseMutation.error ??
+    restoreMutation.error ??
+    memoryMutation.error;
   const snapshotKey = `${sourceId}|${langFilter}|${timeFilter}|${topicFilter}|${query}`;
   const resultFormat = summary?.format ?? (summarizeMutation.variables?.briefing ? "briefing" : selectedFormat);
 
@@ -158,22 +242,19 @@ export default function NewsPage() {
   }
 
   async function onCopy(data: NewsSummarizeData) {
-    if (data.format === "social") {
-      const { tags } = splitSocialBullets(data.bullets);
-      await copyText([data.title, data.summary, tags.join(" ")].filter(Boolean).join("\n\n"));
+    try {
+      await copyText(formatSummaryClipboard(data));
       setCopied(true);
-      return;
+    } catch {
+      setCopied(false);
     }
-    const meta = storyFormatMeta(data.format);
-    const lines =
-      data.format === "facts"
-        ? [data.title, data.dek, ...data.bullets.map((item) => `• ${item}`)]
-        : data.format === "bulletin"
-          ? [data.title, data.dek, data.summary]
-          : [data.title, data.dek, data.summary, ...data.bullets.map((item) => `• ${item}`)];
-    await copyText([meta.ready, ...lines.filter(Boolean)].join("\n\n"));
-    setCopied(true);
   }
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 2500);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
 
   function selectFormat(format: NewsSummarizeData["format"]) {
     setSelectedFormat(format);
@@ -210,9 +291,23 @@ export default function NewsPage() {
     setSelectedId(id);
     setNewIds((prev) => prev.filter((itemId) => itemId !== id));
     summarizeMutation.reset();
+    setConversationId(null);
+    setInstruction("");
     setMobilePane("desk");
     setSelectedFormat((current) => (current === "briefing" ? "desk" : current));
   }
+
+  function submitRevision() {
+    if (!conversationId || !instruction.trim()) return;
+    reviseMutation.mutate({ id: conversationId, text: instruction.trim() });
+  }
+
+  useEffect(() => {
+    const detail = conversationDetailQuery.data;
+    if (!detail) return;
+    setSelectedFormat(detail.format);
+    if (detail.itemId) setSelectedId(detail.itemId);
+  }, [conversationDetailQuery.data]);
 
   return (
     <div className="news-desk">
@@ -386,7 +481,7 @@ export default function NewsPage() {
         </button>
       </div>
 
-      <div className="news-panes">
+      <div className={`news-panes ${showEditorial ? "is-editorial" : ""}`}>
         <section className={`news-pane ${mobilePane === "feed" ? "" : "max-md:hidden"}`} aria-label="العناوين">
           <div className="news-pane-bar">
             <p className="news-pane-label">العناوين</p>
@@ -434,33 +529,126 @@ export default function NewsPage() {
           </div>
         </section>
 
-        <section className={`news-pane news-desk-pane ${mobilePane === "desk" ? "" : "max-md:hidden"}`} aria-label="الملخص">
+        <section
+          className={`news-pane news-desk-pane ${showEditorial ? "is-editorial" : ""} ${mobilePane === "desk" ? "" : "max-md:hidden"}`}
+          aria-label="الملخص"
+        >
           <div className="news-pane-bar news-desk-bar">
-            <p className="news-pane-label">الملخص</p>
-            {busy ? (
-              <p className="news-desk-busy" aria-live="polite">
-                <CircleNotch className="news-spin" size={14} aria-hidden="true" />
-                جاري الكتابة...
-              </p>
-            ) : null}
+            <p className="news-pane-label">{showEditorial ? "غرفة التحرير" : "الملخص"}</p>
+            <div className="news-desk-bar-tools">
+              {busy ? (
+                <p className="news-desk-busy" aria-live="polite">
+                  <CircleNotch className="news-spin" size={14} aria-hidden="true" />
+                  جاري الكتابة...
+                </p>
+              ) : null}
+              <button
+                type="button"
+                className="news-btn-secondary news-conversations-btn"
+                onClick={() => setDrawerOpen(true)}
+              >
+                <Chats size={15} aria-hidden="true" />
+                المحادثات
+              </button>
+            </div>
           </div>
 
           <div className="news-desk-main">
             <div className="news-pane-scroll news-desk-body">
-              {summary ? (
-                <SummaryPane
-                  data={summary}
-                  format={resultFormat}
-                  busy={busy}
-                  copied={copied}
-                  onCopy={() => void onCopy(summary)}
-                  onBack={() => {
-                    summarizeMutation.reset();
-                    setCopied(false);
-                  }}
-                  onStoryFormat={runStoryFormat}
-                  onBriefing={() => runSummarize({ briefing: true, language: "ar" })}
-                />
+              {showEditorial ? (
+                conversationLoading && !summary ? (
+                  <div className="news-editorial news-editorial--loading">
+                    <p className="news-state" aria-live="polite">
+                      <CircleNotch className="news-spin" size={18} aria-hidden="true" />
+                      جاري فتح المحادثة…
+                    </p>
+                  </div>
+                ) : summary ? (
+                  <div className="news-editorial">
+                    <div className="news-editorial-stage">
+                      <div className="news-editorial-main">
+                        <div className="news-editorial-toolbar">
+                          <DeskFormatBar
+                            mode="switch"
+                            selected={resultFormat}
+                            busy={busy}
+                            briefingDisabled={busy}
+                            onSelectFormat={(next) => {
+                              summarizeMutation.reset();
+                              setConversationId(null);
+                              if (next === "briefing") runSummarize({ briefing: true, language: "ar" });
+                              else runStoryFormat(next);
+                            }}
+                          />
+                          <div className="news-editorial-actions">
+                            <button
+                              type="button"
+                              className="news-editorial-action"
+                              onClick={() => void onCopy(summary)}
+                              disabled={busy}
+                              aria-label={copied ? "تم النسخ" : "نسخ المسودة"}
+                              title={copied ? "تم النسخ" : "نسخ"}
+                            >
+                              {copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}
+                            </button>
+                            <button
+                              type="button"
+                              className="news-editorial-action"
+                              onClick={() => {
+                                summarizeMutation.reset();
+                                setConversationId(null);
+                                setCopied(false);
+                                setInstruction("");
+                              }}
+                              disabled={busy}
+                              aria-label="خبر آخر"
+                              title="خبر آخر"
+                            >
+                              <Newspaper size={15} aria-hidden="true" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="news-editorial-doc">
+                          <EditorialDraft
+                            data={summary}
+                            format={resultFormat}
+                            busy={busy}
+                            copied={copied}
+                            hideCopy
+                            onCopy={() => void onCopy(summary)}
+                          />
+                          {error ? (
+                            <p className="news-state is-error">
+                              <WarningCircle size={18} aria-hidden="true" />
+                              {toolErrorMessage(error)}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                      {conversationId ? (
+                        <RevisionThread
+                          messages={conversationDetailQuery.data?.messages ?? []}
+                          versions={conversationDetailQuery.data?.versions ?? []}
+                          currentVersionId={conversationDetailQuery.data?.currentVersionId ?? summary.versionId ?? ""}
+                          pendingMemory={conversationDetailQuery.data?.pendingMemory ?? []}
+                          instruction={instruction}
+                          busy={busy}
+                          format={resultFormat}
+                          onInstructionChange={setInstruction}
+                          onSubmit={submitRevision}
+                          onQuickAction={(value) => {
+                            setInstruction(value);
+                            if (conversationId) reviseMutation.mutate({ id: conversationId, text: value });
+                          }}
+                          onRestore={(versionId) => restoreMutation.mutate({ id: conversationId, versionId })}
+                          onMemorySave={(id) => memoryMutation.mutate({ id, status: "approved" })}
+                          onMemoryEdit={(id, next) => memoryMutation.mutate({ id, status: "approved", instruction: next })}
+                          onMemoryDismiss={(id) => memoryMutation.mutate({ id, status: "rejected" })}
+                        />
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null
               ) : (
                 <>
                   {error ? (
@@ -577,6 +765,28 @@ export default function NewsPage() {
           </div>
         </section>
       </div>
+      <ConversationDrawer
+        open={drawerOpen}
+        search={conversationQuery}
+        conversations={conversationListQuery.data?.items ?? []}
+        memory={memoryQuery.data?.rules ?? []}
+        activeId={conversationId}
+        listLoading={conversationListQuery.isFetching}
+        onSearch={(value) => setConversationQuery(value)}
+        onClose={() => {
+          setDrawerOpen(false);
+          setConversationQuery("");
+        }}
+        onSelect={(id) => {
+          setConversationId(id);
+          summarizeMutation.reset();
+          setCopied(false);
+          setInstruction("");
+          setDrawerOpen(false);
+          setMobilePane("desk");
+        }}
+        onDisableMemory={(id) => memoryMutation.mutate({ id, status: "disabled" })}
+      />
     </div>
   );
 }
@@ -744,113 +954,5 @@ function HeadlineRow({
         {item.title}
       </p>
     </button>
-  );
-}
-
-function SummaryPane({
-  data,
-  format,
-  busy,
-  copied,
-  onCopy,
-  onBack,
-  onStoryFormat,
-  onBriefing,
-}: {
-  data: NewsSummarizeData;
-  format: NewsSummarizeData["format"];
-  busy: boolean;
-  copied: boolean;
-  onCopy: () => void;
-  onBack: () => void;
-  onStoryFormat: (format: NewsStoryFormat) => void;
-  onBriefing: () => void;
-}) {
-  const meta = storyFormatMeta(format);
-  const factsFirst = format === "facts";
-  const isSocial = format === "social";
-  const { tags, alts } = isSocial ? splitSocialBullets(data.bullets) : { tags: [] as string[], alts: data.bullets };
-  const hideBody = format === "facts" && data.summary.length < 40;
-  const bodyBeforeBullets = !factsFirst;
-  const listItems = isSocial ? alts : data.bullets;
-
-  return (
-    <div className={`news-summary is-${format}`}>
-      <div className="news-summary-bar">
-        <p className="news-state is-ready">
-          <Check size={16} aria-hidden="true" />
-          {meta.ready}
-        </p>
-        <div className="news-summary-tools">
-          <button type="button" className="news-btn-secondary" onClick={onCopy} disabled={busy}>
-            {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
-            {copied ? "تم النسخ" : "نسخ"}
-          </button>
-          <button type="button" className="news-btn-secondary" onClick={onBack} disabled={busy}>
-            خبر آخر
-          </button>
-        </div>
-      </div>
-
-      <DeskFormatBar
-        mode="switch"
-        selected={format}
-        busy={busy}
-        briefingDisabled={busy}
-        onSelectFormat={(next) => {
-          if (next === "briefing") onBriefing();
-          else onStoryFormat(next);
-        }}
-      />
-
-      <h2 className="news-story-title" dir={hasArabic(data.title) ? "rtl" : "ltr"}>
-        {data.title}
-      </h2>
-      {data.dek && (
-        <p className="news-story-excerpt" dir={hasArabic(data.dek) ? "rtl" : "ltr"}>
-          {data.dek}
-        </p>
-      )}
-      {bodyBeforeBullets && data.summary ? (
-        <p className="news-summary-body" dir={hasArabic(data.summary) ? "rtl" : "ltr"}>
-          {data.summary}
-        </p>
-      ) : null}
-      {isSocial && tags.length > 0 ? (
-        <ul className="news-social-tags" aria-label="وسوم">
-          {tags.map((tag) => (
-            <li key={tag} dir="ltr">
-              {tag}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {isSocial && alts.length > 0 ? <p className="news-field-label">صياغات أخرى</p> : null}
-      {listItems.length > 0 && (
-        <ul className={`news-bullets ${factsFirst ? "is-facts" : ""}`}>
-          {listItems.map((bullet) => (
-            <li key={bullet} dir={hasArabic(bullet) ? "rtl" : "ltr"}>
-              {bullet}
-            </li>
-          ))}
-        </ul>
-      )}
-      {!bodyBeforeBullets && !hideBody && data.summary ? (
-        <p className="news-summary-body" dir={hasArabic(data.summary) ? "rtl" : "ltr"}>
-          {data.summary}
-        </p>
-      ) : null}
-      {data.sources.length > 0 && (
-        <div className="news-links">
-          <p className="news-field-label">المصادر</p>
-          {data.sources.map((source) => (
-            <a key={`${source.name}-${source.url}`} href={source.url} target="_blank" rel="noreferrer">
-              <SourceMark id="" name={source.name} url={source.url} size={14} />
-              {source.name}
-            </a>
-          ))}
-        </div>
-      )}
-    </div>
   );
 }

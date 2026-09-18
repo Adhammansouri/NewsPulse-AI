@@ -1,6 +1,7 @@
 import { EDITORIAL_VOICE } from "./editorial.js";
+import { SOCIAL_VIDEO_FORMAT_SPEC } from "./socialVideo.js";
 
-export const NEWS_STORY_FORMATS = ["desk", "bulletin", "facts", "context", "social"] as const;
+export const NEWS_STORY_FORMATS = ["desk", "bulletin", "facts", "context", "social", "video"] as const;
 export type NewsStoryFormat = (typeof NEWS_STORY_FORMATS)[number];
 
 const FORMAT_SPECS: Record<NewsStoryFormat, string> = {
@@ -41,6 +42,7 @@ Gold title (ar): السيسي يستقبل شي في القاهرة
 Reject title: 🚨 عاجل | تفاصيل صادمة من قمة مصر والصين
 Gold title (en): Xi lands in Cairo for talks with Sisi
 Reject title: You won't BELIEVE what happened at the summit 🔥`,
+  video: SOCIAL_VIDEO_FORMAT_SPEC,
 };
 
 export function storyFormatAssignment(format: NewsStoryFormat, language: "ar" | "en") {
@@ -81,6 +83,6 @@ Gold social hook (ar): السيسي يستقبل شي في القاهرة
 Reject social hook: 🚨 عاجل | لن تصدق ما حدث في القمة
 
 # Format override
-The assignment spec wins over house defaults when they conflict. SOCIAL DESK may use blank-line breaks in summary and hashtags in bullets. Emoji, engagement bait, and generic hashtags remain forbidden.
+The assignment spec wins over house defaults when they conflict. SOCIAL DESK may use blank-line breaks in summary and hashtags in bullets. SOCIAL VIDEO may use blank-line breaks, "<<<<<<" beat separators, and ((shot cues)). Emoji, engagement bait, and generic hashtags remain forbidden.
 
 Do not paste search snippets, markdown, or raw HTML into title, dek, summary, or bullets.`;

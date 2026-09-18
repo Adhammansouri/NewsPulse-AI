@@ -40,6 +40,37 @@ export const newsSummaryJsonSchema: JsonSchema = {
   },
 };
 
+export const newsRevisionOutputSchema = newsSummaryOutputSchema.extend({
+  note: z.string(),
+  memoryPropose: z.boolean(),
+  memoryInstruction: z.string(),
+  memoryRationale: z.string(),
+});
+
+export const newsRevisionJsonSchema: JsonSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "title",
+    "dek",
+    "summary",
+    "bullets",
+    "sources",
+    "language",
+    "note",
+    "memoryPropose",
+    "memoryInstruction",
+    "memoryRationale",
+  ],
+  properties: {
+    ...newsSummaryJsonSchema.properties,
+    note: { type: "string" },
+    memoryPropose: { type: "boolean" },
+    memoryInstruction: { type: "string" },
+    memoryRationale: { type: "string" },
+  },
+};
+
 export const generateOutputSchema = z.object({
   title: z.string(),
   dek: z.string(),

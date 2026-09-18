@@ -6,8 +6,9 @@ Official split: **Newsplus brand** for marketing shell, **Nothing** for tool/das
 
 | Surface | Theme | Tokens | Components |
 |---------|-------|--------|------------|
-| Header, Footer | Newsplus brand | `design-system/tokens.css` | `BrandMark`, `brand-btn`, `brand-nav-link` |
+| Header, Footer | Newsplus brand | `design-system/tokens.css` (`--header-*`) | `BrandMark`, `brand-header-*` |
 | Home `/` | Newsplus brand desk (after login) | `--color-navy-*`, `--color-teal-*` | `components/brand/desk/*` |
+| Notifications `/notifications` | Newsplus brand settings | semantic + `--header-*` | `modules/Notifications/*` |
 | Login `/login` | Newsplus brand (full-bleed, no Header/Footer) | navy/teal login tokens in `modules/Login/login.css` | `LoginPage` |
 | Tools `/news`, `/generate`, `/translate` | Nothing dashboard | `--nd-*` in `.theme-tools` | `ToolPage`, `nd-*` classes |
 

@@ -116,11 +116,23 @@ Stick to **one cool neutral family** (slate) plus **editorial navy** surfaces. *
 - Focus ring: 2px Pulse Teal, no floating labels
 - Standard vertical gap: 8px label-to-input, 16px between fields
 
-### Navigation
+### Navigation (Header chrome)
 
-- **Desktop:** Single horizontal row, max 80px header height, one line of links
-- **Mobile:** Clean collapse to menu; no decorative status dots
-- **Active state:** Pulse Teal text or underline — not pill on every item
+The header is Newsplus brand chrome on every authenticated route. It is a floating editorial masthead, not a SaaS tab bar and never Nothing-styled.
+
+- **Desktop layout:** Fixed **editorial side rail** (`brand-side-rail`) on `inline-start` (RTL: right). Navy **masthead** (`--brand-rail-masthead`) with tagline + «مكتب التحرير», paper body with ruled index links (Arabic numerals + glyph + label), util dock + underline login. No gradient stacks or nested nav cards
+- **Mobile layout:** Floating masthead shell + drawer (unchanged). Max masthead height 80px (default 64-72px)
+- **Shell:** Pill radius (`--header-shell-radius`), navy-tinted glass (`--header-glass`), hairline border, `shadow-md`
+- **Nav rail:** Quiet inset track (`--header-rail-bg`). Links are text, not filled pills
+- **Active:** Authority Ink text + 2px Pulse Teal underline. Never a navy/teal filled capsule on every item
+- **Hover:** Ink color only. No grey pill wash
+- **Focus:** 2px Pulse Teal ring (`:focus-visible` only)
+- **Mobile drawer:** Fixed side panel from `inline-start` (RTL: right edge), width `--header-drawer-width`, navy scrim + optional blur. Top accent bar (navy→teal), logo + close, inset menu rail with icon + label + chevron per route, footer theme toggle + «إدارة الإشعارات» link. Escape + scrim close. Animation: `--header-drawer-ease` 360ms, staggered link enter 45ms
+- **Classes:** `brand-side-rail`, `brand-side-rail-link`, `brand-header-shell` (mobile), `brand-header-drawer-*`
+
+### Notifications settings (`/notifications`)
+
+Brand settings page (not a tool / Nothing route). Manages Web Push for the **current browser only**: support, system permission, subscription, VAPID configuration, enable/disable, and `POST /push/test` (`sent` count). **No inbox or history** until a backend feed exists. Entry is the side-rail «الإشعارات» row and the mobile drawer link — not main nav.
 
 ### Loaders
 

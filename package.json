@@ -17,6 +17,7 @@
     "dev:front": "npm run dev -w newsplus-front",
     "build": "npm run build -w newsplus-API && npm run build -w newsplus-front",
     "typecheck": "npm run typecheck -w @newsplus/shared && npm run typecheck -w newsplus-API && npm run typecheck -w newsplus-front",
+    "test": "npm run test -w newsplus_api",
     "install:all": "npm install --workspaces"
   },
   "devDependencies": {

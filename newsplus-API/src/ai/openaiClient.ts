@@ -90,6 +90,7 @@ export class OpenAIClient {
         model: options.model,
         instructions: options.instructions,
         input: options.input,
+        store: false,
         reasoning: { effort: options.effort },
         text: {
           verbosity: options.verbosity ?? "medium",

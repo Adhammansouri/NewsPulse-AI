@@ -44,7 +44,7 @@ export type NewsFeedData = {
   items: NewsFeedItem[];
 };
 
-export type NewsStoryFormat = "desk" | "bulletin" | "facts" | "context" | "social";
+export type NewsStoryFormat = "desk" | "bulletin" | "facts" | "context" | "social" | "video";
 export type NewsSummaryFormat = NewsStoryFormat | "briefing";
 
 export type NewsSummarizeRequest = {
@@ -68,4 +68,95 @@ export type NewsSummarizeData = {
   sources: NewsSummarySource[];
   language: NewsLanguage;
   format: NewsSummaryFormat;
+  conversationId?: string;
+  versionId?: string;
+  versionNumber?: number;
+};
+
+export type EditorialMemoryStatus = "pending" | "approved" | "rejected" | "disabled";
+
+export type EditorialMemoryCandidate = {
+  instruction: string;
+  rationale: string;
+};
+
+export type EditorialMemoryRule = EditorialMemoryCandidate & {
+  id: string;
+  status: EditorialMemoryStatus;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  sourceConversationId?: string;
+};
+
+export type EditorialMessageRole = "user" | "assistant" | "system";
+
+export type EditorialMessage = {
+  id: string;
+  conversationId: string;
+  role: EditorialMessageRole;
+  content: string;
+  versionId?: string;
+  createdAt: string;
+  createdBy: string;
+};
+
+export type EditorialVersion = {
+  id: string;
+  conversationId: string;
+  number: number;
+  copy: NewsSummarizeData;
+  note: string;
+  createdAt: string;
+  createdBy: string;
+};
+
+export type EditorialConversationSummary = {
+  id: string;
+  title: string;
+  format: NewsSummaryFormat;
+  language: NewsLanguage;
+  itemId?: string;
+  sourceLabel?: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  versionCount: number;
+};
+
+export type EditorialConversationDetail = EditorialConversationSummary & {
+  sourcePacket: string;
+  currentVersionId: string;
+  copy: NewsSummarizeData;
+  versions: EditorialVersion[];
+  messages: EditorialMessage[];
+  pendingMemory: EditorialMemoryRule[];
+};
+
+export type EditorialConversationListData = {
+  items: EditorialConversationSummary[];
+};
+
+export type EditorialReviseRequest = {
+  instruction: string;
+};
+
+export type EditorialRestoreRequest = {
+  versionId: string;
+};
+
+export type EditorialReviseData = {
+  copy: NewsSummarizeData;
+  conversation: EditorialConversationDetail;
+  note: string;
+  memoryCandidate?: EditorialMemoryCandidate;
+};
+
+export type EditorialMemoryListData = {
+  rules: EditorialMemoryRule[];
+};
+
+export type EditorialMemoryUpdateRequest = {
+  status?: Exclude<EditorialMemoryStatus, "pending">;
+  instruction?: string;
 };

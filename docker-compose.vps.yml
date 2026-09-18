@@ -10,6 +10,8 @@ services:
       HOST: 0.0.0.0
       PORT: 3001
       PUSH_STORE_PATH: /data/push-subscriptions.json
+      EDITORIAL_STORE_PATH: /data/editorial.sqlite
+      NODE_OPTIONS: --experimental-sqlite
     volumes:
       - newsplus_data:/data
     networks:

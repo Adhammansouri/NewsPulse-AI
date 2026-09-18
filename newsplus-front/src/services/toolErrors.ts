@@ -6,6 +6,7 @@ const MESSAGES: Record<string, string> = {
   "too-many-requests": "وصلت للحد الأقصى من الطلبات. انتظر قليلاً ثم أعد المحاولة.",
   unauthorized: "انتهت الجلسة. سجّل الدخول مرة أخرى.",
   "invalid-request": "البيانات غير مكتملة أو غير صالحة.",
+  "not-found": "المحادثة غير موجودة أو حُذفت.",
   "url-blocked": "هذا الرابط غير مسموح أو تعذّر جلبه.",
   "service-unavailable": "الخدمة غير متاحة حالياً.",
 };

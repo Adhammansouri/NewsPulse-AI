@@ -1,69 +1,41 @@
-import { useEffect, useState } from "react";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useSession } from "@/hooks/useSession";
-import {
-  canUseWebPush,
-  isIosDevice,
-  isStandaloneDisplay,
-} from "@/services/pwaDetect";
-import { getExistingPushSubscription, subscribeToPush } from "@/services/pushService";
 
-type PushState = "hidden" | "idle" | "on" | "busy" | "blocked";
+type PushOptInButtonProps = {
+  className?: string;
+};
 
-export function PushOptInButton() {
+export function PushOptInButton({ className }: PushOptInButtonProps = {}) {
   const session = useSession();
-  const [state, setState] = useState<PushState>("hidden");
+  const { status, enable } = usePushNotifications();
 
-  useEffect(() => {
-    if (!session || !canUseWebPush()) {
-      setState("hidden");
-      return;
-    }
-
-    if (isIosDevice() && !isStandaloneDisplay()) {
-      setState("hidden");
-      return;
-    }
-
-    let cancelled = false;
-    void getExistingPushSubscription().then((sub) => {
-      if (cancelled) return;
-      if (Notification.permission === "denied") {
-        setState("blocked");
-        return;
-      }
-      setState(sub ? "on" : "idle");
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [session]);
-
-  if (state === "hidden") return null;
+  if (
+    !session ||
+    status === "unsupported" ||
+    status === "ios_needs_install" ||
+    status === "vapid_off"
+  ) {
+    return null;
+  }
 
   const label =
-    state === "on" ? "الإشعارات مفعّلة" : state === "blocked" ? "الإشعارات محظورة" : "تفعيل الإشعارات";
-
-  async function handleClick() {
-    if (state !== "idle") return;
-    setState("busy");
-    try {
-      const sub = await subscribeToPush();
-      setState(sub ? "on" : "idle");
-    } catch {
-      setState("idle");
-    }
-  }
+    status === "subscribed"
+      ? "الإشعارات مفعّلة"
+      : status === "blocked"
+        ? "الإشعارات محظورة"
+        : status === "busy"
+          ? "جاري التفعيل"
+          : "تفعيل الإشعارات";
 
   return (
     <button
       type="button"
-      className="brand-header-icon-btn"
-      onClick={() => void handleClick()}
+      className={className ?? "brand-header-icon-btn"}
+      onClick={() => void enable()}
       aria-label={label}
       title={label}
-      aria-pressed={state === "on"}
-      disabled={state === "busy" || state === "blocked" || state === "on"}
+      aria-pressed={status === "subscribed"}
+      disabled={status === "busy" || status === "blocked" || status === "subscribed"}
     >
       <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
         <path d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9" strokeLinecap="round" strokeLinejoin="round" />

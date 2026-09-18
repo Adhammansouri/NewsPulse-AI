@@ -14,6 +14,14 @@ export const API_URLS = {
     SOURCES: "/news/sources",
     FEED: "/news/feed",
   },
+  EDITORIAL: {
+    CONVERSATIONS: "/editorial/conversations",
+    CONVERSATION: (id: string) => `/editorial/conversations/${id}`,
+    REVISE: (id: string) => `/editorial/conversations/${id}/revise`,
+    RESTORE: (id: string) => `/editorial/conversations/${id}/restore`,
+    MEMORY: "/editorial/memory",
+    MEMORY_RULE: (id: string) => `/editorial/memory/${id}`,
+  },
   GENERATE: {
     CONTENT: "/generate",
   },

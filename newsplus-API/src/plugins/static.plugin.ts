@@ -4,11 +4,23 @@ import type { FastifyPluginAsync } from "fastify";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { env } from "../config/env.js";
 import { failResponse } from "../utils/apiResponse.js";
 
 const publicDir = path.join(fileURLToPath(new URL("../..", import.meta.url)), "public");
 
 const staticPluginImpl: FastifyPluginAsync = async (app) => {
+  if (env.nodeEnv !== "production") {
+    app.get("/", async (_request, reply) => {
+      return reply.redirect(env.corsOrigin);
+    });
+    app.log.info(
+      { frontend: env.corsOrigin },
+      "Development: API only — open the Vite dev server for the UI (not this port)",
+    );
+    return;
+  }
+
   if (!existsSync(path.join(publicDir, "index.html"))) {
     return;
   }

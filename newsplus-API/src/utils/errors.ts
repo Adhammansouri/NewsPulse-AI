@@ -24,6 +24,13 @@ export class ValidationError extends AppError {
   }
 }
 
+export class NotFoundError extends AppError {
+  constructor(publicMessage = "not-found") {
+    super(404, publicMessage);
+    this.name = "NotFoundError";
+  }
+}
+
 export class UnauthorizedError extends AppError {
   constructor() {
     super(401, "unauthorized");
