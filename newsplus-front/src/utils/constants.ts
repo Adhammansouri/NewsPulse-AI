@@ -3,6 +3,7 @@ export const NAV_ITEMS = [
   { href: "/news", label: "الأخبار" },
   { href: "/generate", label: "توليد" },
   { href: "/translate", label: "ترجمة" },
+  { href: "/usage", label: "استهلاك AI" },
 ] as const;
 
 export const HEADER_CTA = {

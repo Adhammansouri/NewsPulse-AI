@@ -59,7 +59,7 @@ export function hostFromUrl(url?: string) {
 }
 
 export function sourceHost(sourceId: string, url?: string) {
-  return hostFromUrl(url) ?? SOURCE_HOSTS[sourceId] ?? null;
+  return SOURCE_HOSTS[sourceId] ?? hostFromUrl(url) ?? null;
 }
 
 export function faviconUrl(host: string, size = 64) {

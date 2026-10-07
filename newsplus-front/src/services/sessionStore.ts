@@ -9,6 +9,8 @@ export type NewsplusSession = {
   persisted: boolean;
 };
 
+let memorySession: NewsplusSession | null = null;
+
 function storageFor(persisted: boolean) {
   return persisted ? localStorage : sessionStorage;
 }
@@ -33,8 +35,15 @@ function notify() {
 }
 
 export function getSession(): NewsplusSession | null {
+  if (memorySession) return memorySession;
   try {
-    return parseSession(localStorage.getItem(SESSION_KEY)) ?? parseSession(sessionStorage.getItem(SESSION_KEY));
+    const local = parseSession(localStorage.getItem(SESSION_KEY));
+    if (local) return local;
+  } catch {
+    /* Try tab storage independently when persistent storage is blocked. */
+  }
+  try {
+    return parseSession(sessionStorage.getItem(SESSION_KEY));
   } catch {
     return null;
   }
@@ -45,19 +54,33 @@ export function getAccessToken(): string | null {
 }
 
 export function saveSession(session: Omit<NewsplusSession, "persisted">, persist: boolean) {
-  const payload = JSON.stringify({ ...session, persisted: persist });
+  memorySession = { ...session, persisted: persist };
   try {
-    storageFor(persist).setItem(SESSION_KEY, payload);
     storageFor(!persist).removeItem(SESSION_KEY);
   } catch {
-    sessionStorage.setItem(SESSION_KEY, payload);
+    /* A blocked storage API must not prevent using the other one. */
+  }
+  try {
+    storageFor(persist).setItem(SESSION_KEY, JSON.stringify(memorySession));
+  } catch {
+    memorySession.persisted = false;
+    try {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(memorySession));
+    } catch {
+      /* Keep the session in memory when all browser storage is blocked. */
+    }
   }
   notify();
 }
 
 export function clearSession() {
+  memorySession = null;
   try {
     localStorage.removeItem(SESSION_KEY);
+  } catch {
+    /* private mode */
+  }
+  try {
     sessionStorage.removeItem(SESSION_KEY);
   } catch {
     /* private mode */
@@ -66,10 +89,15 @@ export function clearSession() {
 }
 
 export function subscribeToSession(listener: () => void) {
+  const onStorage = (event: StorageEvent) => {
+    if (event.key !== null && event.key !== SESSION_KEY) return;
+    memorySession = null;
+    listener();
+  };
   window.addEventListener(AUTH_EVENT, listener);
-  window.addEventListener("storage", listener);
+  window.addEventListener("storage", onStorage);
   return () => {
     window.removeEventListener(AUTH_EVENT, listener);
-    window.removeEventListener("storage", listener);
+    window.removeEventListener("storage", onStorage);
   };
 }

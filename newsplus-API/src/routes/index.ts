@@ -7,6 +7,8 @@ import { createNewsRoutes } from "./newsRoutes.js";
 import { createEditorialRoutes } from "./editorialRoutes.js";
 import { createGenerateRoutes } from "./generateRoutes.js";
 import { createTranslateRoutes } from "./translateRoutes.js";
+import { createOpenAIUsageRoutes } from "./openaiUsageRoutes.js";
+import { OpenAIUsageService } from "../services/openaiUsageService.js";
 import type { AuthService } from "../services/authService.js";
 import type { PushService } from "../services/pushService.js";
 import type { NewsService } from "../services/newsService.js";
@@ -33,5 +35,6 @@ export function createApiRoutes(services: ApiServices): FastifyPluginAsync {
     await app.register(createEditorialRoutes(services.editorialService));
     await app.register(createGenerateRoutes(services.generateService));
     await app.register(createTranslateRoutes(services.translateService));
+    await app.register(createOpenAIUsageRoutes(new OpenAIUsageService(), services.authService));
   };
 }

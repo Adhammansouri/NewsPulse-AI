@@ -1,4 +1,5 @@
 import cors from "@fastify/cors";
+import fp from "fastify-plugin";
 import type { FastifyPluginAsync } from "fastify";
 import { env } from "../config/index.js";
 
@@ -13,7 +14,7 @@ function resolveCorsOrigin(requestOrigin: string | undefined) {
   return env.corsOrigin;
 }
 
-export const corsPlugin: FastifyPluginAsync = async (app) => {
+const corsPluginImpl: FastifyPluginAsync = async (app) => {
   await app.register(cors, {
     origin: (origin, callback) => {
       callback(null, resolveCorsOrigin(origin));
@@ -23,10 +24,12 @@ export const corsPlugin: FastifyPluginAsync = async (app) => {
   });
 
   app.addHook("onSend", async (request, reply, payload) => {
-    reply.header("Access-Control-Allow-Origin", resolveCorsOrigin(request.headers.origin));
-    reply.header("Cache-Control", "no-store, no-cache, must-revalidate");
-    reply.header("Vary", "Origin");
+    if (request.url === "/api" || request.url.startsWith("/api/")) {
+      reply.header("Cache-Control", "no-store, no-cache, must-revalidate");
+    }
 
     return payload;
   });
 };
+
+export const corsPlugin = fp(corsPluginImpl);

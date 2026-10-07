@@ -1,6 +1,6 @@
 import type { ApiFailResponse } from "@newsplus/shared";
 import { ApiError } from "./apiError";
-import { getAccessToken } from "./sessionStore";
+import { clearSession, getAccessToken } from "./sessionStore";
 import { baseURL } from "./urls";
 
 type RequestOptions = RequestInit & {
@@ -34,17 +34,17 @@ async function readError(response: Response) {
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { params, headers, auth = false, ...rest } = options;
   const token = auth ? getAccessToken() : null;
+  const requestHeaders = new Headers(headers);
+  if (!requestHeaders.has("Content-Type")) requestHeaders.set("Content-Type", "application/json");
+  if (token && !requestHeaders.has("Authorization")) requestHeaders.set("Authorization", `Bearer ${token}`);
 
   const response = await fetch(buildUrl(path, params), {
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...headers,
-    },
+    headers: requestHeaders,
     ...rest,
   });
 
   if (!response.ok) {
+    if (response.status === 401 && token && token === getAccessToken()) clearSession();
     throw new ApiError(response.status, await readError(response));
   }
 
@@ -57,6 +57,7 @@ export async function apiBlob(path: string): Promise<Blob> {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   if (!response.ok) {
+    if (response.status === 401 && token && token === getAccessToken()) clearSession();
     throw new ApiError(response.status, await readError(response));
   }
   return response.blob();

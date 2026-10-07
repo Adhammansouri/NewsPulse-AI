@@ -1,4 +1,5 @@
 export type { ApiFailResponse, ApiSuccessResponse, HealthData, HealthResponse } from "./types/api.js";
+export type { OpenAIDataStatus, OpenAISection, OpenAIUsageRow, OpenAICostRow, OpenAISpendLimit, OpenAIRateLimit, OpenAIUsageQuery, OpenAIUsageData } from "./types/openaiUsage.js";
 export type {
   AuthMeData,
   AuthUser,

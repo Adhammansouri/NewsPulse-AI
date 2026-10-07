@@ -12,10 +12,6 @@ const MAX_ATTEMPTS = 15;
 const buckets = new Map<string, Bucket>();
 
 function clientKey(request: FastifyRequest) {
-  const forwarded = request.headers["x-forwarded-for"];
-  if (typeof forwarded === "string" && forwarded.trim()) {
-    return forwarded.split(",")[0]?.trim() || request.ip || "unknown";
-  }
   return request.ip || "unknown";
 }
 

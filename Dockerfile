@@ -28,6 +28,7 @@ COPY newsplus-API/package.json ./
 RUN npm install --omit=dev --no-audit --no-fund
 
 COPY --from=builder /app/newsplus-API/dist ./dist
+COPY --from=builder /app/newsplus-API/assets ./assets
 COPY --from=builder /app/newsplus-API/server.cjs ./
 COPY --from=builder /app/newsplus-front/dist ./public
 

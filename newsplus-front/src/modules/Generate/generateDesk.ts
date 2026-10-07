@@ -70,7 +70,7 @@ export function urlLooksBroken(value: string) {
   const trimmed = value.trim();
   if (!trimmed) return false;
   if (/\s/.test(trimmed)) return true;
-  if (!looksLikeHttpUrl(trimmed)) return /[:./]/.test(trimmed);
+  if (!looksLikeHttpUrl(trimmed)) return true;
   return !urlHost(trimmed);
 }
 
@@ -90,7 +90,8 @@ export function readingMinutes(words: number, language: GenerateLanguage) {
 export function splitHandoff(raw: string | undefined) {
   const value = raw?.trim() ?? "";
   if (!value) return { url: "", notes: "" };
-  if (looksLikeHttpUrl(value)) return { url: value, notes: "" };
+  const match = value.match(/^(https?:\/\/\S+)/i);
+  if (match) return { url: match[1], notes: value.slice(match[1].length).trim() };
   return { url: "", notes: value };
 }
 
@@ -112,11 +113,21 @@ export function readDrafts(): GenerateDraft[] {
   try {
     const raw = sessionStorage.getItem(DRAFTS_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw) as GenerateDraft[];
-    return Array.isArray(parsed) ? parsed.slice(0, DRAFTS_MAX) : [];
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter(isGenerateDraft).slice(0, DRAFTS_MAX) : [];
   } catch {
     return [];
   }
+}
+
+function isGenerateDraft(value: unknown): value is GenerateDraft {
+  if (!value || typeof value !== "object") return false;
+  const draft = value as Partial<GenerateDraft>;
+  return typeof draft.id === "string" && typeof draft.at === "number" && Number.isFinite(draft.at)
+    && typeof draft.title === "string" && typeof draft.dek === "string" && typeof draft.body === "string"
+    && typeof draft.source === "string" && (draft.language === "ar" || draft.language === "en")
+    && (draft.style === "brief" || draft.style === "article" || draft.style === "report")
+    && (draft.sourceMode === undefined || draft.sourceMode === "page" || draft.sourceMode === "search" || draft.sourceMode === "notes");
 }
 
 export function pushDraft(draft: Omit<GenerateDraft, "id" | "at">): GenerateDraft[] {

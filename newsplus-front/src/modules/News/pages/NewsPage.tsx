@@ -10,11 +10,15 @@ import {
   CircleNotch,
   Copy,
   LinkSimple,
-  MagnifyingGlass,
   FileText,
+  ListBullets,
+  Compass,
+  ShareNetwork,
+  VideoCamera,
+  Images,
+  Stack,
   Newspaper,
   WarningCircle,
-  X,
 } from "@phosphor-icons/react";
 import { useNewsFeed } from "@/hooks/useNewsFeed";
 import { readDeskHandoff } from "@/services/deskHandoff";
@@ -29,7 +33,7 @@ import {
 } from "@/services/editorialService";
 import { QuotaNotice } from "@/components/QuotaNotice";
 import { copyText, isOpenAIQuotaError, toolErrorMessage } from "@/services/toolErrors";
-import type { CarouselOptions, NewsFeedItem, NewsLanguage, NewsSource, NewsStoryFormat, NewsSummarizeData } from "@newsplus/shared";
+import type { CarouselOptions, NewsFeedItem, NewsLanguage, NewsStoryFormat, NewsSummarizeData } from "@newsplus/shared";
 import { SourceMark, SourceMarkStack } from "../SourceMark";
 import { hostFromUrl } from "../sourceLogos";
 import {
@@ -52,8 +56,13 @@ import {
 import { ConversationDrawer } from "../components/editorial/ConversationDrawer";
 import { EditorialDraft } from "../components/editorial/EditorialDraft";
 import { RevisionThread } from "../components/editorial/RevisionThread";
+import { NewsFilters, type FeedFilters } from "../components/NewsFilters";
+import "../newsroom.css";
 type LangFilter = "all" | NewsLanguage;
 type MobilePane = "feed" | "desk";
+type EditorialPane = "draft" | "revision";
+
+const FORMAT_ICONS = { desk: FileText, bulletin: Newspaper, facts: ListBullets, context: Compass, social: ShareNetwork, video: VideoCamera, carousel: Images, briefing: Stack };
 
 export default function NewsPage() {
   const location = useLocation();
@@ -67,10 +76,12 @@ export default function NewsPage() {
   const [topicFilter, setTopicFilter] = useState<TopicFilter>("all");
   const [query, setQuery] = useState("");
   const [mobilePane, setMobilePane] = useState<MobilePane>("feed");
+  const [editorialPane, setEditorialPane] = useState<EditorialPane>("draft");
   const [selectedId, setSelectedId] = useState<string | null>(
     () => handoff?.itemId ?? searchParams.get("item"),
   );
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<NewsSummarizeData["format"]>("desk");
   const [carouselOptions, setCarouselOptions] = useState<CarouselOptions>({
     slides: 4,
@@ -84,6 +95,7 @@ export default function NewsPage() {
   const [conversationQuery, setConversationQuery] = useState("");
   const [newIds, setNewIds] = useState<string[]>([]);
   const feedScrollRef = useRef<HTMLDivElement>(null);
+  const deskPaneRef = useRef<HTMLElement>(null);
   const seenIdsRef = useRef<Set<string>>(new Set());
   const snapshotKeyRef = useRef("all|all|all|all|");
 
@@ -97,6 +109,7 @@ export default function NewsPage() {
   const summarizeMutation = useMutation({
     mutationFn: summarizeNews,
     onSuccess(data) {
+      setEditorialPane("draft");
       if (!data.conversationId) return;
       setConversationId(data.conversationId);
       void queryClient.invalidateQueries({ queryKey: ["editorial-conversations"] });
@@ -127,9 +140,14 @@ export default function NewsPage() {
     onSuccess(data) {
       setInstruction("");
       setCopied(false);
+      setCopyError(false);
+      setEditorialPane("draft");
       queryClient.setQueryData(["editorial-conversation", data.conversation.id], data.conversation);
       void queryClient.invalidateQueries({ queryKey: ["editorial-conversations"] });
       void queryClient.invalidateQueries({ queryKey: ["editorial-memory"] });
+    },
+    onError() {
+      void queryClient.invalidateQueries({ queryKey: ["editorial-conversation", conversationId] });
     },
   });
 
@@ -137,6 +155,7 @@ export default function NewsPage() {
     mutationFn: ({ id, versionId }: { id: string; versionId: string }) => restoreEditorialVersion(id, versionId),
     onSuccess(data) {
       setCopied(false);
+      setEditorialPane("draft");
       queryClient.setQueryData(["editorial-conversation", data.conversation.id], data.conversation);
       void queryClient.invalidateQueries({ queryKey: ["editorial-conversations"] });
     },
@@ -203,6 +222,10 @@ export default function NewsPage() {
   const resultFormat = summary?.format ?? (summarizeMutation.variables?.briefing ? "briefing" : selectedFormat);
 
   useEffect(() => {
+    if (mobilePane === "desk") deskPaneRef.current?.focus({ preventScroll: true });
+  }, [mobilePane]);
+
+  useEffect(() => {
     if (!handoff?.input) return;
     navigate("/generate", {
       replace: true,
@@ -238,12 +261,18 @@ export default function NewsPage() {
     const first = newIds[0];
     setNewIds([]);
     if (!first) return;
-    const node = feedScrollRef.current?.querySelector(`[data-headline-id="${CSS.escape(first)}"]`);
-    node?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    setMobilePane("feed");
+    window.requestAnimationFrame(() => {
+      const node = feedScrollRef.current?.querySelector(`[data-headline-id="${CSS.escape(first)}"]`);
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      node?.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+    });
   }
 
   function runSummarize(body: Parameters<typeof summarizeNews>[0]) {
+    if (busy) return;
     setCopied(false);
+    setCopyError(false);
     summarizeMutation.mutate(body);
   }
 
@@ -251,8 +280,10 @@ export default function NewsPage() {
     try {
       await copyText(formatSummaryClipboard(data));
       setCopied(true);
+      setCopyError(false);
     } catch {
       setCopied(false);
+      setCopyError(true);
     }
   }
 
@@ -270,7 +301,7 @@ export default function NewsPage() {
   function storyRequest(format: NewsSummarizeData["format"]) {
     if (format === "briefing") return { briefing: true as const, language: "ar" as const };
     return {
-      itemId: selected?.id,
+      itemId: conversationDetailQuery.data?.itemId ?? selected?.id,
       language: "ar" as const,
       format,
       ...(format === "carousel" ? { carousel: carouselOptions } : {}),
@@ -284,33 +315,38 @@ export default function NewsPage() {
   }
 
   function runStoryFormat(format: NewsStoryFormat) {
-    if (!selected) return;
+    if (!conversationDetailQuery.data?.itemId && !selected) return;
     setSelectedFormat(format);
     runSummarize(storyRequest(format));
   }
 
-  function selectLanguage(next: LangFilter) {
-    setLangFilter(next);
-    setSourceId("all");
-  }
-
-  function selectSource(id: string, language: NewsLanguage) {
-    setSourceId(id);
-    setLangFilter(language);
+  function changeFilters(patch: Partial<FeedFilters>) {
+    if (patch.query !== undefined) setQuery(patch.query);
+    if (patch.language !== undefined) setLangFilter(patch.language);
+    if (patch.source !== undefined) setSourceId(patch.source);
+    if (patch.time !== undefined) setTimeFilter(patch.time);
+    if (patch.topic !== undefined) setTopicFilter(patch.topic);
   }
 
   function selectHeadline(id: string) {
+    if (busy) return;
     setSelectedId(id);
     setNewIds((prev) => prev.filter((itemId) => itemId !== id));
     summarizeMutation.reset();
+    reviseMutation.reset();
+    restoreMutation.reset();
+    memoryMutation.reset();
     setConversationId(null);
     setInstruction("");
+    setCopied(false);
+    setCopyError(false);
+    setEditorialPane("draft");
     setMobilePane("desk");
     setSelectedFormat((current) => (current === "briefing" ? "desk" : current));
   }
 
   function submitRevision() {
-    if (!conversationId || !instruction.trim()) return;
+    if (busy || !conversationId || !instruction.trim()) return;
     reviseMutation.mutate({ id: conversationId, text: instruction.trim() });
   }
 
@@ -319,10 +355,14 @@ export default function NewsPage() {
     if (!detail) return;
     setSelectedFormat(detail.format);
     if (detail.itemId) setSelectedId(detail.itemId);
+    if (detail.copy.carousel) {
+      const { slides, style, density, mark } = detail.copy.carousel;
+      setCarouselOptions({ slides: slides.length, style, density, mark });
+    }
   }, [conversationDetailQuery.data]);
 
   return (
-    <div className="news-desk">
+    <div className={`news-desk newsroom is-${mobilePane}`}>
       <header className="news-desk-head">
         <div className="news-kicker">
           <span className="news-pulse" aria-hidden="true" />
@@ -331,10 +371,13 @@ export default function NewsPage() {
         </div>
         <div className="news-desk-head-row">
           <div>
-            <h1 className="news-title">ملخص الأخبار</h1>
-            <p className="news-lede">اختر خبراً أو موضوعاً، واطلب ملخصاً تحريرياً جاهزاً للنشر.</p>
+            <h1 className="news-title">غرفة الأخبار</h1>
+            <p className="news-lede">تابع المصادر، وصُغ الخبر، وراجعه مع المحرّر.</p>
           </div>
           <div className="news-live">
+            <button type="button" className="news-btn-secondary newsroom-history" onClick={() => setDrawerOpen(true)} aria-haspopup="dialog">
+              <Chats size={18} aria-hidden="true" /><span>المحادثات</span>
+            </button>
             <p className="news-count" aria-live="polite">
               {feedQuery.isFetching && !feedQuery.isLoading ? (
                 <CircleNotch className="news-spin" size={14} aria-hidden="true" />
@@ -367,136 +410,27 @@ export default function NewsPage() {
         </div>
       </header>
 
-      <div className="news-toolbar">
-        <div className="news-filter-bar">
-          <div className="news-seg news-seg--lang" role="group" aria-label="تصفية اللغة">
-            {(
-              [
-                { id: "all", label: "الكل" },
-                { id: "ar", label: "عربي" },
-                { id: "en", label: "English" },
-              ] as const
-            ).map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                className={`news-seg-btn ${langFilter === option.id ? "is-active" : ""}`}
-                aria-pressed={langFilter === option.id}
-                onClick={() => selectLanguage(option.id)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
+      <NewsFilters
+        filters={{ query, language: langFilter, source: sourceId, time: timeFilter, topic: topicFilter }}
+        sources={sources}
+        timeCounts={timeCounts}
+        topicCounts={topicCounts}
+        onChange={changeFilters}
+      />
 
-          <label className="news-search" htmlFor="news-query">
-            <MagnifyingGlass size={16} weight="regular" aria-hidden="true" />
-            <span className="sr-only">بحث في العناوين</span>
-            <input
-              id="news-query"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="ابحث في العناوين..."
-            />
-            {query ? (
-              <button type="button" className="news-icon-btn" aria-label="مسح البحث" onClick={() => setQuery("")}>
-                <X size={14} weight="bold" />
-              </button>
-            ) : null}
-          </label>
-        </div>
-
-        <div className="news-seg news-seg--time" role="group" aria-label="تصفية الوقت">
-          {TIME_FILTERS.map((option) => {
-            const count = timeCounts[option.id];
-            const empty = option.id !== "all" && count === 0;
-            return (
-              <button
-                key={option.id}
-                type="button"
-                className={`news-seg-btn ${timeFilter === option.id ? "is-active" : ""} ${empty ? "is-empty" : ""}`}
-                aria-pressed={timeFilter === option.id}
-                aria-label={`${option.hint}، ${count} عنوان`}
-                title={option.hint}
-                onClick={() => setTimeFilter(option.id)}
-              >
-                {option.label}
-                <span className="news-seg-count">{count}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="news-topic-rail" role="listbox" aria-label="تصفية الموضوع">
-          {TOPIC_FILTERS.map((option) => {
-            const count = topicCounts[option.id];
-            const empty = option.id !== "all" && count === 0;
-            return (
-              <button
-                key={option.id}
-                type="button"
-                className={`news-chip ${topicFilter === option.id ? "is-active" : ""} ${empty ? "is-empty" : ""}`}
-                aria-pressed={topicFilter === option.id}
-                aria-label={`${option.label}، ${count} عنوان`}
-                disabled={empty}
-                onClick={() => setTopicFilter(option.id)}
-              >
-                {option.label}
-                <span className="news-seg-count">{count}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {visibleSources.length > 0 && (
-        <div className="news-source-rail max-md:hidden" role="listbox" aria-label="المصادر">
-          <button
-            type="button"
-            className={`news-chip ${sourceId === "all" ? "is-active" : ""}`}
-            aria-pressed={sourceId === "all"}
-            onClick={() => setSourceId("all")}
-          >
-            كل المصادر
-          </button>
-          {visibleSources.map((source) => (
-            <SourceChip
-              key={source.id}
-              source={source}
-              active={sourceId === source.id}
-              onSelect={() => selectSource(source.id, source.language)}
-            />
-          ))}
-        </div>
-      )}
-
-      <div className="news-pane-tabs md:hidden" role="tablist" aria-label="أقسام الغرفة">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={mobilePane === "feed"}
-          className={mobilePane === "feed" ? "is-active" : ""}
-          onClick={() => setMobilePane("feed")}
-        >
-          <Newspaper size={16} aria-hidden="true" />
-          العناوين
+      <div className="newsroom-pane-tabs" role="group" aria-label="أقسام الغرفة">
+        <button type="button" aria-pressed={mobilePane === "feed"} aria-controls="news-feed-pane" className={mobilePane === "feed" ? "is-active" : ""} onClick={() => setMobilePane("feed")}>
+          <Newspaper size={18} aria-hidden="true" />العناوين <span className="newsroom-tab-count">{items.length}</span>
         </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={mobilePane === "desk"}
-          className={mobilePane === "desk" ? "is-active" : ""}
-          onClick={() => setMobilePane("desk")}
-        >
-          <FileText size={16} aria-hidden="true" />
-          الملخص
+        <button type="button" aria-pressed={mobilePane === "desk"} aria-controls="news-desk-pane" className={mobilePane === "desk" ? "is-active" : ""} onClick={() => setMobilePane("desk")}>
+          <FileText size={18} aria-hidden="true" />التحرير {showEditorial && <span className="newsroom-tab-dot" aria-label="توجد مسودة" />}
         </button>
       </div>
 
       <div className={`news-panes ${showEditorial ? "is-editorial" : ""}`}>
-        <section className={`news-pane ${mobilePane === "feed" ? "" : "max-md:hidden"}`} aria-label="العناوين">
+        <section id="news-feed-pane" className={`news-pane newsroom-feed-pane ${mobilePane === "feed" ? "" : "is-mobile-hidden"}`} aria-label="العناوين">
           <div className="news-pane-bar">
-            <p className="news-pane-label">العناوين</p>
+            <p className="news-pane-label"><Newspaper size={17} aria-hidden="true" />العناوين</p>
             <p className="news-pane-meta">
               {items.length}
               {timeFilter !== "all"
@@ -507,14 +441,15 @@ export default function NewsPage() {
                 : ""}
             </p>
           </div>
-          <div className="news-pane-scroll" ref={feedScrollRef}>
+          <div className="news-pane-scroll" ref={feedScrollRef} tabIndex={-1} aria-label="قائمة العناوين">
+            {feedQuery.error || sourcesQuery.error ? <DeskError error={feedQuery.error ?? sourcesQuery.error} /> : null}
             {feedQuery.isLoading && (
               <p className="news-state">
                 <CircleNotch className="news-spin" size={18} aria-hidden="true" />
                 جاري جلب العناوين...
               </p>
             )}
-            {!feedQuery.isLoading && items.length === 0 && (
+            {!feedQuery.isLoading && !feedQuery.error && !sourcesQuery.error && items.length === 0 && (
               <div className="news-state news-state--empty">
                 <p>لا توجد عناوين في هذه النافذة. غيّر الوقت أو الموضوع أو المصدر أو كلمة البحث.</p>
                 {timeFilter !== "all" ? (
@@ -534,6 +469,7 @@ export default function NewsPage() {
                 key={item.id}
                 item={item}
                 active={selected?.id === item.id}
+                disabled={busy}
                 justArrived={newIds.includes(item.id)}
                 onSelect={() => selectHeadline(item.id)}
               />
@@ -542,11 +478,17 @@ export default function NewsPage() {
         </section>
 
         <section
-          className={`news-pane news-desk-pane ${showEditorial ? "is-editorial" : ""} ${mobilePane === "desk" ? "" : "max-md:hidden"}`}
-          aria-label="الملخص"
+          id="news-desk-pane"
+          ref={deskPaneRef}
+          tabIndex={-1}
+          className={`news-pane news-desk-pane newsroom-desk-pane ${showEditorial ? "is-editorial" : ""} ${mobilePane === "desk" ? "" : "is-mobile-hidden"}`}
+          aria-label="التحرير"
         >
           <div className="news-pane-bar news-desk-bar">
-            <p className="news-pane-label">{showEditorial ? "غرفة التحرير" : "الملخص"}</p>
+            <div className="newsroom-desk-heading">
+              <button type="button" className="newsroom-back" aria-label="العودة إلى العناوين" onClick={() => setMobilePane("feed")}><ArrowLeft size={18} aria-hidden="true" /></button>
+              <p className="news-pane-label"><FileText size={17} aria-hidden="true" />{showEditorial ? "المسودة والمحرّر" : "الخبر وأدوات الكتابة"}</p>
+            </div>
             <div className="news-desk-bar-tools">
               {busy ? (
                 <p className="news-desk-busy" aria-live="polite">
@@ -554,16 +496,16 @@ export default function NewsPage() {
                   جاري الكتابة...
                 </p>
               ) : null}
-              <button
-                type="button"
-                className="news-btn-secondary news-conversations-btn"
-                onClick={() => setDrawerOpen(true)}
-              >
-                <Chats size={15} aria-hidden="true" />
-                المحادثات
-              </button>
+              {!busy && <span className="news-pane-meta">{showEditorial ? storyFormatMeta(resultFormat).label : "معاينة المصدر"}</span>}
             </div>
           </div>
+
+          {showEditorial && conversationId && (
+            <div className="newsroom-editor-tabs" role="group" aria-label="أدوات التحرير">
+              <button type="button" className={editorialPane === "draft" ? "is-active" : ""} aria-pressed={editorialPane === "draft"} aria-controls="news-editorial-draft" onClick={() => setEditorialPane("draft")}><FileText size={16} aria-hidden="true" />المسودة</button>
+              <button type="button" className={editorialPane === "revision" ? "is-active" : ""} aria-pressed={editorialPane === "revision"} aria-controls="news-editorial-revision" onClick={() => setEditorialPane("revision")}><Chats size={16} aria-hidden="true" />تعديل النص <span className="newsroom-tab-note">والنسخ السابقة</span></button>
+            </div>
+          )}
 
           <div className="news-desk-main">
             <div className="news-pane-scroll news-desk-body">
@@ -577,8 +519,8 @@ export default function NewsPage() {
                   </div>
                 ) : summary ? (
                   <div className="news-editorial">
-                    <div className="news-editorial-stage">
-                      <div className="news-editorial-main">
+                    <div className={`news-editorial-stage is-${editorialPane} ${conversationId ? "has-revision" : ""}`}>
+                      <div className="news-editorial-main" id="news-editorial-draft">
                         <div className="news-editorial-toolbar">
                           <DeskFormatBar
                             mode="switch"
@@ -605,6 +547,7 @@ export default function NewsPage() {
                               title={copied ? "تم النسخ" : "نسخ"}
                             >
                               {copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}
+                              <span>{copied ? "تم النسخ" : "نسخ"}</span>
                             </button>
                             <button
                               type="button"
@@ -620,6 +563,7 @@ export default function NewsPage() {
                               title="خبر آخر"
                             >
                               <Newspaper size={15} aria-hidden="true" />
+                              <span>خبر آخر</span>
                             </button>
                           </div>
                         </div>
@@ -637,6 +581,7 @@ export default function NewsPage() {
                       </div>
                       {conversationId ? (
                         <RevisionThread
+                          id="news-editorial-revision"
                           messages={conversationDetailQuery.data?.messages ?? []}
                           versions={conversationDetailQuery.data?.versions ?? []}
                           currentVersionId={conversationDetailQuery.data?.currentVersionId ?? summary.versionId ?? ""}
@@ -673,7 +618,7 @@ export default function NewsPage() {
                       <div className="news-story-copy">
                         <div className="news-story-card-meta">
                           <div className="news-feed-source">
-                            <SourceMarkStack sources={selected.sources} size={18} />
+                            <SourceMarkStack sources={selected.sources} size={24} />
                             {selected.sources[0] ? (
                               <span className="news-source-name">{selected.sources[0].name}</span>
                             ) : null}
@@ -698,7 +643,7 @@ export default function NewsPage() {
 
                         {selected.excerpt ? (
                           <div className="news-story-brief">
-                            <p className="news-story-kicker">عن الخبر</p>
+                            <p className="news-story-kicker">من المصدر</p>
                             <p className="news-story-excerpt" dir={hasArabic(selected.excerpt) ? "rtl" : "ltr"}>
                               {selected.excerpt}
                             </p>
@@ -714,7 +659,7 @@ export default function NewsPage() {
                               return (
                                 <li key={`${source.id}-${source.url}`}>
                                   <a href={source.url} target="_blank" rel="noreferrer">
-                                    <SourceMark id={source.id} name={source.name} url={source.url} size={16} />
+                                    <SourceMark id={source.id} name={source.name} url={source.url} size={24} />
                                     <span className="news-story-origin-copy">
                                       <span>اقرأ في {source.name}</span>
                                       {host ? <span className="news-story-origin-host">{host}</span> : null}
@@ -738,7 +683,6 @@ export default function NewsPage() {
                           carouselOptions={carouselOptions}
                           onCarouselOptions={setCarouselOptions}
                           onSelectFormat={selectFormat}
-                          onGenerate={generateSummary}
                         />
                       </div>
                     </article>
@@ -753,6 +697,17 @@ export default function NewsPage() {
                 </>
               )}
             </div>
+
+            {copyError && <p className="newsroom-copy-error" role="alert">تعذّر النسخ. يمكنك تحديد النص ونسخه يدوياً.</p>}
+            {!showEditorial && selected && (
+              <div className="newsroom-generate-dock">
+                <p><span>الصيغة المختارة</span><strong>{storyFormatMeta(selectedFormat).label}</strong></p>
+                <button type="button" className="news-btn-primary" disabled={busy || (selectedFormat === "briefing" && items.length === 0)} onClick={generateSummary}>
+                  {busy ? <CircleNotch className="news-spin" size={18} aria-hidden="true" /> : <FileText size={18} aria-hidden="true" />}
+                  {busy ? "جارٍ إعداد المحتوى…" : "توليد المحتوى"}
+                </button>
+              </div>
+            )}
 
             <Link
               to="/generate"
@@ -773,27 +728,36 @@ export default function NewsPage() {
         </section>
       </div>
       <ConversationDrawer
+        busy={busy}
         open={drawerOpen}
         search={conversationQuery}
         conversations={conversationListQuery.data?.items ?? []}
         memory={memoryQuery.data?.rules ?? []}
         activeId={conversationId}
         listLoading={conversationListQuery.isFetching}
+        error={conversationListQuery.error || memoryQuery.error || memoryMutation.error ? toolErrorMessage(conversationListQuery.error ?? memoryQuery.error ?? memoryMutation.error) : undefined}
         onSearch={(value) => setConversationQuery(value)}
         onClose={() => {
           setDrawerOpen(false);
           setConversationQuery("");
         }}
         onSelect={(id) => {
+          if (busy) return;
           setConversationId(id);
           summarizeMutation.reset();
+          reviseMutation.reset();
+          restoreMutation.reset();
+          memoryMutation.reset();
           setCopied(false);
+          setCopyError(false);
+          setEditorialPane("draft");
           setInstruction("");
           setDrawerOpen(false);
           setMobilePane("desk");
         }}
         onDisableMemory={(id) => memoryMutation.mutate({ id, status: "disabled" })}
       />
+      <p className="sr-only" role="status">{copied ? "تم نسخ المسودة" : ""}</p>
     </div>
   );
 }
@@ -801,7 +765,7 @@ export default function NewsPage() {
 function DeskError({ error }: { error: unknown }) {
   if (isOpenAIQuotaError(error)) return <QuotaNotice />;
   return (
-    <p className="news-state is-error">
+    <p className="news-state is-error" role="alert">
       <WarningCircle size={18} aria-hidden="true" />
       {toolErrorMessage(error)}
     </p>
@@ -818,7 +782,6 @@ function DeskFormatBar({
   onCarouselOptions,
   onApplyCarousel,
   onSelectFormat,
-  onGenerate,
 }: {
   mode: "picker" | "switch";
   selected: NewsSummarizeData["format"];
@@ -829,7 +792,6 @@ function DeskFormatBar({
   onCarouselOptions?: (next: CarouselOptions) => void;
   onApplyCarousel?: () => void;
   onSelectFormat: (format: NewsSummarizeData["format"]) => void;
-  onGenerate?: () => void;
 }) {
   const hintId = showHint ? "news-format-hint-story" : "news-format-hint-result";
   const meta = storyFormatMeta(selected);
@@ -843,8 +805,8 @@ function DeskFormatBar({
     <div className={`news-format-bar ${showHint ? "" : "is-compact"} ${isPicker ? "is-picker" : "is-switch"}`}>
       {showHint ? (
         <p className="news-format-caption" id={hintId}>
-          <span>شكل التلخيص</span>
-          <span>{meta.hint}</span>
+          <span>اختر صيغة المحتوى</span>
+          <span>للخبر أو لموجز العناوين</span>
         </p>
       ) : (
         <span className="sr-only" id={hintId}>
@@ -855,6 +817,7 @@ function DeskFormatBar({
       <div className="news-format-toolbar">
         <div className="news-seg news-seg--formats" role="group" aria-label="شكل التلخيص" aria-describedby={hintId}>
           {choices.map((option) => {
+            const Icon = FORMAT_ICONS[option.id];
             const active = selected === option.id;
             const isBriefing = option.id === "briefing";
             return (
@@ -867,39 +830,30 @@ function DeskFormatBar({
                 title={option.hint}
                 onClick={() => onSelectFormat(option.id)}
               >
-                {busy && active ? <CircleNotch className="news-spin" size={12} aria-hidden="true" /> : null}
-                {option.label}
+                {busy && active ? <CircleNotch className="news-spin" size={18} aria-hidden="true" /> : <Icon size={18} aria-hidden="true" />}
+                <span className="newsroom-format-copy"><span>{option.label}</span>{isPicker && <span className="newsroom-format-hint">{option.hint}</span>}</span>
+                {isPicker && active && <Check className="newsroom-format-check" size={14} aria-hidden="true" />}
               </button>
             );
           })}
         </div>
 
-        {isPicker && onGenerate ? (
-          <button
-            type="button"
-            className="news-btn-primary news-format-generate"
-            disabled={busy || (selected === "briefing" && briefingDisabled)}
-            onClick={onGenerate}
-          >
-            {busy ? <CircleNotch className="news-spin" size={16} aria-hidden="true" /> : null}
-            {busy ? "جاري التوليد..." : "توليد"}
-          </button>
-        ) : null}
       </div>
       {selected === "carousel" && carouselOptions && onCarouselOptions ? (
-        <CarouselControls
-          options={carouselOptions}
-          busy={busy}
-          showApply={mode === "switch"}
-          onChange={onCarouselOptions}
-          onApply={onApplyCarousel}
-        />
+        isPicker ? (
+          <CarouselControls options={carouselOptions} busy={busy} showApply={false} onChange={onCarouselOptions} />
+        ) : (
+          <details className="newsroom-carousel-settings">
+            <summary>إعدادات الكاروسيل</summary>
+            <CarouselControls options={carouselOptions} busy={busy} showApply onChange={onCarouselOptions} onApply={onApplyCarousel} />
+          </details>
+        )
       ) : null}
     </div>
   );
 }
 
-function CarouselControls({
+export function CarouselControls({
   options,
   busy,
   showApply,
@@ -950,6 +904,13 @@ function CarouselControls({
           </StyleButton>
         </div>
       </div>
+      <div className="news-carousel-field">
+        <span className="news-field-label">كثافة النص</span>
+        <div className="news-carousel-pills" role="group" aria-label="كثافة نص الشرائح">
+          {([{ id: "headline", label: "عنوان" }, { id: "banner", label: "عنوان وشريط" }, { id: "line", label: "سطر توضيحي" }] as const).map((option) => <StyleButton key={option.id} active={options.density === option.id} disabled={busy} onClick={() => onChange({ ...options, density: option.id })}>{option.label}</StyleButton>)}
+        </div>
+      </div>
+      <label className="newsroom-carousel-mark"><input type="checkbox" checked={options.mark} disabled={busy} onChange={(event) => onChange({ ...options, mark: event.target.checked })} />إظهار علامة Newsplus</label>
       {showApply && onApply ? (
         <button type="button" className="news-btn-primary news-carousel-apply" disabled={busy} onClick={onApply}>
           تحديث الشرائح
@@ -977,28 +938,6 @@ function StyleButton({
   );
 }
 
-function SourceChip({
-  source,
-  active,
-  onSelect,
-}: {
-  source: NewsSource;
-  active: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      className={`news-chip ${active ? "is-active" : ""}`}
-      aria-pressed={active}
-      onClick={onSelect}
-    >
-      <SourceMark id={source.id} name={source.name} size={16} />
-      {source.name}
-    </button>
-  );
-}
-
 function RecencyMarks({ justArrived = false }: { justArrived?: boolean }) {
   if (!justArrived) return null;
 
@@ -1013,11 +952,13 @@ function HeadlineRow({
   item,
   active,
   justArrived,
+  disabled,
   onSelect,
 }: {
   item: NewsFeedItem;
   active: boolean;
   justArrived: boolean;
+  disabled: boolean;
   onSelect: () => void;
 }) {
   const recency = newsRecency(item.publishedAt);
@@ -1028,6 +969,8 @@ function HeadlineRow({
       type="button"
       id={`news-headline-${item.id}`}
       data-headline-id={item.id}
+      disabled={disabled}
+      aria-pressed={active}
       className={[
         "news-feed-item",
         `is-${recency}`,
@@ -1040,9 +983,9 @@ function HeadlineRow({
     >
       <div className="news-feed-row">
         <div className="news-feed-source">
-          <SourceMarkStack sources={item.sources} size={16} />
+          <SourceMarkStack sources={item.sources} size={24} />
           {primarySource ? (
-            <span className="news-source-name">{primarySource.name}</span>
+            <bdi className="news-source-name">{primarySource.name}</bdi>
           ) : null}
           {item.sources.length > 1 ? (
             <span className="news-cluster">+{item.sources.length - 1}</span>
@@ -1060,9 +1003,13 @@ function HeadlineRow({
         </div>
       </div>
 
-      <p className="news-feed-title" dir={hasArabic(item.title) ? "rtl" : "ltr"}>
+      <p className="news-feed-title" dir={hasArabic(item.title) ? "rtl" : "ltr"} lang={hasArabic(item.title) ? "ar" : "en"}>
         {item.title}
       </p>
+      <div className="newsroom-feed-bottom">
+        <span className="newsroom-feed-tags">{item.breaking && <span className="newsroom-breaking">عاجل</span>}<span>{TOPIC_FILTERS.find((topic) => topic.id === item.topic)?.label ?? "أخرى"}</span></span>
+        <span className="newsroom-read-label">عرض الخبر <ArrowLeft size={14} aria-hidden="true" /></span>
+      </div>
     </button>
   );
 }

@@ -1,27 +1,33 @@
-import { isIP } from "node:net";
-import { lookup } from "node:dns/promises";
+import { BlockList, isIP, type LookupFunction } from "node:net";
+import dns from "node:dns/promises";
+import http from "node:http";
+import https from "node:https";
+import { Readable } from "node:stream";
 import { ValidationError } from "../utils/errors.js";
 
 const FETCH_TIMEOUT_MS = 12_000;
 const MAX_BYTES = 500_000;
 const MAX_TEXT = 16_000;
+const MAX_REDIRECTS = 5;
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+const validatedAddresses = new WeakMap<URL, string[]>();
+
+const blockedAddresses = new BlockList();
+for (const [address, prefix] of [
+  ["0.0.0.0", 8], ["10.0.0.0", 8], ["100.64.0.0", 10],
+  ["127.0.0.0", 8], ["169.254.0.0", 16], ["172.16.0.0", 12],
+  ["192.168.0.0", 16], ["224.0.0.0", 4], ["240.0.0.0", 4],
+] as const) blockedAddresses.addSubnet(address, prefix, "ipv4");
+for (const [address, prefix] of [
+  ["::", 128], ["::1", 128], ["fc00::", 7], ["fe80::", 10], ["ff00::", 8],
+] as const) blockedAddresses.addSubnet(address, prefix, "ipv6");
 
 const BROWSER_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
 function isPrivateAddress(address: string) {
-  if (address === "::1" || address.startsWith("fe80:") || address.startsWith("fc") || address.startsWith("fd")) {
-    return true;
-  }
-
-  const parts = address.split(".").map(Number);
-  if (parts.length !== 4 || parts.some((part) => Number.isNaN(part))) return false;
-
-  const [a, b] = parts;
-  if (a === 10 || a === 127 || a === 0 || (a === 169 && b === 254)) return true;
-  if (a === 192 && b === 168) return true;
-  if (a === 172 && b >= 16 && b <= 31) return true;
-  return false;
+  const family = isIP(address);
+  return !family || blockedAddresses.check(address, family === 6 ? "ipv6" : "ipv4");
 }
 
 export function looksLikeHttpUrl(value: string) {
@@ -33,7 +39,7 @@ export function looksLikeHttpUrl(value: string) {
   }
 }
 
-async function assertPublicHttpUrl(raw: string) {
+export async function assertPublicHttpUrl(raw: string) {
   let url: URL;
   try {
     url = new URL(raw.trim());
@@ -45,20 +51,73 @@ async function assertPublicHttpUrl(raw: string) {
     throw new ValidationError("url-blocked");
   }
 
-  const host = url.hostname.toLowerCase();
+  const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (url.username || url.password) throw new ValidationError("url-blocked");
   if (host === "localhost" || host.endsWith(".local") || host.endsWith(".internal")) {
     throw new ValidationError("url-blocked");
   }
 
-  const addresses = isIP(host)
-    ? [host]
-    : (await lookup(host, { all: true })).map((entry) => entry.address);
+  let addresses: string[];
+  try {
+    addresses = isIP(host) ? [host] : (await dns.lookup(host, { all: true })).map((entry) => entry.address);
+  } catch {
+    throw new ValidationError("url-blocked");
+  }
 
   if (addresses.length === 0 || addresses.some(isPrivateAddress)) {
     throw new ValidationError("url-blocked");
   }
 
+  validatedAddresses.set(url, addresses);
   return url;
+}
+
+function pinnedLookup(url: URL): LookupFunction {
+  const addresses = validatedAddresses.get(url);
+  if (!addresses?.length) throw new ValidationError("url-blocked");
+  return (_hostname, options, callback) => {
+    const candidates = addresses.map((address) => ({ address, family: isIP(address) }))
+      .filter((item) => !options.family || item.family === options.family);
+    if (!candidates.length) return callback(new Error("No validated address for this family"), []);
+    if (options.all) callback(null, candidates);
+    else callback(null, candidates[0]!.address, candidates[0]!.family);
+  };
+}
+
+export function publicHttpsAgent(url: URL) {
+  return new https.Agent({ lookup: pinnedLookup(url) });
+}
+
+function fetchValidatedUrl(url: URL, options: RequestInit): Promise<Response> {
+  // Literal IPs have no second DNS resolution. Hostnames use the addresses that
+  // passed validation, preventing a DNS change between checking and connecting.
+  if (isIP(url.hostname.replace(/^\[|\]$/g, ""))) return fetch(url, options);
+  return new Promise((resolve, reject) => {
+    const transport = url.protocol === "https:" ? https : http;
+    const request = transport.request(url, {
+      signal: options.signal ?? undefined,
+      headers: Object.fromEntries(new Headers(options.headers)),
+      lookup: pinnedLookup(url),
+      agent: false,
+    }, (incoming) => {
+      try {
+        const headers = new Headers();
+        for (const [name, value] of Object.entries(incoming.headers)) {
+          if (Array.isArray(value)) value.forEach((item) => headers.append(name, item));
+          else if (value !== undefined) headers.set(name, value);
+        }
+        const status = incoming.statusCode ?? 502;
+        const noBody = status === 204 || status === 205 || status === 304;
+        if (noBody) incoming.resume();
+        resolve(new Response(noBody ? null : Readable.toWeb(incoming) as ReadableStream<Uint8Array>, { status, headers }));
+      } catch (error) {
+        incoming.destroy();
+        reject(error);
+      }
+    });
+    request.on("error", reject);
+    request.end();
+  });
 }
 
 function decodeEntities(value: string) {
@@ -147,8 +206,7 @@ function extractReadableText(html: string, rejectTruncated = false) {
   const article = extractTag(cleaned, "article");
   const main = extractTag(cleaned, "main");
   const fallback = stripHtml(cleaned);
-  const ranked = [jsonLd, article, main, fallback].sort((left, right) => right.length - left.length);
-  const body = ranked[0] ?? "";
+  const body = [jsonLd, article, main].find((candidate) => candidate.length >= 80) || fallback;
   const title = extractMeta(html, "og:title") || extractTag(html, "title");
   const description = extractMeta(html, "og:description");
   const head = [title, description].filter(Boolean).join("\n");
@@ -158,34 +216,71 @@ function extractReadableText(html: string, rejectTruncated = false) {
   return combined.slice(0, MAX_TEXT);
 }
 
+async function readBoundedBody(response: Response, rejectTruncated = false) {
+  if (!response.body) return new Uint8Array();
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      const remaining = MAX_BYTES - size;
+      if (value.byteLength > remaining) {
+        await reader.cancel();
+        if (rejectTruncated) throw new ValidationError("source-too-long");
+        chunks.push(value.subarray(0, remaining));
+        size = MAX_BYTES;
+        break;
+      }
+      chunks.push(value);
+      size += value.byteLength;
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  return bytes;
+}
+
 export async function fetchPublicText(rawUrl: string, options: { rejectTruncated?: boolean } = {}): Promise<{ url: string; text: string }> {
-  const url = await assertPublicHttpUrl(rawUrl);
+  let url = await assertPublicHttpUrl(rawUrl);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
   try {
-    const response = await fetch(url, {
-      redirect: "follow",
-      signal: controller.signal,
-      headers: {
-        Accept: "text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8",
-        "Accept-Language": "ar,en-US;q=0.8,en;q=0.7",
-        "User-Agent": BROWSER_UA,
-      },
-    });
+    let response: Response;
+    for (let redirects = 0; ; redirects += 1) {
+      response = await fetchValidatedUrl(url, {
+        redirect: "manual",
+        signal: controller.signal,
+        headers: {
+          Accept: "text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8",
+          "Accept-Language": "ar,en-US;q=0.8,en;q=0.7",
+          "User-Agent": BROWSER_UA,
+        },
+      });
+      if (!REDIRECT_STATUSES.has(response.status)) break;
+      await response.body?.cancel();
+      const location = response.headers.get("location");
+      if (!location || redirects >= MAX_REDIRECTS) throw new ValidationError("url-blocked");
+      url = await assertPublicHttpUrl(new URL(location, url).toString());
+    }
 
-    const landed = response.url || url.toString();
-    await assertPublicHttpUrl(landed);
+    const landed = url.toString();
 
     if (!response.ok) {
+      await response.body?.cancel();
       return { url: landed, text: "" };
     }
 
-    const buffer = await response.arrayBuffer();
-    if (options.rejectTruncated && buffer.byteLength > MAX_BYTES) throw new ValidationError("source-too-long");
-    const sliced = buffer.byteLength > MAX_BYTES ? buffer.slice(0, MAX_BYTES) : buffer;
-    const html = new TextDecoder("utf-8", { fatal: false }).decode(sliced);
-    const text = extractReadableText(html, options.rejectTruncated);
+    const buffer = await readBoundedBody(response, options.rejectTruncated);
+    const html = new TextDecoder("utf-8", { fatal: false }).decode(buffer);
+    const isPlainText = response.headers.get("content-type")?.split(";")[0]?.trim() === "text/plain" && !/<(?:html|article|p|div|script)\b/i.test(html);
+    if (isPlainText && options.rejectTruncated && html.trim().length > MAX_TEXT) throw new ValidationError("source-too-long");
+    const text = isPlainText ? html.trim().slice(0, MAX_TEXT) : extractReadableText(html, options.rejectTruncated);
     if (text.length < 80) return { url: landed, text: "" };
     return { url: landed, text };
   } catch (error) {

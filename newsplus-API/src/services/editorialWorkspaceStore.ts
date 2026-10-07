@@ -14,7 +14,7 @@ import type {
   NewsSummarizeData,
   NewsSummaryFormat,
 } from "@newsplus/shared";
-import { NotFoundError } from "../utils/errors.js";
+import { ConflictError, NotFoundError } from "../utils/errors.js";
 
 export type StoredEditorialCopy = Omit<NewsSummarizeData, "conversationId" | "versionId" | "versionNumber">;
 
@@ -36,6 +36,7 @@ export type AddVersionInput = {
   note: string;
   createdBy: string;
   userMessage?: string;
+  expectedVersionId?: string;
 };
 
 type ConversationRow = {
@@ -363,7 +364,8 @@ export class EditorialWorkspaceStore {
   }
 
   addVersion(input: AddVersionInput): EditorialConversationDetail {
-    this.getConversation(input.conversationId);
+    const current = this.getConversation(input.conversationId);
+    if (input.expectedVersionId && current.currentVersionId !== input.expectedVersionId) throw new ConflictError();
     const createdAt = nowIso();
     const versionId = randomUUID();
     const nextNumber = Number(

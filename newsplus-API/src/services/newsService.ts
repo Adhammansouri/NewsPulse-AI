@@ -43,9 +43,10 @@ export class NewsService {
     const previous = this.slideLocks.get(conversationId) ?? Promise.resolve();
     const run = previous.then(task, task);
     this.slideLocks.set(conversationId, run);
-    void run.finally(() => {
+    const cleanup = () => {
       if (this.slideLocks.get(conversationId) === run) this.slideLocks.delete(conversationId);
-    });
+    };
+    void run.then(cleanup, cleanup);
     return run;
   }
 

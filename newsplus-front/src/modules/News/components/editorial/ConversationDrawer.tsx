@@ -1,41 +1,53 @@
 import { MagnifyingGlass, X } from "@phosphor-icons/react";
+import { useEffect, useRef } from "react";
 import type { EditorialConversationSummary, EditorialMemoryRule } from "@newsplus/shared";
 import { formatRelative, storyFormatMeta } from "../../newsFormat";
 import { MemoryRuleCard } from "./MemoryRuleCard";
 
 export function ConversationDrawer({
+  busy = false,
   open,
   search,
   conversations,
   memory,
   activeId,
   listLoading = false,
+  error,
   onSearch,
   onClose,
   onSelect,
   onDisableMemory,
 }: {
+  busy?: boolean;
   open: boolean;
   search: string;
   conversations: EditorialConversationSummary[];
   memory: EditorialMemoryRule[];
   activeId: string | null;
   listLoading?: boolean;
+  error?: string;
   onSearch: (value: string) => void;
   onClose: () => void;
   onSelect: (id: string) => void;
   onDisableMemory: (id: string) => void;
 }) {
   const trimmedSearch = search.trim();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!open || !dialog) return;
+    if (!dialog.open) dialog.showModal();
+    return () => dialog.close();
+  }, [open]);
   if (!open) return null;
 
   return (
-    <div className="news-drawer" role="dialog" aria-modal="true" aria-label="المحادثات">
-      <button type="button" className="news-drawer-backdrop" aria-label="إغلاق" onClick={onClose} />
+    <dialog ref={dialogRef} className="news-drawer" aria-label="المحادثات وذاكرة الفريق" onCancel={(event) => { event.preventDefault(); onClose(); }}>
+      <button type="button" className="news-drawer-backdrop" aria-label="إغلاق" tabIndex={-1} onClick={onClose} />
       <section className="news-drawer-panel">
         <header className="news-drawer-head">
           <div className="news-drawer-head-copy">
-            <h2 className="news-drawer-title">المحادثات</h2>
+            <h2 className="news-drawer-title">المحادثات المحفوظة</h2>
             <p className="news-drawer-count">{conversations.length} جلسة</p>
           </div>
           <button type="button" className="news-icon-btn" aria-label="إغلاق المحادثات" onClick={onClose}>
@@ -57,9 +69,10 @@ export function ConversationDrawer({
         </label>
 
         <div className="news-drawer-scroll">
+          {error && <p className="news-state is-error" role="alert">{error}</p>}
           {listLoading && conversations.length === 0 ? (
             <p className="news-drawer-empty">جاري تحميل المحادثات…</p>
-          ) : conversations.length === 0 ? (
+          ) : conversations.length === 0 && !error ? (
             <p className="news-drawer-empty">
               {trimmedSearch ? "لا نتائج لهذا البحث." : "لا محادثات بعد. ولّد ملخصاً ثم عدّل عليه."}
             </p>
@@ -73,6 +86,7 @@ export function ConversationDrawer({
                     <button
                       type="button"
                       className={`news-conversation-item ${active ? "is-active" : ""}`}
+                      disabled={busy}
                       onClick={() => onSelect(item.id)}
                       aria-current={active ? "page" : undefined}
                     >
@@ -102,7 +116,7 @@ export function ConversationDrawer({
                 <MemoryRuleCard
                   key={rule.id}
                   rule={rule}
-                  busy={false}
+                  busy={busy}
                   compact
                   onDismiss={rule.status === "approved" ? () => onDisableMemory(rule.id) : undefined}
                 />
@@ -111,6 +125,6 @@ export function ConversationDrawer({
           </div>
         </div>
       </section>
-    </div>
+    </dialog>
   );
 }

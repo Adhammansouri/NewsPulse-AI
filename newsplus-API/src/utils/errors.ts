@@ -72,3 +72,10 @@ export class OpenAIUpstreamError extends AppError {
     this.name = "OpenAIUpstreamError";
   }
 }
+
+export class ConflictError extends AppError {
+  constructor() {
+    super(409, "conversation-changed");
+    this.name = "ConflictError";
+  }
+}

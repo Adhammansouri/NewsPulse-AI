@@ -55,28 +55,34 @@ export default function GeneratePage() {
   const [length, setLength] = useState<GenerateLength>("standard");
   const [tone, setTone] = useState<GenerateTone>("desk");
   const [copied, setCopied] = useState<CopiedKey>(null);
+  const [copyError, setCopyError] = useState(false);
+  const submittingRef = useRef(false);
   const [mobilePane, setMobilePane] = useState<MobilePane>("assign");
   const [drafts, setDrafts] = useState<GenerateDraft[]>(readDrafts);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(() => readDrafts()[0]?.id ?? null);
 
   const mutation = useMutation({
     mutationFn: generateContent,
-    onSuccess: (data) => {
+    onSuccess: (data, request) => {
+      const submitted = splitHandoff(request.prompt);
       const next = pushDraft({
         ...data,
-        style,
-        source: url.trim() || notes.trim().slice(0, 80),
+        style: request.style,
+        source: submitted.url || submitted.notes.slice(0, 80),
       });
       setDrafts(next);
       setActiveDraftId(next[0]?.id ?? null);
       setMobilePane("copy");
     },
+    onSettled: () => { submittingRef.current = false; },
   });
 
   const result = drafts.find((item) => item.id === activeDraftId) ?? null;
   const host = urlHost(url);
   const brokenUrl = urlLooksBroken(url);
-  const canSubmit = Boolean((url.trim() && host) || notes.trim()) && !brokenUrl;
+  const assignmentPrompt = [url.trim(), notes.trim()].filter(Boolean).join("\n\n");
+  const tooLong = assignmentPrompt.length > 12_000 || angle.trim().length > 240;
+  const canSubmit = assignmentPrompt.length >= 3 && !tooLong && Boolean((url.trim() && host) || notes.trim()) && !brokenUrl;
   const words = result ? wordCount(result.title, result.dek, result.body) : 0;
   const minutes = result ? readingMinutes(words, result.language) : 0;
   const resultStyle = result?.style ?? style;
@@ -89,11 +95,14 @@ export default function GeneratePage() {
   }, [copied]);
 
   function onSubmit() {
+    if (mutation.isPending || submittingRef.current || !canSubmit) return;
     const sourceUrl = url.trim();
     const assignment = notes.trim();
     const prompt = sourceUrl || assignment;
     if (!prompt || brokenUrl) return;
     setCopied(null);
+    setCopyError(false);
+    submittingRef.current = true;
     mutation.mutate({
       prompt: [sourceUrl, assignment].filter(Boolean).join("\n\n"),
       style,
@@ -118,8 +127,14 @@ export default function GeneratePage() {
   }, []);
 
   async function copyPart(key: CopiedKey, value: string) {
-    await copyText(value);
-    setCopied(key);
+    try {
+      await copyText(value);
+      setCopied(key);
+      setCopyError(false);
+    } catch {
+      setCopied(null);
+      setCopyError(true);
+    }
   }
 
   return (
@@ -318,6 +333,7 @@ export default function GeneratePage() {
           )}
 
           <div className="news-desk-actions gen-assign-foot">
+            {tooLong && <p className="tool-desk-hint is-error" role="alert">الحد الأقصى للتعيين 12,000 حرف وللزاوية 240 حرف.</p>}
             {mutation.error ? (
               isOpenAIQuotaError(mutation.error) ? (
                 <QuotaNotice />
@@ -349,6 +365,7 @@ export default function GeneratePage() {
           </div>
 
           <div className="news-desk-main">
+            {copyError && <p className="tool-desk-hint is-error" role="alert">تعذّر النسخ. يمكنك تحديد النص ونسخه يدويًا.</p>}
             <div className="news-pane-scroll news-desk-body">
               {!result && !mutation.isPending && (
                 <div className="news-desk-empty">

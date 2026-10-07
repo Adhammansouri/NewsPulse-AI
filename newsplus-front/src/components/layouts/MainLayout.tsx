@@ -3,7 +3,7 @@ import { Footer } from "@/components/shared/Footer";
 import { Header } from "@/components/shared/Header";
 import { Outlet, useLocation } from "react-router-dom";
 
-const TOOL_PATHS = ["/news", "/generate", "/translate"];
+const TOOL_PATHS = ["/news", "/generate", "/translate", "/usage"];
 
 function isToolRoute(pathname: string) {
   return TOOL_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));

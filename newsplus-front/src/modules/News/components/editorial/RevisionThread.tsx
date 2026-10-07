@@ -53,6 +53,7 @@ export function toChatTurns(messages: EditorialMessage[]): ChatTurn[] {
 }
 
 export function RevisionThread({
+  id,
   messages,
   versions,
   currentVersionId,
@@ -68,6 +69,7 @@ export function RevisionThread({
   onMemoryEdit,
   onMemoryDismiss,
 }: {
+  id?: string;
   messages: EditorialMessage[];
   versions: EditorialVersion[];
   currentVersionId: string;
@@ -100,7 +102,7 @@ export function RevisionThread({
   }, [currentVersionId, versions.length]);
 
   return (
-    <section className="news-revise" aria-label="محادثة التعديل">
+    <section id={id} className="news-revise" aria-label="محادثة التعديل">
       <header className="news-revise-head">
         <div className="news-revise-head-brand">
           <span className="news-revise-head-icon" aria-hidden="true">

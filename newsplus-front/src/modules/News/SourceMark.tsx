@@ -11,9 +11,9 @@ type SourceMarkProps = {
 
 export function SourceMark({ id, name, url, size = 18 }: SourceMarkProps) {
   const host = sourceHost(id, url);
-  const [failed, setFailed] = useState(!host);
+  const [failedHost, setFailedHost] = useState<string | null>(null);
 
-  if (failed || !host) {
+  if (!host || failedHost === host) {
     return (
       <span
         className="news-source-mark news-source-mark--fallback"
@@ -32,9 +32,11 @@ export function SourceMark({ id, name, url, size = 18 }: SourceMarkProps) {
         alt=""
         width={size}
         height={size}
+        loading="lazy"
         decoding="async"
         referrerPolicy="no-referrer"
-        onError={() => setFailed(true)}
+        key={host}
+        onError={() => setFailedHost(host)}
       />
     </span>
   );

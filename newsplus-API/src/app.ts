@@ -13,8 +13,9 @@ export async function buildApp() {
     // Image generation is silent on the socket until the PNG is ready (often past 2 minutes).
     requestTimeout: 660_000,
     connectionTimeout: 660_000,
-    // Behind nginx on VPS — use X-Forwarded-For for request.ip (login rate limit per client)
-    trustProxy: true,
+    // nginx appends the connecting client's address. Trust only that nearest hop,
+    // not a client-supplied prefix in X-Forwarded-For.
+    trustProxy: 1,
   });
 
   await app.register(corsPlugin);

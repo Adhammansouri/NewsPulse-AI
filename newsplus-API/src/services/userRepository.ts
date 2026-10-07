@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import type { IPasswordHasher } from "../utils/passwordHasher.js";
 import { normalizeEmail, normalizeIdentifier } from "../utils/identifier.js";
 import type { UserRecord } from "../model/user.js";
@@ -22,8 +22,11 @@ export class InMemoryUserRepository implements IUserRepository {
 
   static async seed(hasher: IPasswordHasher, seed: SeedUser): Promise<InMemoryUserRepository> {
     const repo = new InMemoryUserRepository();
+    // The configured seed account must survive process restarts: JWT subjects,
+    // editorial attribution and stored push subscriptions all refer to this ID.
+    const identity = createHash("sha256").update(`newsplus:seed:${normalizeIdentifier(seed.username)}`).digest("hex");
     repo.users.push({
-      id: randomUUID(),
+      id: `${identity.slice(0, 8)}-${identity.slice(8, 12)}-5${identity.slice(13, 16)}-a${identity.slice(17, 20)}-${identity.slice(20, 32)}`,
       username: normalizeIdentifier(seed.username),
       phone: seed.phone ? normalizeIdentifier(seed.phone) : null,
       email: normalizeEmail(seed.email),

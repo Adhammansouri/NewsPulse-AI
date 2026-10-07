@@ -8,7 +8,7 @@
     "dev": "node --experimental-sqlite --import tsx --watch src/index.ts",
     "build": "tsc -p tsconfig.build.json",
     "start": "node --experimental-sqlite server.cjs",
-    "test": "node --experimental-sqlite --import tsx --test src/services/editorialWorkspaceStore.test.ts src/ai/editorialRevision.test.ts src/ai/prompts/socialVideo.test.ts src/ai/prompts/carousel.test.ts src/services/carouselCompose.test.ts src/services/translateService.test.ts",
+    "test": "node --experimental-sqlite --import tsx --test src/*.test.ts src/services/*.test.ts src/plugins/*.test.ts src/middleware/*.test.ts src/ai/*.test.ts src/ai/prompts/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -31,6 +31,6 @@
     "tsx": "^4.21.0"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22.12.0"
   }
 }

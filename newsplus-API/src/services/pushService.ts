@@ -3,7 +3,8 @@ import { dirname, join } from "node:path";
 import webpush from "web-push";
 import type { FastifyBaseLogger } from "fastify";
 import { env } from "../config/index.js";
-import { ServiceUnavailableError } from "../utils/errors.js";
+import { ServiceUnavailableError, ValidationError } from "../utils/errors.js";
+import { assertPublicHttpUrl, publicHttpsAgent } from "./urlFetcher.js";
 import {
   FilePushSubscriptionStore,
   type StoredPushSubscription,
@@ -81,6 +82,7 @@ export class PushService {
 
   async subscribe(input: PushSubscribeInput) {
     this.requireKeys();
+    await this.validateEndpoint(input.endpoint);
     const now = new Date().toISOString();
     const record: StoredPushSubscription = {
       userId: input.userId,
@@ -106,17 +108,22 @@ export class PushService {
 
     for (const subscription of subscriptions) {
       try {
-        await webpush.sendNotification(
-          {
-            endpoint: subscription.endpoint,
-            keys: subscription.keys,
-          },
-          JSON.stringify({
-            title: "Newsplus",
-            body: "تم تفعيل الإشعارات بنجاح.",
-            url: "/",
-          }),
-        );
+        const endpoint = await this.validateEndpoint(subscription.endpoint);
+        const agent = publicHttpsAgent(endpoint);
+        try {
+          await webpush.sendNotification(
+            {
+              endpoint: subscription.endpoint,
+              keys: subscription.keys,
+            },
+            JSON.stringify({
+              title: "Newsplus",
+              body: "تم تفعيل الإشعارات بنجاح.",
+              url: "/",
+            }),
+            { timeout: 10_000, agent },
+          );
+        } finally { agent.destroy(); }
         sent += 1;
       } catch (error) {
         const statusCode = (error as { statusCode?: number }).statusCode;
@@ -129,6 +136,12 @@ export class PushService {
     }
 
     return { sent };
+  }
+
+  private async validateEndpoint(endpoint: string) {
+    const url = await assertPublicHttpUrl(endpoint);
+    if (url.protocol !== "https:") throw new ValidationError("url-blocked");
+    return url;
   }
 }
 

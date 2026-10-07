@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Newsplus — AI-powered news monitoring, summarisation, translation & report writing",
   "engines": {
-    "node": ">=18.20.8"
+    "node": ">=22.12.0"
   },
   "workspaces": [
     "newsplus-API",
@@ -17,7 +17,7 @@
     "dev:front": "npm run dev -w newsplus-front",
     "build": "npm run build -w newsplus-API && npm run build -w newsplus-front",
     "typecheck": "npm run typecheck -w @newsplus/shared && npm run typecheck -w newsplus-API && npm run typecheck -w newsplus-front",
-    "test": "npm run test -w newsplus_api",
+    "test": "npm run test -w newsplus_api && npm run test -w newsplus-front",
     "install:all": "npm install --workspaces"
   },
   "devDependencies": {

@@ -7,6 +7,7 @@ import LoginPage from "@/modules/Login/pages/LoginPage";
 import NewsPage from "@/modules/News/pages/NewsPage";
 import NotificationsPage from "@/modules/Notifications/pages/NotificationsPage";
 import TranslatePage from "@/modules/Translate/pages/TranslatePage";
+import UsagePage from "@/modules/Usage/pages/UsagePage";
 
 export default function AppRoutes() {
   return (
@@ -19,6 +20,7 @@ export default function AppRoutes() {
           <Route path="/generate" element={<GeneratePage />} />
           <Route path="/translate" element={<TranslatePage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/usage" element={<UsagePage />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

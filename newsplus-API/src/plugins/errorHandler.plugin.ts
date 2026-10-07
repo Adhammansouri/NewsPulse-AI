@@ -10,6 +10,11 @@ const errorHandlerPluginImpl: FastifyPluginAsync = async (app) => {
       return reply.status(error.statusCode).send(failResponse(error.publicMessage));
     }
 
+    const statusCode = (error as { statusCode?: number }).statusCode;
+    if (statusCode && statusCode >= 400 && statusCode < 500) {
+      return reply.status(statusCode).send(failResponse("invalid-request"));
+    }
+
     request.log.error(error);
 
     const message = env.nodeEnv === "production" || !(error instanceof Error)

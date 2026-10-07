@@ -115,6 +115,7 @@ export class EditorialConversationService {
 
     const next = this.deps.workspace.addVersion({
       conversationId,
+      expectedVersionId: conversation.currentVersionId,
       copy,
       note: scrubDeskProse(parsed.note) || "تعديل تحريري",
       createdBy: userId,
@@ -193,7 +194,7 @@ export class EditorialConversationService {
     });
 
     const slides = mergeCarouselSlides(
-      carousel.slides,
+      this.deps.workspace.getVersion(conversation.currentVersionId).copy.carousel?.slides,
       parsed.slides.map((slide) => ({
         role: slide.role,
         headline: scrubDeskProse(slide.headline),
@@ -223,6 +224,7 @@ export class EditorialConversationService {
 
     const next = this.deps.workspace.addVersion({
       conversationId: conversation.id,
+      expectedVersionId: conversation.currentVersionId,
       copy,
       note: scrubDeskProse(parsed.note) || "تعديل كاروسيل",
       createdBy: userId,

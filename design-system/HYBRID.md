@@ -11,6 +11,7 @@ Official split: **Newsplus brand** for marketing shell, **Nothing** for tool/das
 | Notifications `/notifications` | Newsplus brand settings | semantic + `--header-*` | `modules/Notifications/*` |
 | Login `/login` | Newsplus brand (full-bleed, no Header/Footer) | navy/teal login tokens in `modules/Login/login.css` | `LoginPage` |
 | Tools `/news`, `/generate`, `/translate` | Nothing dashboard | `--nd-*` in `.theme-tools` | `ToolPage`, `nd-*` classes |
+| OpenAI usage `/usage` | Nothing dashboard | `--nd-*` in `.theme-tools` | Arabic usage dashboard, charts, spend meters |
 
 ## Implementation
 

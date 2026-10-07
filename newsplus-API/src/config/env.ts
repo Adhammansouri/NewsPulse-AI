@@ -34,6 +34,8 @@ export const env = {
   host: process.env.HOST ?? "0.0.0.0",
   corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:5180",
   openaiApiKey: process.env.OPENAI_API_KEY ?? "",
+  openaiAdminKey: process.env.OPENAI_ADMIN_KEY ?? "",
+  openaiProjectId: process.env.OPENAI_PROJECT_ID ?? "",
   openaiModelGenerate: process.env.OPENAI_MODEL_GENERATE ?? process.env.OPENAI_MODEL ?? "gpt-5.6-sol",
   openaiModelSummarize: process.env.OPENAI_MODEL_SUMMARIZE ?? process.env.OPENAI_MODEL ?? "gpt-5.6-sol",
   openaiModelTranslate: process.env.OPENAI_MODEL_TRANSLATE ?? process.env.OPENAI_MODEL ?? "gpt-5.6-sol",

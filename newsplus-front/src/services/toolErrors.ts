@@ -1,6 +1,7 @@
 import { isApiError } from "./apiError";
 
 const MESSAGES: Record<string, string> = {
+  "conversation-changed": "المحادثة اتعدّلت أثناء تجهيز النسخة. حدّثها وراجع النسخة الأحدث، ثم أعد التعديل.",
   "openai-not-configured": "OpenAI غير مُعدّ على الخادم. أضف المفتاح ثم أعد المحاولة.",
   "openai-upstream": "تعذّر إكمال الطلب من نموذج الذكاء الاصطناعي. حاول مرة أخرى.",
   "too-many-requests": "وصلت للحد الأقصى من الطلبات. انتظر قليلاً ثم أعد المحاولة.",

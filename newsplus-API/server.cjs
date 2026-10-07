@@ -5,7 +5,7 @@ const { join, dirname } = require("node:path");
 
 const root = __dirname;
 const localEnvPath = join(root, ".env");
-const hostingerPath = "/opt/alt/alt-nodejs20/root/bin:/usr/bin:/bin";
+const hostingerPath = "/opt/alt/alt-nodejs22/root/bin:/usr/bin:/bin";
 
 function logBoot(message) {
   console.error(`[newsplus-boot] ${message}`);
@@ -64,7 +64,16 @@ function ensureProductionSecrets(hostedEnvPath) {
   }
 }
 
-if (!existsSync(join(root, "node_modules", "fastify"))) {
+function hasDependencies() {
+  try {
+    require.resolve("fastify");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+if (!hasDependencies()) {
   logBoot("Installing production dependencies...");
   execSync("npm install --omit=dev", {
     cwd: root,
