@@ -83,12 +83,14 @@ export default defineConfig({
       "/api": {
         target: "http://localhost:3001",
         changeOrigin: true,
-        timeout: 180_000,
+        timeout: 660_000,
+        proxyTimeout: 660_000,
       },
     },
   },
   server: {
-    port: 5173,
+    port: 5180,
+    strictPort: true,
     host: true,
     allowedHosts: true,
     fs: {
@@ -98,7 +100,8 @@ export default defineConfig({
       "/api": {
         target: "http://localhost:3001",
         changeOrigin: true,
-        timeout: 180_000,
+        timeout: 660_000,
+        proxyTimeout: 660_000,
       },
     },
   },

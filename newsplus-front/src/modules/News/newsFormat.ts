@@ -168,6 +168,7 @@ export const STORY_FORMATS: {
   { id: "context", label: "سياق", hint: "لماذا يهم الآن", ready: "سياق الخبر" },
   { id: "social", label: "سوشيال", hint: "ملخص سوشيال ميديا · 40–70 كلمة", ready: "منشور سوشيال" },
   { id: "video", label: "فيديو", hint: "سكريبت فيديو اجتماعي · هوك وحبكة", ready: "سكريبت فيديو" },
+  { id: "carousel", label: "كاروسيل", hint: "نصوص الشرائح · تتحط على الصورة", ready: "نصوص الكاروسيل" },
 ];
 
 export function splitSocialBullets(bullets: string[]) {
@@ -191,6 +192,18 @@ export function formatSummaryClipboard(data: NewsSummarizeData) {
   if (data.format === "social") {
     const { tags } = splitSocialBullets(data.bullets);
     return [data.title, data.summary, tags.join(" ")].filter(Boolean).join("\n\n");
+  }
+  if (data.format === "carousel") {
+    const tags = data.bullets
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((item) => (item.startsWith("#") || item.startsWith("＃") ? item : `#${item.replace(/\s+/g, "")}`));
+    const slides = (data.carousel?.slides ?? [])
+      .map((slide, index) =>
+        [`شريحة ${index + 1}`, slide.headline, slide.banner, slide.attribution].filter(Boolean).join("\n"),
+      )
+      .join("\n\n");
+    return [slides, data.summary, tags.join(" ")].filter(Boolean).join("\n\n");
   }
   if (data.format === "video") {
     const shots = data.bullets.filter(Boolean);

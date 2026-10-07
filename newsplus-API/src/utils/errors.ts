@@ -45,6 +45,13 @@ export class TooManyRequestsError extends AppError {
   }
 }
 
+export class OpenAIQuotaError extends AppError {
+  constructor() {
+    super(402, "openai-quota");
+    this.name = "OpenAIQuotaError";
+  }
+}
+
 export class ServiceUnavailableError extends AppError {
   constructor(publicMessage = "service-unavailable") {
     super(503, publicMessage);

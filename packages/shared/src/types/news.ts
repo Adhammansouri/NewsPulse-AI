@@ -44,8 +44,52 @@ export type NewsFeedData = {
   items: NewsFeedItem[];
 };
 
-export type NewsStoryFormat = "desk" | "bulletin" | "facts" | "context" | "social" | "video";
+export type NewsStoryFormat = "desk" | "bulletin" | "facts" | "context" | "social" | "video" | "carousel";
 export type NewsSummaryFormat = NewsStoryFormat | "briefing";
+
+export type CarouselStyle = "cinematic" | "frame";
+export type CarouselDensity = "headline" | "banner" | "line";
+export type CarouselArc = "dispute" | "statement" | "sequence";
+export type CarouselSlideRole =
+  | "hook"
+  | "counter"
+  | "evidence"
+  | "stake"
+  | "quote"
+  | "scope"
+  | "means"
+  | "condition"
+  | "beat"
+  | "closer";
+export type CarouselSlideStatus = "pending" | "ready" | "mismatch" | "failed";
+
+export type CarouselOptions = {
+  slides: number;
+  style: CarouselStyle;
+  density: CarouselDensity;
+  mark: boolean;
+};
+
+export type CarouselSlide = {
+  index: number;
+  role: CarouselSlideRole;
+  headline: string;
+  banner: string;
+  attribution: string;
+  scene: string;
+  status: CarouselSlideStatus;
+  assetId?: string;
+  mismatch?: string;
+};
+
+export type CarouselPayload = {
+  style: CarouselStyle;
+  density: CarouselDensity;
+  mark: boolean;
+  arc: CarouselArc;
+  styleLock: string;
+  slides: CarouselSlide[];
+};
 
 export type NewsSummarizeRequest = {
   input?: string;
@@ -53,6 +97,13 @@ export type NewsSummarizeRequest = {
   briefing?: boolean;
   format?: NewsStoryFormat;
   language?: NewsLanguage;
+  carousel?: CarouselOptions;
+};
+
+export type CarouselRenderRequest = {
+  conversationId: string;
+  versionId: string;
+  index: number;
 };
 
 export type NewsSummarySource = {
@@ -68,6 +119,7 @@ export type NewsSummarizeData = {
   sources: NewsSummarySource[];
   language: NewsLanguage;
   format: NewsSummaryFormat;
+  carousel?: CarouselPayload;
   conversationId?: string;
   versionId?: string;
   versionNumber?: number;

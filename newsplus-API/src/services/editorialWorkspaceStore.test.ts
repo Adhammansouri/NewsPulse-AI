@@ -146,3 +146,58 @@ test("approved memory is listed separately from rejected rules", () => {
   assert.equal(store.listMemoryRules("rejected").length, 1);
   assert.equal(store.listMemoryRules().length, 2);
 });
+
+test("restore and patch keep carousel slide files", () => {
+  const store = openStore();
+  const carouselCopy = {
+    ...copy,
+    format: "carousel" as const,
+    summary: "كابشن الخبر",
+    carousel: {
+      style: "cinematic" as const,
+      density: "banner" as const,
+      mark: true,
+      arc: "dispute" as const,
+      styleLock: "35mm night exterior.",
+      slides: [
+        {
+          index: 0,
+          role: "hook" as const,
+          headline: "البيت الأبيض متهم بسرقة لعبة",
+          banner: "باستخدام علامتها",
+          attribution: "",
+          scene: "A white house at night.",
+          status: "ready" as const,
+          assetId: "asset-0",
+        },
+      ],
+    },
+  };
+  const created = store.createConversation({
+    title: carouselCopy.title,
+    format: "carousel",
+    language: "ar",
+    sourcePacket: "source",
+    copy: carouselCopy,
+    createdBy: "editor-1",
+  });
+  const patched = store.patchVersionCopy(created.currentVersionId, {
+    ...carouselCopy,
+    carousel: {
+      ...carouselCopy.carousel,
+      slides: [{ ...carouselCopy.carousel.slides[0], status: "mismatch", mismatch: "النص تغيّر" }],
+    },
+  });
+  assert.equal(patched.carousel?.slides[0]?.status, "mismatch");
+  assert.equal(patched.carousel?.slides[0]?.assetId, "asset-0");
+
+  const revised = store.addVersion({
+    conversationId: created.id,
+    copy: { ...carouselCopy, title: "عنوان أحدث", carousel: { ...carouselCopy.carousel, slides: [] } },
+    note: "تعديل",
+    createdBy: "editor-1",
+  });
+  const restored = store.restoreVersion(revised.id, created.currentVersionId, "editor-1");
+  assert.equal(restored.copy.carousel?.slides[0]?.assetId, "asset-0");
+  assert.equal(restored.copy.carousel?.slides[0]?.headline, "البيت الأبيض متهم بسرقة لعبة");
+});

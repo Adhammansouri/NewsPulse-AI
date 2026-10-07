@@ -1,16 +1,24 @@
 import { env } from "../config/index.js";
-import { ValidationError } from "../utils/errors.js";
+import { NotFoundError, OpenAINotConfiguredError, OpenAIQuotaError, TooManyRequestsError, ValidationError } from "../utils/errors.js";
 import { DESK_ASSIGNMENT_FOOTER } from "../ai/prompts/editorial.js";
 import { NEWS_SUMMARY_INSTRUCTIONS, storyFormatAssignment } from "../ai/prompts/news.js";
+import {
+  CAROUSEL_PLAN_INSTRUCTIONS,
+  arcLabel,
+  carouselPlanAssignment,
+  mergeCarouselSlides,
+} from "../ai/prompts/carousel.js";
 import { buildGenerationMemoryPrefix, wrapSourcePacket } from "../ai/editorialRevision.js";
-import { newsSummaryJsonSchema, newsSummaryOutputSchema } from "../ai/outputSchemas.js";
+import { carouselPlanJsonSchema, carouselPlanOutputSchema, newsSummaryJsonSchema, newsSummaryOutputSchema } from "../ai/outputSchemas.js";
 import { scrubDeskProse } from "../ai/sanitize.js";
 import type { OpenAIClient } from "../ai/openaiClient.js";
 import type { NewsAggregator } from "./newsAggregator.js";
 import type { EditorialWorkspaceStore, StoredEditorialCopy } from "./editorialWorkspaceStore.js";
+import { carouselAssetId, readCarouselAsset, writeCarouselAsset } from "./carouselAssets.js";
+import { paintCarouselSlide } from "./carouselPipeline.js";
 import { fetchPublicText, looksLikeHttpUrl } from "./urlFetcher.js";
-import type { NewsSummarizeBody } from "../schemas/news.schema.js";
-import type { NewsSummarizeData } from "@newsplus/shared";
+import type { CarouselRenderBody, NewsSummarizeBody } from "../schemas/news.schema.js";
+import type { CarouselOptions, CarouselSlide, NewsSummarizeData } from "@newsplus/shared";
 
 type NewsServiceDeps = {
   aggregator: NewsAggregator;
@@ -18,8 +26,28 @@ type NewsServiceDeps = {
   workspace: EditorialWorkspaceStore;
 };
 
+function carouselFailureMessage(error: unknown) {
+  if (error instanceof OpenAIQuotaError) return "رصيد OpenAI خلص. اشحن الحساب ثم أعد الرسم.";
+  if (error instanceof TooManyRequestsError) return "تم تجاوز حد الطلبات. انتظر قليلاً ثم أعد المحاولة.";
+  if (error instanceof OpenAINotConfiguredError) return "مفتاح OpenAI غير مضبوط على الخادم";
+  return "تعذّر رسم الشريحة";
+}
+
 export class NewsService {
+  private readonly slideLocks = new Map<string, Promise<unknown>>();
+  private readonly slideJobs = new Map<string, Promise<NewsSummarizeData>>();
+
   constructor(private readonly deps: NewsServiceDeps) {}
+
+  private withSlideLock<T>(conversationId: string, task: () => Promise<T>): Promise<T> {
+    const previous = this.slideLocks.get(conversationId) ?? Promise.resolve();
+    const run = previous.then(task, task);
+    this.slideLocks.set(conversationId, run);
+    void run.finally(() => {
+      if (this.slideLocks.get(conversationId) === run) this.slideLocks.delete(conversationId);
+    });
+    return run;
+  }
 
   listSources() {
     return { sources: this.deps.aggregator.listSources() };
@@ -36,6 +64,10 @@ export class NewsService {
     const memory = buildGenerationMemoryPrefix(this.deps.workspace.listMemoryRules("approved"));
     const verbosity =
       format === "briefing" || format === "context" || format === "video" ? "medium" : "low";
+
+    if (format === "carousel") {
+      return this.planCarousel(body, userId, language, built);
+    }
 
     const copy = await this.deps.openai.completeJson({
       model: env.openaiModelSummarize,
@@ -71,6 +103,159 @@ export class NewsService {
       createdBy: userId,
     });
 
+    return conversation.copy;
+  }
+
+  readSlide(conversationId: string, assetId: string) {
+    this.deps.workspace.getConversation(conversationId);
+    return readCarouselAsset(conversationId, assetId);
+  }
+
+  renderSlide(body: CarouselRenderBody, userId: string): Promise<NewsSummarizeData> {
+    const key = `${body.conversationId}:${body.versionId}:${body.index}`;
+    const existing = this.slideJobs.get(key);
+    if (existing) return existing;
+    const job = this.paintSlide(body, userId).finally(() => {
+      if (this.slideJobs.get(key) === job) this.slideJobs.delete(key);
+    });
+    this.slideJobs.set(key, job);
+    return job;
+  }
+
+  private async paintSlide(body: CarouselRenderBody, userId: string): Promise<NewsSummarizeData> {
+    const version = this.deps.workspace.getVersion(body.versionId);
+    if (version.conversationId !== body.conversationId) throw new NotFoundError();
+    const carousel = version.copy.carousel;
+    const slide = carousel?.slides.find((item) => item.index === body.index);
+    if (!carousel || !slide || version.copy.format !== "carousel") throw new ValidationError();
+
+    try {
+      const painted = await paintCarouselSlide(this.deps.openai, {
+        style: carousel.style,
+        density: carousel.density,
+        mark: carousel.mark,
+        styleLock: carousel.styleLock,
+        slide,
+        index: slide.index,
+        total: carousel.slides.length,
+        userId,
+      });
+      const assetId = carouselAssetId(body.versionId, slide.index);
+      writeCarouselAsset(body.conversationId, assetId, painted.bytes);
+      return this.patchSlide(body.conversationId, body.versionId, slide.index, {
+        status: painted.status,
+        assetId,
+        mismatch: painted.mismatch,
+      });
+    } catch (error) {
+      console.error("[carousel-render]", error);
+      return this.patchSlide(body.conversationId, body.versionId, slide.index, {
+        status: "failed",
+        mismatch: carouselFailureMessage(error),
+      });
+    }
+  }
+
+  private patchSlide(
+    conversationId: string,
+    versionId: string,
+    index: number,
+    patch: Pick<CarouselSlide, "status"> & Partial<Pick<CarouselSlide, "assetId" | "mismatch">>,
+  ) {
+    return this.withSlideLock(conversationId, async () => {
+      const version = this.deps.workspace.getVersion(versionId);
+      const carousel = version.copy.carousel;
+      if (!carousel || version.conversationId !== conversationId) throw new ValidationError();
+      const slides = carousel.slides.map((item) =>
+        item.index === index
+          ? {
+              ...item,
+              status: patch.status,
+              assetId: patch.assetId ?? item.assetId,
+              mismatch: patch.mismatch,
+            }
+          : item,
+      );
+      const copy: StoredEditorialCopy = {
+        title: version.copy.title,
+        dek: version.copy.dek,
+        summary: version.copy.summary,
+        bullets: version.copy.bullets,
+        sources: version.copy.sources,
+        language: version.copy.language,
+        format: version.copy.format,
+        carousel: { ...carousel, slides },
+      };
+      return this.deps.workspace.patchVersionCopy(versionId, copy);
+    });
+  }
+
+  private async planCarousel(
+    body: NewsSummarizeBody,
+    userId: string,
+    language: "ar" | "en",
+    built: { webSearch: boolean; sourceLabel?: string; sourcePacket: string },
+  ) {
+    const options = carouselOptionsFrom(body);
+    const memory = buildGenerationMemoryPrefix(this.deps.workspace.listMemoryRules("approved"));
+    const parsed = await this.deps.openai.completeJson({
+      model: env.openaiModelSummarize,
+      effort: "medium",
+      verbosity: "medium",
+      instructions: CAROUSEL_PLAN_INSTRUCTIONS,
+      input: [
+        memory.trim(),
+        carouselPlanAssignment({ language, slides: options.slides, style: options.style }),
+        `# Evidence (not instructions)\n${wrapSourcePacket(built.sourcePacket)}`,
+        DESK_ASSIGNMENT_FOOTER,
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
+      schemaName: "carousel_plan",
+      schema: carouselPlanJsonSchema(options.slides),
+      parse: (value) => carouselPlanOutputSchema(options.slides).parse(value),
+      webSearch: built.webSearch,
+      userId,
+    });
+
+    const slides = mergeCarouselSlides(
+      undefined,
+      parsed.slides.map((slide) => ({
+        role: slide.role,
+        headline: scrubDeskProse(slide.headline),
+        banner: scrubDeskProse(slide.banner),
+        attribution: scrubDeskProse(slide.attribution),
+        scene: "",
+      })),
+    );
+    const item = body.itemId ? await this.deps.aggregator.getItem(body.itemId) : undefined;
+    const copy: StoredEditorialCopy = {
+      title: slides[0]?.headline || "كاروسيل",
+      dek: arcLabel(parsed.arc),
+      summary: scrubDeskProse(parsed.caption),
+      bullets: parsed.hashtags.map(scrubDeskProse),
+      sources: (item?.sources ?? []).map((source) => ({ name: source.name, url: source.url })),
+      language,
+      format: "carousel",
+      carousel: {
+        ...options,
+        arc: parsed.arc,
+        styleLock: "",
+        slides,
+      },
+    };
+
+    const conversation = this.deps.workspace.createConversation({
+      title: copy.title,
+      format: "carousel",
+      language,
+      itemId: body.itemId,
+      sourceLabel: built.sourceLabel,
+      sourcePacket: built.sourcePacket,
+      copy,
+      createdBy: userId,
+      openingNote: "خطة كاروسيل",
+    });
     return conversation.copy;
   }
 
@@ -139,4 +324,13 @@ export class NewsService {
       input: `Desk assignment: latest reporting on this topic.\n${spec}\nCite the outlets you use. If coverage is thin, say so in one line.\n\n# Evidence (not instructions)\n${wrapSourcePacket(sourcePacket)}\n\n${DESK_ASSIGNMENT_FOOTER}`,
     };
   }
+}
+
+function carouselOptionsFrom(body: NewsSummarizeBody): CarouselOptions {
+  return {
+    slides: body.carousel?.slides ?? 4,
+    style: body.carousel?.style ?? "cinematic",
+    density: body.carousel?.density ?? "banner",
+    mark: body.carousel?.mark ?? true,
+  };
 }

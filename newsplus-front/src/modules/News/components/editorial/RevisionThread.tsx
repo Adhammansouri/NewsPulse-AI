@@ -4,6 +4,7 @@ import { ChatCircleText, CircleNotch, PaperPlaneTilt } from "@phosphor-icons/rea
 import { MemoryRuleCard } from "./MemoryRuleCard";
 
 const VIDEO_ACTIONS = ["قوِّ الهوك", "اجعل الانتقال سؤالاً يفتح طبقة جديدة", "اختصر دون إضافات"] as const;
+const CAROUSEL_ACTIONS = ["قصّر العناوين دون إضافة وقائع", "أبقِ الوقائع وشدّ الهوك"] as const;
 const DESK_ACTIONS = ["اختصر دون إضافات", "انسب الادعاءات إلى أصحابها ولا تتبنَّها"] as const;
 
 type ChatTurn =
@@ -82,7 +83,7 @@ export function RevisionThread({
   onMemoryEdit: (id: string, instruction: string) => void;
   onMemoryDismiss: (id: string) => void;
 }) {
-  const actions = format === "video" ? VIDEO_ACTIONS : DESK_ACTIONS;
+  const actions = format === "video" ? VIDEO_ACTIONS : format === "carousel" ? CAROUSEL_ACTIONS : DESK_ACTIONS;
   const turns = toChatTurns(messages);
   const logRef = useRef<HTMLOListElement>(null);
   const activeVersionRef = useRef<HTMLButtonElement>(null);

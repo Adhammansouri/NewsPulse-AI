@@ -13,6 +13,9 @@ export const API_URLS = {
     SUMMARIZE: "/news/summarize",
     SOURCES: "/news/sources",
     FEED: "/news/feed",
+    CAROUSEL_RENDER: "/news/carousel/render",
+    CAROUSEL_ASSET: (conversationId: string, assetId: string) =>
+      `/news/carousel/${conversationId}/${assetId}`,
   },
   EDITORIAL: {
     CONVERSATIONS: "/editorial/conversations",

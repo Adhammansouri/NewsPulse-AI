@@ -13,7 +13,8 @@ import {
 } from "@phosphor-icons/react";
 import { readDeskHandoff } from "@/services/deskHandoff";
 import { generateContent } from "@/services/generateService";
-import { copyText, toolErrorMessage } from "@/services/toolErrors";
+import { QuotaNotice } from "@/components/QuotaNotice";
+import { copyText, isOpenAIQuotaError, toolErrorMessage } from "@/services/toolErrors";
 import type { GenerateLanguage, GenerateLength, GenerateStyle, GenerateTone } from "@newsplus/shared";
 import {
   ANGLES,
@@ -317,7 +318,13 @@ export default function GeneratePage() {
           )}
 
           <div className="news-desk-actions gen-assign-foot">
-            {mutation.error && <p className="tool-desk-hint is-error">{toolErrorMessage(mutation.error)}</p>}
+            {mutation.error ? (
+              isOpenAIQuotaError(mutation.error) ? (
+                <QuotaNotice />
+              ) : (
+                <p className="tool-desk-hint is-error">{toolErrorMessage(mutation.error)}</p>
+              )
+            ) : null}
             <button type="submit" className="news-btn-primary news-format-generate" disabled={mutation.isPending || !canSubmit}>
               {mutation.isPending ? <CircleNotch className="news-spin" size={16} aria-hidden="true" /> : null}
               {mutation.isPending ? "جاري الكتابة..." : "توليد"}

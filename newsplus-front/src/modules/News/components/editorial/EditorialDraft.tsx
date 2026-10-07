@@ -2,6 +2,7 @@ import { Check, Copy } from "@phosphor-icons/react";
 import type { NewsSummarizeData } from "@newsplus/shared";
 import { hasArabic, splitSocialBullets, storyFormatMeta } from "../../newsFormat";
 import { SourceMark } from "../../SourceMark";
+import { CarouselDraft } from "./CarouselDraft";
 
 export function EditorialDraft({
   data,
@@ -26,6 +27,21 @@ export function EditorialDraft({
   const hideBody = format === "facts" && data.summary.length < 40;
   const bodyBeforeBullets = !factsFirst;
   const listItems = isSocial ? alts : data.bullets;
+
+  if (format === "carousel" && data.carousel) {
+    return (
+      <div className={`news-summary is-${format}`}>
+        <div className="news-summary-bar">
+          <p className="news-state is-ready">
+            <Check size={16} aria-hidden="true" />
+            {meta.ready}
+            {data.versionNumber ? <span className="news-version-chip">ن{data.versionNumber}</span> : null}
+          </p>
+        </div>
+        <CarouselDraft data={data} slides={data.carousel.slides} />
+      </div>
+    );
+  }
 
   return (
     <div className={`news-summary is-${format}`}>

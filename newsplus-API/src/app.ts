@@ -10,8 +10,9 @@ import { createPushService } from "./services/pushService.js";
 export async function buildApp() {
   const app = Fastify({
     logger: true,
-    requestTimeout: 120_000,
-    connectionTimeout: 120_000,
+    // Image generation is silent on the socket until the PNG is ready (often past 2 minutes).
+    requestTimeout: 660_000,
+    connectionTimeout: 660_000,
     // Behind nginx on VPS — use X-Forwarded-For for request.ip (login rate limit per client)
     trustProxy: true,
   });

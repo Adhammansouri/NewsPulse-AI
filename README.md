@@ -35,10 +35,10 @@ npm run dev
 
 | Service | URL |
 |---------|-----|
-| Frontend (use this in dev) | http://localhost:5173 |
+| Frontend (use this in dev) | http://localhost:5180 |
 | API | http://localhost:3001/api/health |
 
-In development, open **only the Vite URL** (5173). Port 3001 is API-only; an old build in `newsplus-API/public/` is used on the server in production, not for local UI.
+In development, open **only the Vite URL** (5180). Port 3001 is API-only. Port 5180 avoids clashing with other Vite apps (e.g. Laravel) on 5173.
 
 ## Scripts
 

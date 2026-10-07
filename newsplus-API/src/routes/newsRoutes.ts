@@ -3,7 +3,7 @@ import { createNewsController } from "../controllers/newsController.js";
 import { aiRateLimit } from "../middleware/aiRateLimit.js";
 import { validateBody } from "../middleware/validateBody.js";
 import { validateQuery } from "../middleware/validateQuery.js";
-import { newsFeedQuerySchema, newsSummarizeBodySchema } from "../schemas/news.schema.js";
+import { newsFeedQuerySchema, newsSummarizeBodySchema, carouselRenderBodySchema } from "../schemas/news.schema.js";
 import type { NewsService } from "../services/newsService.js";
 
 export function createNewsRoutes(newsService: NewsService): FastifyPluginAsync {
@@ -22,6 +22,15 @@ export function createNewsRoutes(newsService: NewsService): FastifyPluginAsync {
     app.post("/news/summarize", {
       preHandler: [aiRateLimit, validateBody(newsSummarizeBodySchema)],
       handler: controller.summarize,
+    });
+
+    app.post("/news/carousel/render", {
+      preHandler: [aiRateLimit, validateBody(carouselRenderBodySchema)],
+      handler: controller.renderSlide,
+    });
+
+    app.get("/news/carousel/:conversationId/:assetId", {
+      handler: controller.slideAsset,
     });
   };
 }

@@ -141,7 +141,7 @@ function looksLikeConsentWall(text: string) {
   return markers.filter((marker) => lower.includes(marker)).length >= 1;
 }
 
-function extractReadableText(html: string) {
+function extractReadableText(html: string, rejectTruncated = false) {
   const cleaned = stripNoise(html);
   const jsonLd = extractJsonLd(html);
   const article = extractTag(cleaned, "article");
@@ -154,10 +154,11 @@ function extractReadableText(html: string) {
   const head = [title, description].filter(Boolean).join("\n");
   const combined = (head ? `${head}\n\n${body}` : body).trim();
   if (looksLikeConsentWall(combined)) return "";
+  if (rejectTruncated && combined.length > MAX_TEXT) throw new ValidationError("source-too-long");
   return combined.slice(0, MAX_TEXT);
 }
 
-export async function fetchPublicText(rawUrl: string): Promise<{ url: string; text: string }> {
+export async function fetchPublicText(rawUrl: string, options: { rejectTruncated?: boolean } = {}): Promise<{ url: string; text: string }> {
   const url = await assertPublicHttpUrl(rawUrl);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -181,9 +182,10 @@ export async function fetchPublicText(rawUrl: string): Promise<{ url: string; te
     }
 
     const buffer = await response.arrayBuffer();
+    if (options.rejectTruncated && buffer.byteLength > MAX_BYTES) throw new ValidationError("source-too-long");
     const sliced = buffer.byteLength > MAX_BYTES ? buffer.slice(0, MAX_BYTES) : buffer;
     const html = new TextDecoder("utf-8", { fatal: false }).decode(sliced);
-    const text = extractReadableText(html);
+    const text = extractReadableText(html, options.rejectTruncated);
     if (text.length < 80) return { url: landed, text: "" };
     return { url: landed, text };
   } catch (error) {

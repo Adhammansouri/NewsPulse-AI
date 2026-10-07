@@ -27,8 +27,9 @@ import {
   reviseEditorialConversation,
   updateEditorialMemory,
 } from "@/services/editorialService";
-import { copyText, toolErrorMessage } from "@/services/toolErrors";
-import type { NewsFeedItem, NewsLanguage, NewsSource, NewsStoryFormat, NewsSummarizeData } from "@newsplus/shared";
+import { QuotaNotice } from "@/components/QuotaNotice";
+import { copyText, isOpenAIQuotaError, toolErrorMessage } from "@/services/toolErrors";
+import type { CarouselOptions, NewsFeedItem, NewsLanguage, NewsSource, NewsStoryFormat, NewsSummarizeData } from "@newsplus/shared";
 import { SourceMark, SourceMarkStack } from "../SourceMark";
 import { hostFromUrl } from "../sourceLogos";
 import {
@@ -51,7 +52,6 @@ import {
 import { ConversationDrawer } from "../components/editorial/ConversationDrawer";
 import { EditorialDraft } from "../components/editorial/EditorialDraft";
 import { RevisionThread } from "../components/editorial/RevisionThread";
-
 type LangFilter = "all" | NewsLanguage;
 type MobilePane = "feed" | "desk";
 
@@ -72,6 +72,12 @@ export default function NewsPage() {
   );
   const [copied, setCopied] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<NewsSummarizeData["format"]>("desk");
+  const [carouselOptions, setCarouselOptions] = useState<CarouselOptions>({
+    slides: 4,
+    style: "cinematic",
+    density: "banner",
+    mark: true,
+  });
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [instruction, setInstruction] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -261,20 +267,26 @@ export default function NewsPage() {
     setCopied(false);
   }
 
+  function storyRequest(format: NewsSummarizeData["format"]) {
+    if (format === "briefing") return { briefing: true as const, language: "ar" as const };
+    return {
+      itemId: selected?.id,
+      language: "ar" as const,
+      format,
+      ...(format === "carousel" ? { carousel: carouselOptions } : {}),
+    };
+  }
+
   function generateSummary() {
-    if (!selected) return;
+    if (!selected && selectedFormat !== "briefing") return;
     setCopied(false);
-    if (selectedFormat === "briefing") {
-      runSummarize({ briefing: true, language: "ar" });
-    } else {
-      runSummarize({ itemId: selected.id, language: "ar", format: selectedFormat });
-    }
+    runSummarize(storyRequest(selectedFormat));
   }
 
   function runStoryFormat(format: NewsStoryFormat) {
     if (!selected) return;
     setSelectedFormat(format);
-    runSummarize({ itemId: selected.id, language: "ar", format });
+    runSummarize(storyRequest(format));
   }
 
   function selectLanguage(next: LangFilter) {
@@ -573,6 +585,9 @@ export default function NewsPage() {
                             selected={resultFormat}
                             busy={busy}
                             briefingDisabled={busy}
+                            carouselOptions={carouselOptions}
+                            onCarouselOptions={setCarouselOptions}
+                            onApplyCarousel={() => runStoryFormat("carousel")}
                             onSelectFormat={(next) => {
                               summarizeMutation.reset();
                               setConversationId(null);
@@ -617,12 +632,7 @@ export default function NewsPage() {
                             hideCopy
                             onCopy={() => void onCopy(summary)}
                           />
-                          {error ? (
-                            <p className="news-state is-error">
-                              <WarningCircle size={18} aria-hidden="true" />
-                              {toolErrorMessage(error)}
-                            </p>
-                          ) : null}
+                          {error ? <DeskError error={error} /> : null}
                         </div>
                       </div>
                       {conversationId ? (
@@ -651,12 +661,7 @@ export default function NewsPage() {
                 ) : null
               ) : (
                 <>
-                  {error ? (
-                    <p className="news-state is-error">
-                      <WarningCircle size={18} aria-hidden="true" />
-                      {toolErrorMessage(error)}
-                    </p>
-                  ) : null}
+                  {error ? <DeskError error={error} /> : null}
 
                   {selected ? (
                     <article
@@ -730,6 +735,8 @@ export default function NewsPage() {
                           busy={busy}
                           briefingDisabled={busy || items.length === 0}
                           showHint
+                          carouselOptions={carouselOptions}
+                          onCarouselOptions={setCarouselOptions}
                           onSelectFormat={selectFormat}
                           onGenerate={generateSummary}
                         />
@@ -791,12 +798,25 @@ export default function NewsPage() {
   );
 }
 
+function DeskError({ error }: { error: unknown }) {
+  if (isOpenAIQuotaError(error)) return <QuotaNotice />;
+  return (
+    <p className="news-state is-error">
+      <WarningCircle size={18} aria-hidden="true" />
+      {toolErrorMessage(error)}
+    </p>
+  );
+}
+
 function DeskFormatBar({
   mode,
   selected,
   busy,
   briefingDisabled,
   showHint = false,
+  carouselOptions,
+  onCarouselOptions,
+  onApplyCarousel,
   onSelectFormat,
   onGenerate,
 }: {
@@ -805,6 +825,9 @@ function DeskFormatBar({
   busy: boolean;
   briefingDisabled: boolean;
   showHint?: boolean;
+  carouselOptions?: CarouselOptions;
+  onCarouselOptions?: (next: CarouselOptions) => void;
+  onApplyCarousel?: () => void;
   onSelectFormat: (format: NewsSummarizeData["format"]) => void;
   onGenerate?: () => void;
 }) {
@@ -863,7 +886,94 @@ function DeskFormatBar({
           </button>
         ) : null}
       </div>
+      {selected === "carousel" && carouselOptions && onCarouselOptions ? (
+        <CarouselControls
+          options={carouselOptions}
+          busy={busy}
+          showApply={mode === "switch"}
+          onChange={onCarouselOptions}
+          onApply={onApplyCarousel}
+        />
+      ) : null}
     </div>
+  );
+}
+
+function CarouselControls({
+  options,
+  busy,
+  showApply,
+  onChange,
+  onApply,
+}: {
+  options: CarouselOptions;
+  busy: boolean;
+  showApply: boolean;
+  onChange: (next: CarouselOptions) => void;
+  onApply?: () => void;
+}) {
+  return (
+    <div className="news-carousel-controls">
+      <div className="news-carousel-field">
+        <span className="news-field-label">عدد الشرائح</span>
+        <div className="news-carousel-pills" role="group" aria-label="عدد الشرائح">
+          {[3, 4, 5, 6].map((count) => (
+            <button
+              key={count}
+              type="button"
+              className={`news-seg-btn ${options.slides === count ? "is-active" : ""}`}
+              aria-pressed={options.slides === count}
+              disabled={busy}
+              onClick={() => onChange({ ...options, slides: count })}
+            >
+              {count}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="news-carousel-field">
+        <span className="news-field-label">الأسلوب</span>
+        <div className="news-carousel-pills" role="group" aria-label="أسلوب النص">
+          <StyleButton
+            active={options.style === "cinematic"}
+            disabled={busy}
+            onClick={() => onChange({ ...options, style: "cinematic" })}
+          >
+            قصة
+          </StyleButton>
+          <StyleButton
+            active={options.style === "frame"}
+            disabled={busy}
+            onClick={() => onChange({ ...options, style: "frame" })}
+          >
+            بطاقة
+          </StyleButton>
+        </div>
+      </div>
+      {showApply && onApply ? (
+        <button type="button" className="news-btn-primary news-carousel-apply" disabled={busy} onClick={onApply}>
+          تحديث الشرائح
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function StyleButton({
+  active,
+  disabled,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  disabled: boolean;
+  onClick: () => void;
+  children: string;
+}) {
+  return (
+    <button type="button" className={`news-seg-btn ${active ? "is-active" : ""}`} aria-pressed={active} disabled={disabled} onClick={onClick}>
+      {children}
+    </button>
   );
 }
 

@@ -1,11 +1,12 @@
 import type {
   ApiSuccessResponse,
+  CarouselRenderRequest,
   NewsFeedData,
   NewsSourcesData,
   NewsSummarizeData,
   NewsSummarizeRequest,
 } from "@newsplus/shared";
-import { apiRequest } from "./httpConfig";
+import { apiBlob, apiRequest } from "./httpConfig";
 import { API_URLS } from "./urls";
 
 export async function getNewsSources() {
@@ -33,4 +34,17 @@ export async function summarizeNews(body: NewsSummarizeRequest) {
     body: JSON.stringify(body),
   });
   return response.data;
+}
+
+export async function renderCarouselSlide(body: CarouselRenderRequest) {
+  const response = await apiRequest<ApiSuccessResponse<NewsSummarizeData>>(API_URLS.NEWS.CAROUSEL_RENDER, {
+    method: "POST",
+    auth: true,
+    body: JSON.stringify(body),
+  });
+  return response.data;
+}
+
+export function fetchCarouselAsset(conversationId: string, assetId: string) {
+  return apiBlob(API_URLS.NEWS.CAROUSEL_ASSET(conversationId, assetId));
 }

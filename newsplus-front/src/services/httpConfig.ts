@@ -50,3 +50,14 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   return response.json() as Promise<T>;
 }
+
+export async function apiBlob(path: string): Promise<Blob> {
+  const token = getAccessToken();
+  const response = await fetch(buildUrl(path), {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!response.ok) {
+    throw new ApiError(response.status, await readError(response));
+  }
+  return response.blob();
+}

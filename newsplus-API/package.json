@@ -6,15 +6,16 @@
   "main": "server.cjs",
   "scripts": {
     "dev": "node --experimental-sqlite --import tsx --watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node --experimental-sqlite server.cjs",
-    "test": "node --experimental-sqlite --import tsx --test src/services/editorialWorkspaceStore.test.ts src/ai/editorialRevision.test.ts src/ai/prompts/socialVideo.test.ts",
+    "test": "node --experimental-sqlite --import tsx --test src/services/editorialWorkspaceStore.test.ts src/ai/editorialRevision.test.ts src/ai/prompts/socialVideo.test.ts src/ai/prompts/carousel.test.ts src/services/carouselCompose.test.ts src/services/translateService.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",
     "@fastify/jwt": "^10.0.0",
     "@fastify/static": "^10.0.0",
+    "@napi-rs/canvas": "^1.0.9",
     "@types/node": "^26.2.0",
     "dotenv": "^17.3.1",
     "fastify": "^5.8.2",

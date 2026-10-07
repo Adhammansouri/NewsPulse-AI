@@ -1,7 +1,8 @@
 import { EDITORIAL_VOICE } from "./editorial.js";
+import { CAROUSEL_FORMAT_SPEC } from "./carousel.js";
 import { SOCIAL_VIDEO_FORMAT_SPEC } from "./socialVideo.js";
 
-export const NEWS_STORY_FORMATS = ["desk", "bulletin", "facts", "context", "social", "video"] as const;
+export const NEWS_STORY_FORMATS = ["desk", "bulletin", "facts", "context", "social", "video", "carousel"] as const;
 export type NewsStoryFormat = (typeof NEWS_STORY_FORMATS)[number];
 
 const FORMAT_SPECS: Record<NewsStoryFormat, string> = {
@@ -43,6 +44,7 @@ Reject title: 🚨 عاجل | تفاصيل صادمة من قمة مصر وال�
 Gold title (en): Xi lands in Cairo for talks with Sisi
 Reject title: You won't BELIEVE what happened at the summit 🔥`,
   video: SOCIAL_VIDEO_FORMAT_SPEC,
+  carousel: CAROUSEL_FORMAT_SPEC,
 };
 
 export function storyFormatAssignment(format: NewsStoryFormat, language: "ar" | "en") {

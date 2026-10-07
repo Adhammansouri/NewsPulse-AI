@@ -423,6 +423,20 @@ export class EditorialWorkspaceStore {
     return this.getConversation(input.conversationId);
   }
 
+  patchVersionCopy(versionId: string, copy: StoredEditorialCopy): NewsSummarizeData {
+    const version = this.getVersion(versionId);
+    this.db.prepare("UPDATE editorial_versions SET copy_json = ? WHERE id = ?").run(JSON.stringify(copy), versionId);
+    const current = this.db
+      .prepare("SELECT current_version_id FROM editorial_conversations WHERE id = ?")
+      .get(version.conversationId) as { current_version_id: string } | undefined;
+    if (current?.current_version_id === versionId) {
+      this.db
+        .prepare("UPDATE editorial_conversations SET title = ?, updated_at = ? WHERE id = ?")
+        .run(copy.title, nowIso(), version.conversationId);
+    }
+    return this.getVersion(versionId).copy;
+  }
+
   restoreVersion(conversationId: string, versionId: string, userId: string): EditorialConversationDetail {
     const source = this.getVersion(versionId);
     if (source.conversationId !== conversationId) throw new NotFoundError();
@@ -434,6 +448,7 @@ export class EditorialWorkspaceStore {
       sources: source.copy.sources,
       language: source.copy.language,
       format: source.copy.format,
+      ...(source.copy.carousel ? { carousel: source.copy.carousel } : {}),
     };
     return this.addVersion({
       conversationId,
