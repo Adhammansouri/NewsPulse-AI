@@ -25,7 +25,7 @@ Common causes:
 | Root directory | `newsplus-API` |
 | Entry file | `server.cjs` (or `server.js` — delegates to `server.cjs`) |
 | Build command | `build` |
-| Node.js | 20 |
+| Node.js | **22** (required by `openai` and workspace `engines`; Node 20 fails `npm run build`) |
 
 ## Environment file (recommended)
 

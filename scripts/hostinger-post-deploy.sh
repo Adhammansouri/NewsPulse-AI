@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export PATH="/usr/bin:/bin:/opt/alt/alt-nodejs20/root/bin:$PATH"
+export PATH="/opt/alt/alt-nodejs22/root/bin:/usr/bin:/bin:$PATH"
 
 DOMAIN="deepskyblue-ibis-463603.hostingersite.com"
 BASE="/home/u358087675/domains/${DOMAIN}"
