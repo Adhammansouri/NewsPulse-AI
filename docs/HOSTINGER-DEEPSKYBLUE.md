@@ -53,11 +53,20 @@ Hostinger Git deploy only builds the API workspace. The React app must be built 
 
 **Automatic:** every push to `main` runs `.github/workflows/deploy-hostinger.yml` — builds in GitHub Actions, rsyncs artifacts over SSH, then runs `scripts/hostinger-finish-deploy.sh` on the server (no Vite build on shared hosting).
 
-**Manual (SSH):**
+**Manual (SSH on server):**
 
 ```bash
 bash /home/u358087675/domains/deepskyblue-ibis-463603.hostingersite.com/repos/NewsPulse-AI/scripts/hostinger-post-deploy.sh
 ```
+
+**Manual (SSH from your PC — recommended when Vite fails on shared hosting):**
+
+```bash
+bash scripts/ssh-deploy-deepskyblue.sh
+# or upload bundle: scripts/hostinger-apply-bundle.sh on the server after scp of newsplus-ssh-deploy.tgz
+```
+
+**VPS (production):** upload sources + prebuilt `dist` then `bash /tmp/vps-extract-and-build.sh` (see `scripts/vps-extract-and-build.sh`).
 
 Logs: `~/domains/deepskyblue-ibis-463603.hostingersite.com/logs/post-deploy.log`
 
