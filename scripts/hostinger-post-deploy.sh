@@ -41,6 +41,10 @@ EOF
   if ! grep -q '^NODE_ENV=' "${ENV_FILE}"; then
     printf "NODE_ENV=production\n" >> "${ENV_FILE}"
   fi
+
+  if ! grep -q '^NODE_OPTIONS=' "${ENV_FILE}"; then
+    printf "NODE_OPTIONS=--experimental-sqlite\n" >> "${ENV_FILE}"
+  fi
 }
 
 log "==> Post-deploy start"
@@ -58,11 +62,16 @@ git reset --hard origin/main
 log "Installing workspace dependencies"
 npm install --workspaces --include=dev --include=optional
 
+log "Building API"
+npm run build --workspace=newsplus-API
+
 log "Building frontend"
-npm run build --workspace=newsplus-front
+if ! npm run build --workspace=newsplus-front; then
+  log "WARN: Vite build failed on shared hosting (resource limits). Keep existing dist or run scripts/ssh-deploy-deepskyblue.sh from your PC."
+fi
 
 if [ ! -f "${REPO_DIR}/newsplus-front/dist/index.html" ]; then
-  log "ERROR: frontend build missing index.html"
+  log "ERROR: frontend dist missing — run scripts/ssh-deploy-deepskyblue.sh from a dev machine"
   exit 1
 fi
 
@@ -83,11 +92,9 @@ if [ -f "${NODE_APP}/package.json" ]; then
   cd "${NODE_APP}"
   npm install --omit=dev
 
-  if [ ! -f "${NODE_APP}/dist/server.js" ]; then
-    log "dist/server.js missing in NODE_APP — building API from repo"
-    npm run build --prefix "${REPO_DIR}/newsplus-API"
-    rsync -a "${REPO_DIR}/newsplus-API/dist/" "${NODE_APP}/dist/"
-  fi
+  log "Syncing API dist into NODE_APP"
+  rsync -a "${REPO_DIR}/newsplus-API/dist/" "${NODE_APP}/dist/"
+  cp "${REPO_DIR}/newsplus-API/server.cjs" "${REPO_DIR}/newsplus-API/server.js" "${REPO_DIR}/newsplus-API/package.json" "${NODE_APP}/"
 
   log "Syncing frontend into Node public/"
   mkdir -p "${NODE_APP}/public"

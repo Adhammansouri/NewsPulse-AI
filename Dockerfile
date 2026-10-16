@@ -9,9 +9,8 @@ COPY design-system design-system
 COPY newsplus-API newsplus-API
 COPY newsplus-front newsplus-front
 
-# Work around npm optional-deps bug for lightningcss native bindings (Linux CI/Docker)
-RUN rm -rf node_modules package-lock.json && \
-    npm install --workspaces --include-workspace-root --no-audit --no-fund && \
+# Reproducible workspace install (keep package-lock.json). Optional native binding for Tailwind/lightningcss on Linux.
+RUN npm ci --workspaces --include-workspace-root --no-audit --no-fund && \
     node -e "require('lightningcss-linux-x64-gnu'); console.log('lightningcss binding ok')"
 
 RUN npm run build -w newsplus-API && npm run build -w newsplus-front
