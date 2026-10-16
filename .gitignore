@@ -45,6 +45,7 @@ Thumbs.db
 
 # Local deploy artifacts (CI builds on GitHub Actions)
 .deploy/
+.deploy-ssh/
 deploy/api-staging/
 deploy/archive.b64.txt
 deploy/newsplus-api-hostinger.zip
