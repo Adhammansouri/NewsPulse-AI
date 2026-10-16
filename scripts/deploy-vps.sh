@@ -31,13 +31,15 @@ fi
 
 mkdir -p "$(dirname "${APP_DIR}")"
 
-if [ ! -d "${APP_DIR}/.git" ]; then
-  log "Cloning repository into ${APP_DIR}"
-  git clone --branch "${BRANCH}" "${REPO_URL}" "${APP_DIR}"
-else
+if [ -d "${APP_DIR}/.git" ]; then
   log "Updating repository in ${APP_DIR}"
   git -C "${APP_DIR}" fetch origin "${BRANCH}"
   git -C "${APP_DIR}" reset --hard "origin/${BRANCH}"
+elif [ ! -d "${APP_DIR}" ] || [ ! -f "${APP_DIR}/docker-compose.vps.yml" ]; then
+  log "Cloning repository into ${APP_DIR}"
+  git clone --branch "${BRANCH}" "${REPO_URL}" "${APP_DIR}"
+else
+  log "Using existing ${APP_DIR} (no git remote). Upload sources via scripts/vps-extract-and-build.sh"
 fi
 
 cd "${APP_DIR}"
