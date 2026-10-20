@@ -4,17 +4,12 @@ Monorepo: `newsplus-API` + `newsplus-front`.
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) and [README.md](./README.md).
 
-## Frontend design (hybrid)
+## Frontend design
 
-Official design system: **[design-system/HYBRID.md](./design-system/HYBRID.md)**
+Official design system: **[design-system/DESIGN-SYSTEM.md](./design-system/DESIGN-SYSTEM.md)** — one unified system (Arabic-first RTL, light/dark, mobile + desktop).
 
-| Layer | Style | Where |
-|-------|-------|-------|
-| **Brand / marketing** | Newsplus navy/teal + Taste Skill | Home, Header, Footer, `/login` |
-| **Tools / dashboard** | [Nothing Design](https://github.com/dominikmartn/nothing-design-skill) | `/news`, `/generate`, `/translate` |
-
-- **Theme:** global light/dark via `html[data-theme]` — `newsplus-front/src/services/themeStore.ts`, toggle in Header + Login
-- Newsplus tokens: `design-system/tokens.css`, `newsplus-design-system.md`
-- Brand components: `newsplus-front/src/components/brand/`
-- Nothing skill: `.cursor/skills/nothing-design/SKILL.md` (tools only)
-- Taste Skill: `.cursor/skills/design-taste-frontend/SKILL.md` (global anti-slop)
+- Tokens: `design-system/tokens.css`; shared styles in `newsplus-front/src/styles/`
+- UI primitives: `newsplus-front/src/components/ui/` (Segmented, Sheet, toast, CopyButton, Notice, EmptyState)
+- App shell: `newsplus-front/src/components/shell/`
+- Theme: `html[data-theme]` via `newsplus-front/src/services/themeStore.ts`
+- Use logical CSS properties; no hardcoded colors/radii outside tokens.

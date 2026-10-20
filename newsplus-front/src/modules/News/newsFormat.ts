@@ -2,10 +2,10 @@ import type { NewsStoryFormat, NewsSummarizeData, NewsSummaryFormat, NewsTopic }
 import { NEWS_TOPICS } from "@newsplus/shared";
 
 const SOURCE_TONES = [
-  "var(--color-teal-600)",
-  "var(--color-navy-700)",
-  "var(--color-coral-500)",
-  "var(--color-navy-500)",
+  "var(--teal-700)",
+  "var(--navy-700)",
+  "var(--coral-600)",
+  "var(--navy-500)",
 ];
 
 export function sourceTone(id: string) {
@@ -28,32 +28,8 @@ export function hasArabic(text: string) {
   return /[\u0600-\u06FF]/.test(text);
 }
 
-export function formatRelative(iso: string) {
-  try {
-    const date = new Date(iso);
-    const diffMs = Date.now() - date.getTime();
-    const minute = 60_000;
-    const hour = 60 * minute;
-    const day = 24 * hour;
-    const rtf = new Intl.RelativeTimeFormat("ar", { numeric: "auto" });
-
-    if (Math.abs(diffMs) < minute) return "الآن";
-    if (Math.abs(diffMs) < hour) return rtf.format(-Math.round(diffMs / minute), "minute");
-    if (Math.abs(diffMs) < day) return rtf.format(-Math.round(diffMs / hour), "hour");
-    if (Math.abs(diffMs) < 7 * day) return rtf.format(-Math.round(diffMs / day), "day");
-    return date.toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" });
-  } catch {
-    return iso;
-  }
-}
-
-export function formatStamp(iso: string) {
-  try {
-    return new Date(iso).toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" });
-  } catch {
-    return iso;
-  }
-}
+export { formatRelative, formatAgo } from "@/utils/format";
+export { formatDateTime as formatStamp } from "@/utils/format";
 
 export type NewsRecency = "now" | "fresh" | "hour" | "recent" | "aging";
 
@@ -70,6 +46,13 @@ export function newsRecency(iso: string): NewsRecency {
   if (diff < HOUR_MS) return "hour";
   if (diff < RECENT_MS) return "recent";
   return "aging";
+}
+
+/** "Breaking" only when it is genuinely fresh or confirmed by several outlets (the API flags anything < 2h). */
+export function isBreaking(item: { breaking: boolean; publishedAt: string; sources: unknown[] }) {
+  if (!item.breaking) return false;
+  const recency = newsRecency(item.publishedAt);
+  return recency === "now" || recency === "fresh" || (recency === "hour" && item.sources.length > 1);
 }
 
 export type TimeFilter = "all" | "fresh" | "hour" | "three" | "today";

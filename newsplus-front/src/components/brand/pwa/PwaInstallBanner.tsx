@@ -1,10 +1,6 @@
+import { DeviceMobile } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
-import {
-  INSTALL_DISMISS_KEY,
-  isStandaloneDisplay,
-  readDismissed,
-  writeDismissed,
-} from "@/services/pwaDetect";
+import { INSTALL_DISMISS_KEY, isStandaloneDisplay, readDismissed, writeDismissed } from "@/services/pwaDetect";
 
 export function PwaInstallBanner() {
   const [event, setEvent] = useState<BeforeInstallPromptEvent | null>(null);
@@ -38,19 +34,14 @@ export function PwaInstallBanner() {
 
   return (
     <div className="pwa-banner" role="dialog" aria-labelledby="pwa-install-title">
-      <div className="pwa-banner__copy">
-        <p id="pwa-install-title" className="pwa-banner__title">
-          ثبّت Newsplus
-        </p>
-        <p className="pwa-banner__text">افتح التطبيق من الشاشة الرئيسية بدون المتصفح.</p>
+      <DeviceMobile size={26} weight="duotone" aria-hidden="true" />
+      <div className="pwa-copy">
+        <p id="pwa-install-title" className="pwa-title">ثبّت Newsplus</p>
+        <p className="pwa-text">افتح التطبيق من الشاشة الرئيسية بدون المتصفح.</p>
       </div>
-      <div className="pwa-banner__actions">
-        <button type="button" className="brand-btn brand-btn-pill" onClick={() => void handleInstall()}>
-          تثبيت
-        </button>
-        <button type="button" className="brand-header-ghost-btn" onClick={handleDismiss}>
-          لاحقاً
-        </button>
+      <div className="pwa-actions">
+        <button type="button" className="btn btn-primary btn-sm" onClick={() => void handleInstall()}>ثبّت</button>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={handleDismiss}>لاحقاً</button>
       </div>
     </div>
   );

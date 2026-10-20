@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { EditorialMemoryRule, EditorialMessage, EditorialVersion, NewsSummarizeData } from "@newsplus/shared";
-import { ChatCircleText, CircleNotch, PaperPlaneTilt } from "@phosphor-icons/react";
+import { ChatCircleText, PaperPlaneTilt } from "@phosphor-icons/react";
 import { MemoryRuleCard } from "./MemoryRuleCard";
 
 const VIDEO_ACTIONS = ["قوِّ الهوك", "اجعل الانتقال سؤالاً يفتح طبقة جديدة", "اختصر دون إضافات"] as const;
@@ -102,127 +102,101 @@ export function RevisionThread({
   }, [currentVersionId, versions.length]);
 
   return (
-    <section id={id} className="news-revise" aria-label="محادثة التعديل">
-      <header className="news-revise-head">
-        <div className="news-revise-head-brand">
-          <span className="news-revise-head-icon" aria-hidden="true">
-            <ChatCircleText size={17} weight="duotone" />
-          </span>
-          <p className="news-revise-head-title">
-            المحرّر
-            {currentVersion ? <span className="news-revise-head-num">ن{currentVersion.number}</span> : null}
-          </p>
-        </div>
+    <section id={id} className="chat" aria-label="محادثة التعديل">
+      <header className="chat-head">
+        <p className="chat-title">
+          <ChatCircleText size={18} weight="duotone" aria-hidden="true" />
+          المحرّر
+          {currentVersion ? <span className="badge badge-brand">نسخة {currentVersion.number}</span> : null}
+        </p>
 
         {versions.length > 1 ? (
-          <div className="news-version-scroller" data-version-count={versions.length}>
-            <div className="news-version-track" role="list" aria-label="النسخ">
-              {versions.map((version) => {
-                const isActive = version.id === currentVersionId;
-                return (
-                  <button
-                    key={version.id}
-                    ref={isActive ? activeVersionRef : undefined}
-                    type="button"
-                    role="listitem"
-                    className={`news-version-chip ${isActive ? "is-active" : ""}`}
-                    disabled={busy || isActive}
-                    onClick={() => onRestore(version.id)}
-                    title={version.note || `النسخة ${version.number}`}
-                    aria-label={
-                      isActive ? `النسخة ${version.number} (الحالية)` : `استعادة النسخة ${version.number}`
-                    }
-                    aria-current={isActive ? "true" : undefined}
-                  >
-                    <span className="news-version-chip-label">{version.number}</span>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="chat-versions" role="list" aria-label="النسخ">
+            {versions.map((version) => {
+              const isActive = version.id === currentVersionId;
+              return (
+                <button
+                  key={version.id}
+                  ref={isActive ? activeVersionRef : undefined}
+                  type="button"
+                  role="listitem"
+                  className={`version ${isActive ? "is-active" : ""}`}
+                  disabled={busy || isActive}
+                  onClick={() => onRestore(version.id)}
+                  title={version.note || `النسخة ${version.number}`}
+                  aria-label={isActive ? `النسخة ${version.number} (الحالية)` : `استعادة النسخة ${version.number}`}
+                  aria-current={isActive ? "true" : undefined}
+                >
+                  {version.number}
+                </button>
+              );
+            })}
           </div>
         ) : null}
       </header>
 
-      <ol className="news-revise-log" ref={logRef}>
+      <ol className="chat-log" ref={logRef}>
         {turns.length === 0 && !busy ? (
-          <li className="news-revise-empty">اطلب تعديلاً. كل جولة تُحفظ كنسخة يمكن الرجوع إليها.</li>
+          <li className="chat-empty">اطلب تعديلاً على النص. كل جولة تُحفظ كنسخة يمكنك الرجوع إليها.</li>
         ) : null}
 
         {turns.map((turn) =>
           turn.kind === "system" ? (
-            <li key={turn.id} className="news-revise-system">
-              {turn.content}
-            </li>
+            <li key={turn.id} className="msg-system">{turn.content}</li>
           ) : (
-            <li key={turn.id} className={`news-revise-turn is-${turn.kind}`}>
-              {turn.kind === "assistant" ? <span className="news-revise-who">المكتب</span> : null}
+            <li key={turn.id} className={`msg is-${turn.kind}`}>
+              {turn.kind === "assistant" ? <span className="msg-who">المحرّر</span> : null}
               <p>{turn.content}</p>
             </li>
           ),
         )}
 
         {busy ? (
-          <li className="news-revise-turn is-assistant is-pending" aria-live="polite">
-            <span className="news-revise-who">المكتب</span>
-            <p>
-              <span className="news-revise-dots" aria-hidden="true" />
-              جاري الكتابة…
-            </p>
+          <li className="msg is-assistant is-pending" aria-live="polite">
+            <span className="msg-who">المحرّر</span>
+            <p className="working"><span className="working-dots" aria-hidden="true"><i /><i /><i /></span>يعدّل النص…</p>
           </li>
         ) : null}
 
         {pendingMemory.map((rule) => (
-          <li key={rule.id} className="news-revise-memory">
-            <MemoryRuleCard
-              rule={rule}
-              busy={busy}
-              onSave={() => onMemorySave(rule.id)}
-              onEdit={(next) => onMemoryEdit(rule.id, next)}
-              onDismiss={() => onMemoryDismiss(rule.id)}
-            />
+          <li key={rule.id} className="msg-memory">
+            <MemoryRuleCard rule={rule} busy={busy} onSave={() => onMemorySave(rule.id)} onEdit={(next) => onMemoryEdit(rule.id, next)} onDismiss={() => onMemoryDismiss(rule.id)} />
           </li>
         ))}
       </ol>
 
       <form
-        className="news-revise-dock"
+        className="chat-dock"
         onSubmit={(event) => {
           event.preventDefault();
           onSubmit();
         }}
       >
-        <div className="news-revise-actions">
-          {actions.map((action) => (
-            <button key={action} type="button" className="news-chip" disabled={busy} onClick={() => onQuickAction(action)}>
-              {action}
-            </button>
-          ))}
+        <div className="chat-quick">
+          <div className="chip-scroll">
+            {actions.map((action) => (
+              <button key={action} type="button" className="chip" disabled={busy} onClick={() => onQuickAction(action)}>{action}</button>
+            ))}
+          </div>
         </div>
-        <div className="news-revise-input">
-          <label className="sr-only" htmlFor="news-revise-input">
-            اطلب تعديلاً على النص
-          </label>
+        <div className="chat-input">
+          <label className="sr-only" htmlFor="chat-input">اطلب تعديلاً على النص</label>
           <textarea
-            id="news-revise-input"
+            id="chat-input"
             rows={1}
             value={instruction}
             disabled={busy}
-            placeholder="اكتب تعديلاً…"
+            placeholder="اكتب التعديل المطلوب…"
             onChange={(event) => onInstructionChange(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
+              if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
                 event.preventDefault();
                 onSubmit();
               }
             }}
           />
-          <button
-            type="submit"
-            className="news-revise-send"
-            disabled={busy || !instruction.trim()}
-            aria-label="إرسال التعديل"
-          >
-            {busy ? <CircleNotch className="news-spin" size={16} aria-hidden="true" /> : <PaperPlaneTilt size={16} weight="fill" />}
+          <button type="submit" className="btn btn-primary chat-send" disabled={busy || !instruction.trim()} aria-label="إرسال التعديل">
+            {busy ? <span className="spinner" aria-hidden="true" /> : <PaperPlaneTilt size={18} weight="fill" className="flip-rtl" aria-hidden="true" />}
           </button>
         </div>
       </form>

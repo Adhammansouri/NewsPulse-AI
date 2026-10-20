@@ -1,6 +1,6 @@
-import { MagnifyingGlass, X } from "@phosphor-icons/react";
-import { useEffect, useRef } from "react";
+import { MagnifyingGlass } from "@phosphor-icons/react";
 import type { EditorialConversationSummary, EditorialMemoryRule } from "@newsplus/shared";
+import { Sheet } from "@/components/ui/Sheet";
 import { formatRelative, storyFormatMeta } from "../../newsFormat";
 import { MemoryRuleCard } from "./MemoryRuleCard";
 
@@ -31,100 +31,51 @@ export function ConversationDrawer({
   onSelect: (id: string) => void;
   onDisableMemory: (id: string) => void;
 }) {
-  const trimmedSearch = search.trim();
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!open || !dialog) return;
-    if (!dialog.open) dialog.showModal();
-    return () => dialog.close();
-  }, [open]);
-  if (!open) return null;
+  const searching = search.trim().length > 0;
 
   return (
-    <dialog ref={dialogRef} className="news-drawer" aria-label="المحادثات وذاكرة الفريق" onCancel={(event) => { event.preventDefault(); onClose(); }}>
-      <button type="button" className="news-drawer-backdrop" aria-label="إغلاق" tabIndex={-1} onClick={onClose} />
-      <section className="news-drawer-panel">
-        <header className="news-drawer-head">
-          <div className="news-drawer-head-copy">
-            <h2 className="news-drawer-title">المحادثات المحفوظة</h2>
-            <p className="news-drawer-count">{conversations.length} جلسة</p>
-          </div>
-          <button type="button" className="news-icon-btn" aria-label="إغلاق المحادثات" onClick={onClose}>
-            <X size={16} weight="bold" />
-          </button>
-        </header>
+    <Sheet open={open} onClose={onClose} title="المحادثات المحفوظة" subtitle={`${conversations.length} جلسة`} variant="side">
+      <div className="input-wrap drawer-search">
+        <MagnifyingGlass size={18} aria-hidden="true" />
+        <label className="sr-only" htmlFor="conversation-search">بحث في المحادثات</label>
+        <input id="conversation-search" className="input" type="search" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="ابحث في عناوين المحادثات…" autoComplete="off" />
+      </div>
 
-        <label className="news-drawer-search" htmlFor="news-conversation-search">
-          <MagnifyingGlass size={15} weight="regular" aria-hidden="true" />
-          <span className="sr-only">بحث في المحادثات</span>
-          <input
-            id="news-conversation-search"
-            type="search"
-            value={search ?? ""}
-            onChange={(event) => onSearch(event.target.value)}
-            placeholder="ابحث في عناوين المحادثات…"
-            autoComplete="off"
-          />
-        </label>
+      {error ? <p className="hint is-error" role="alert">{error}</p> : null}
+      {listLoading && conversations.length === 0 ? (
+        <div className="drawer-skel" aria-hidden="true">{[0, 1, 2].map((i) => <span key={i} className="skel" style={{ height: "3.6rem" }} />)}</div>
+      ) : conversations.length === 0 && !error ? (
+        <p className="hint drawer-empty">{searching ? "لا نتائج لهذا البحث." : "لا محادثات بعد. ولّد محتوى من خبر وسيُحفظ هنا تلقائياً."}</p>
+      ) : (
+        <ul className="convo-list">
+          {conversations.map((item) => {
+            const active = activeId === item.id;
+            return (
+              <li key={item.id}>
+                <button type="button" className={`convo ${active ? "is-active" : ""}`} disabled={busy} onClick={() => onSelect(item.id)} aria-current={active ? "true" : undefined}>
+                  <span className="convo-title">{item.title}</span>
+                  <span className="convo-meta">
+                    <span className="badge badge-brand">{storyFormatMeta(item.format).label}</span>
+                    <span className="badge">{item.versionCount} نسخ</span>
+                    <time dateTime={item.updatedAt}>{formatRelative(item.updatedAt)}</time>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
-        <div className="news-drawer-scroll">
-          {error && <p className="news-state is-error" role="alert">{error}</p>}
-          {listLoading && conversations.length === 0 ? (
-            <p className="news-drawer-empty">جاري تحميل المحادثات…</p>
-          ) : conversations.length === 0 && !error ? (
-            <p className="news-drawer-empty">
-              {trimmedSearch ? "لا نتائج لهذا البحث." : "لا محادثات بعد. ولّد ملخصاً ثم عدّل عليه."}
-            </p>
-          ) : (
-            <ul className="news-conversation-list">
-              {conversations.map((item) => {
-                const meta = storyFormatMeta(item.format);
-                const active = activeId === item.id;
-                return (
-                  <li key={item.id}>
-                    <button
-                      type="button"
-                      className={`news-conversation-item ${active ? "is-active" : ""}`}
-                      disabled={busy}
-                      onClick={() => onSelect(item.id)}
-                      aria-current={active ? "page" : undefined}
-                    >
-                      <span className="news-conversation-title">{item.title}</span>
-                      <span className="news-conversation-meta">
-                        <span className="news-conversation-pill">{meta.label}</span>
-                        <span className="news-conversation-pill news-conversation-pill--muted">
-                          ن{item.versionCount}
-                        </span>
-                        <time className="news-conversation-time" dateTime={item.updatedAt}>
-                          {formatRelative(item.updatedAt)}
-                        </time>
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-
-          <div className="news-memory-list">
-            <p className="news-drawer-section-label">ذاكرة الفريق</p>
-            {memory.length === 0 ? (
-              <p className="news-memory-empty">لا قواعد محفوظة بعد. اقترحها المحرر بعد التعديل.</p>
-            ) : (
-              memory.map((rule) => (
-                <MemoryRuleCard
-                  key={rule.id}
-                  rule={rule}
-                  busy={busy}
-                  compact
-                  onDismiss={rule.status === "approved" ? () => onDisableMemory(rule.id) : undefined}
-                />
-              ))
-            )}
-          </div>
-        </div>
+      <section className="drawer-memory" aria-labelledby="memory-title">
+        <h3 id="memory-title">ذاكرة الفريق</h3>
+        {memory.length === 0 ? (
+          <p className="hint">لا قواعد محفوظة بعد. يقترحها المحرّر بعد التعديلات المتكررة.</p>
+        ) : (
+          memory.map((rule) => (
+            <MemoryRuleCard key={rule.id} rule={rule} busy={busy} compact onDismiss={rule.status === "approved" ? () => onDisableMemory(rule.id) : undefined} />
+          ))
+        )}
       </section>
-    </dialog>
+    </Sheet>
   );
 }

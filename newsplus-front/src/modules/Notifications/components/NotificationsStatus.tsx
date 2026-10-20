@@ -1,12 +1,8 @@
+import { CheckCircle, MinusCircle, WarningCircle } from "@phosphor-icons/react";
 import type { PushNotificationStatus } from "@/hooks/usePushNotifications";
 
-type ChipTone = "ok" | "warn" | "muted";
-
-type StatusItem = {
-  label: string;
-  value: string;
-  tone: ChipTone;
-};
+type Tone = "ok" | "warn" | "muted";
+type Row = { label: string; value: string; tone: Tone };
 
 type NotificationsStatusProps = {
   status: PushNotificationStatus;
@@ -15,50 +11,47 @@ type NotificationsStatusProps = {
   hasSubscription: boolean;
 };
 
-function permissionChip(permission: NotificationPermission | "unavailable"): Omit<StatusItem, "label"> {
+function permissionRow(permission: NotificationPermission | "unavailable"): Omit<Row, "label"> {
   if (permission === "granted") return { value: "مسموح", tone: "ok" };
   if (permission === "denied") return { value: "محظور", tone: "warn" };
-  if (permission === "default") return { value: "لم يُطلب", tone: "muted" };
+  if (permission === "default") return { value: "لم يُطلب بعد", tone: "muted" };
   return { value: "غير متاح", tone: "muted" };
 }
 
-function flagChip(value: boolean | null, yes: string, no: string): Omit<StatusItem, "label"> {
+function flagRow(value: boolean | null, yes: string, no: string): Omit<Row, "label"> {
   if (value == null) return { value: "غير معروف", tone: "muted" };
   return value ? { value: yes, tone: "ok" } : { value: no, tone: "muted" };
 }
 
-export function NotificationsStatus({
-  status,
-  permission,
-  vapidConfigured,
-  hasSubscription,
-}: NotificationsStatusProps) {
-  const browserSupported = status !== "unsupported";
-  const items: StatusItem[] = [
-    {
-      label: "المتصفح",
-      value: browserSupported ? "يدعم الدفع" : "غير مدعوم",
-      tone: browserSupported ? "ok" : "warn",
-    },
-    { label: "إذن النظام", ...permissionChip(permission) },
-    { label: "اشتراك الدفع", ...flagChip(hasSubscription, "مشترك", "غير مشترك") },
-    { label: "مفتاح الخادم", ...flagChip(vapidConfigured, "مُعدّ", "غير مُعدّ") },
+const ICONS = { ok: CheckCircle, warn: WarningCircle, muted: MinusCircle } as const;
+
+export function NotificationsStatus({ status, permission, vapidConfigured, hasSubscription }: NotificationsStatusProps) {
+  const supported = status !== "unsupported";
+  const rows: Row[] = [
+    { label: "دعم المتصفح", value: supported ? "يدعم الدفع" : "غير مدعوم", tone: supported ? "ok" : "warn" },
+    { label: "إذن المتصفح", ...permissionRow(permission) },
+    { label: "اشتراك هذا الجهاز", ...flagRow(hasSubscription, "مشترك", "غير مشترك") },
+    { label: "مفتاح الخادم", ...flagRow(vapidConfigured, "مُعدّ", "غير مُعدّ") },
   ];
 
   return (
-    <section className="notifications-status" aria-labelledby="notifications-status-title">
-      <h2 id="notifications-status-title" className="notifications-status__title">
-        الحالة الحالية
-      </h2>
-      <dl className="notifications-status__grid">
-        {items.map((item) => (
-          <div key={item.label} className="notifications-status__cell">
-            <dt>{item.label}</dt>
-            <dd>
-              <span className={`notifications-chip notifications-chip--${item.tone}`}>{item.value}</span>
-            </dd>
-          </div>
-        ))}
+    <section className="panel settings-block" aria-labelledby="notif-status-title">
+      <div className="panel-head">
+        <h2 id="notif-status-title" className="panel-title">الحالة الحالية</h2>
+      </div>
+      <dl className="status-list">
+        {rows.map((row) => {
+          const Icon = ICONS[row.tone];
+          return (
+            <div key={row.label} className="status-row">
+              <dt>{row.label}</dt>
+              <dd className={`is-${row.tone}`}>
+                <Icon size={18} weight="fill" aria-hidden="true" />
+                {row.value}
+              </dd>
+            </div>
+          );
+        })}
       </dl>
     </section>
   );

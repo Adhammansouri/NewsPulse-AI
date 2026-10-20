@@ -1,28 +1,26 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowClockwise,
-  ArrowLeft,
+  ArrowRight,
   ArrowSquareOut,
   Chats,
-  Check,
-  CircleNotch,
-  Copy,
-  LinkSimple,
   FileText,
-  ListBullets,
-  Compass,
-  ShareNetwork,
-  VideoCamera,
-  Images,
-  Stack,
+  LinkSimple,
   Newspaper,
+  PencilSimple,
   WarningCircle,
 } from "@phosphor-icons/react";
+import type { CarouselOptions, NewsFeedItem, NewsLanguage, NewsSummarizeData } from "@newsplus/shared";
+import { QuotaNotice } from "@/components/QuotaNotice";
+import { CopyButton } from "@/components/ui/CopyButton";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Segmented } from "@/components/ui/Segmented";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useIsDesktop } from "@/hooks/useMediaQuery";
 import { useNewsFeed } from "@/hooks/useNewsFeed";
 import { readDeskHandoff } from "@/services/deskHandoff";
-import { getNewsSources, summarizeNews } from "@/services/newsService";
 import {
   getEditorialConversation,
   listEditorialConversations,
@@ -31,24 +29,21 @@ import {
   reviseEditorialConversation,
   updateEditorialMemory,
 } from "@/services/editorialService";
-import { QuotaNotice } from "@/components/QuotaNotice";
-import { copyText, isOpenAIQuotaError, toolErrorMessage } from "@/services/toolErrors";
-import type { CarouselOptions, NewsFeedItem, NewsLanguage, NewsStoryFormat, NewsSummarizeData } from "@newsplus/shared";
+import { getNewsSources, summarizeNews } from "@/services/newsService";
+import { isOpenAIQuotaError, toolErrorMessage } from "@/services/toolErrors";
+import { formatRelative } from "@/utils/format";
 import { SourceMark, SourceMarkStack } from "../SourceMark";
 import { hostFromUrl } from "../sourceLogos";
 import {
-  formatRelative,
   formatStamp,
   formatSummaryClipboard,
   hasArabic,
+  isBreaking,
   matchesTimeFilter,
   matchesTopicFilter,
   newsRecency,
-  STORY_FORMATS,
   storyFormatMeta,
-  TIME_FILTERS,
   timeFilterCounts,
-  TOPIC_FILTERS,
   topicFilterCounts,
   type TimeFilter,
   type TopicFilter,
@@ -56,62 +51,75 @@ import {
 import { ConversationDrawer } from "../components/editorial/ConversationDrawer";
 import { EditorialDraft } from "../components/editorial/EditorialDraft";
 import { RevisionThread } from "../components/editorial/RevisionThread";
-import { NewsFilters, type FeedFilters } from "../components/NewsFilters";
+import { FormatCards, FormatSwitch } from "../components/FormatPicker";
+import { NewsToolbar, type FeedFilters } from "../components/NewsToolbar";
+import { WireRow, WireSkeleton } from "../components/WireRow";
 import "../newsroom.css";
-type LangFilter = "all" | NewsLanguage;
-type MobilePane = "feed" | "desk";
-type EditorialPane = "draft" | "revision";
 
-const FORMAT_ICONS = { desk: FileText, bulletin: Newspaper, facts: ListBullets, context: Compass, social: ShareNetwork, video: VideoCamera, carousel: Images, briefing: Stack };
+type Format = NewsSummarizeData["format"];
+type EditorTab = "draft" | "chat";
+
+const DEFAULT_CAROUSEL: CarouselOptions = { slides: 4, style: "cinematic", density: "banner", mark: true };
 
 export default function NewsPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [searchParams] = useSearchParams();
+  const isDesktop = useIsDesktop();
+  const [params, setParams] = useSearchParams();
   const handoff = readDeskHandoff(location.state);
+
+  // The URL says what is open: ?item=<headline>&c=<conversation>. Back/forward just work.
+  const itemParam = params.get("item") ?? handoff?.itemId ?? null;
+  const conversationId = params.get("c");
+
   const [sourceId, setSourceId] = useState("all");
-  const [langFilter, setLangFilter] = useState<LangFilter>("all");
+  const [langFilter, setLangFilter] = useState<"all" | NewsLanguage>("all");
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
   const [topicFilter, setTopicFilter] = useState<TopicFilter>("all");
-  const [query, setQuery] = useState("");
-  const [mobilePane, setMobilePane] = useState<MobilePane>("feed");
-  const [editorialPane, setEditorialPane] = useState<EditorialPane>("draft");
-  const [selectedId, setSelectedId] = useState<string | null>(
-    () => handoff?.itemId ?? searchParams.get("item"),
-  );
-  const [copied, setCopied] = useState(false);
-  const [copyError, setCopyError] = useState(false);
-  const [selectedFormat, setSelectedFormat] = useState<NewsSummarizeData["format"]>("desk");
-  const [carouselOptions, setCarouselOptions] = useState<CarouselOptions>({
-    slides: 4,
-    style: "cinematic",
-    density: "banner",
-    mark: true,
-  });
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const query = useDebouncedValue(search.trim(), 350);
+
+  const [pinned, setPinned] = useState<NewsFeedItem | null>(null);
+  const [selectedFormat, setSelectedFormat] = useState<Format>("desk");
+  const [carouselOptions, setCarouselOptions] = useState<CarouselOptions>(DEFAULT_CAROUSEL);
+  const [tab, setTab] = useState<EditorTab>("draft");
   const [instruction, setInstruction] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [conversationQuery, setConversationQuery] = useState("");
   const [newIds, setNewIds] = useState<string[]>([]);
+
   const feedScrollRef = useRef<HTMLDivElement>(null);
-  const deskPaneRef = useRef<HTMLElement>(null);
+  const workRef = useRef<HTMLElement>(null);
   const seenIdsRef = useRef<Set<string>>(new Set());
-  const snapshotKeyRef = useRef("all|all|all|all|");
+  const snapshotKeyRef = useRef("");
 
-  const sourcesQuery = useQuery({
-    queryKey: ["news-sources"],
-    queryFn: getNewsSources,
-  });
-
+  const sourcesQuery = useQuery({ queryKey: ["news-sources"], queryFn: getNewsSources });
   const feedQuery = useNewsFeed(sourceId, query);
+
+  const patchParams = useCallback(
+    (patch: Record<string, string | null>, replace = true) => {
+      setParams(
+        (current) => {
+          const next = new URLSearchParams(current);
+          for (const [key, value] of Object.entries(patch)) {
+            if (value === null) next.delete(key);
+            else next.set(key, value);
+          }
+          return next;
+        },
+        { replace },
+      );
+    },
+    [setParams],
+  );
 
   const summarizeMutation = useMutation({
     mutationFn: summarizeNews,
     onSuccess(data) {
-      setEditorialPane("draft");
+      setTab("draft");
       if (!data.conversationId) return;
-      setConversationId(data.conversationId);
+      patchParams({ c: data.conversationId });
       void queryClient.invalidateQueries({ queryKey: ["editorial-conversations"] });
       void queryClient.invalidateQueries({ queryKey: ["editorial-conversation", data.conversationId] });
     },
@@ -126,22 +134,19 @@ export default function NewsPage() {
   const conversationListQuery = useQuery({
     queryKey: ["editorial-conversations", conversationQuery],
     queryFn: () => listEditorialConversations(conversationQuery),
-    enabled: drawerOpen || Boolean(conversationId),
+    enabled: drawerOpen,
   });
 
   const memoryQuery = useQuery({
     queryKey: ["editorial-memory"],
     queryFn: () => listEditorialMemory("approved"),
-    enabled: drawerOpen || Boolean(conversationId),
+    enabled: drawerOpen,
   });
 
   const reviseMutation = useMutation({
     mutationFn: ({ id, text }: { id: string; text: string }) => reviseEditorialConversation(id, text),
     onSuccess(data) {
       setInstruction("");
-      setCopied(false);
-      setCopyError(false);
-      setEditorialPane("draft");
       queryClient.setQueryData(["editorial-conversation", data.conversation.id], data.conversation);
       void queryClient.invalidateQueries({ queryKey: ["editorial-conversations"] });
       void queryClient.invalidateQueries({ queryKey: ["editorial-memory"] });
@@ -154,8 +159,7 @@ export default function NewsPage() {
   const restoreMutation = useMutation({
     mutationFn: ({ id, versionId }: { id: string; versionId: string }) => restoreEditorialVersion(id, versionId),
     onSuccess(data) {
-      setCopied(false);
-      setEditorialPane("draft");
+      setTab("draft");
       queryClient.setQueryData(["editorial-conversation", data.conversation.id], data.conversation);
       void queryClient.invalidateQueries({ queryKey: ["editorial-conversations"] });
     },
@@ -170,74 +174,67 @@ export default function NewsPage() {
     },
   });
 
+  // ---- Feed derivation --------------------------------------------------
   const sources = sourcesQuery.data?.sources ?? [];
-  const arabicSources = sources.filter((source) => source.language === "ar");
-  const englishSources = sources.filter((source) => source.language === "en");
-  const visibleSources = langFilter === "ar" ? arabicSources : langFilter === "en" ? englishSources : [];
 
   const scopedItems = useMemo(() => {
     const all = feedQuery.data?.items ?? [];
     if (sourceId !== "all" || langFilter === "all") return all;
-    const allowed = new Set(visibleSources.map((source) => source.id));
+    const allowed = new Set(sources.filter((source) => source.language === langFilter).map((source) => source.id));
     return all.filter((item) => item.sources.some((source) => allowed.has(source.id)));
-  }, [feedQuery.data?.items, langFilter, sourceId, visibleSources]);
+  }, [feedQuery.data?.items, langFilter, sourceId, sources]);
 
   const timeCounts = useMemo(() => timeFilterCounts(scopedItems), [scopedItems]);
-  const timedItems = useMemo(
-    () => scopedItems.filter((item) => matchesTimeFilter(item.publishedAt, timeFilter)),
-    [scopedItems, timeFilter],
-  );
+  const timedItems = useMemo(() => scopedItems.filter((item) => matchesTimeFilter(item.publishedAt, timeFilter)), [scopedItems, timeFilter]);
   const topicCounts = useMemo(() => topicFilterCounts(timedItems), [timedItems]);
+  const items = useMemo(() => timedItems.filter((item) => matchesTopicFilter(item.topic, topicFilter)), [timedItems, topicFilter]);
 
-  const items = useMemo(
-    () => timedItems.filter((item) => matchesTopicFilter(item.topic, topicFilter)),
-    [timedItems, topicFilter],
-  );
-
-  const selected = useMemo(() => {
-    const match = items.find((item) => item.id === selectedId);
-    if (match) return match;
-    if (summarizeMutation.isPending) return null;
-    return items[0] ?? null;
-  }, [items, selectedId, summarizeMutation.isPending]);
-
-  const summary = conversationDetailQuery.data?.copy ?? summarizeMutation.data;
-  const conversationLoading =
-    Boolean(conversationId) && conversationDetailQuery.isFetching && !conversationDetailQuery.data?.copy;
-  const showEditorial = Boolean(summary) || conversationLoading;
-  const busy =
-    summarizeMutation.isPending ||
-    reviseMutation.isPending ||
-    restoreMutation.isPending ||
-    memoryMutation.isPending;
-  const error =
-    sourcesQuery.error ??
-    feedQuery.error ??
-    summarizeMutation.error ??
-    conversationDetailQuery.error ??
-    reviseMutation.error ??
-    restoreMutation.error ??
-    memoryMutation.error;
-  const snapshotKey = `${sourceId}|${langFilter}|${timeFilter}|${topicFilter}|${query}`;
-  const resultFormat = summary?.format ?? (summarizeMutation.variables?.briefing ? "briefing" : selectedFormat);
+  // The open story outlives refreshes: cluster ids can change, so we keep a snapshot.
+  const fromFeed = itemParam ? items.find((item) => item.id === itemParam) ?? null : null;
+  const selected = fromFeed ?? (pinned && (!itemParam || pinned.id === itemParam) ? pinned : null);
 
   useEffect(() => {
-    if (mobilePane === "desk") deskPaneRef.current?.focus({ preventScroll: true });
-  }, [mobilePane]);
+    if (fromFeed) setPinned(fromFeed);
+  }, [fromFeed]);
+
+  useEffect(() => {
+    // Desktop shows a story straight away; phones wait for a tap.
+    if (!isDesktop || itemParam || pinned || conversationId) return;
+    if (items[0]) setPinned(items[0]);
+  }, [isDesktop, itemParam, pinned, conversationId, items]);
+
+  // ---- Derived work state ----------------------------------------------
+  const detail = conversationDetailQuery.data;
+  const summary: NewsSummarizeData | undefined = detail?.copy ?? summarizeMutation.data;
+  const opening = Boolean(conversationId) && conversationDetailQuery.isLoading && !summary;
+  const hasDraft = Boolean(summary);
+  const busy = summarizeMutation.isPending || reviseMutation.isPending || restoreMutation.isPending || memoryMutation.isPending;
+  const workError =
+    summarizeMutation.error ?? conversationDetailQuery.error ?? reviseMutation.error ?? restoreMutation.error ?? memoryMutation.error;
+  const resultFormat: Format = summary?.format ?? selectedFormat;
+  const pendingFormat: Format = summarizeMutation.variables?.briefing ? "briefing" : (summarizeMutation.variables?.format ?? selectedFormat);
+  const workOpen = Boolean(itemParam || conversationId);
+  const mobileOpen = !isDesktop && workOpen;
+
+  // Keep selection/format in step with a loaded conversation.
+  useEffect(() => {
+    if (!detail) return;
+    setSelectedFormat(detail.format);
+    if (detail.itemId && detail.itemId !== params.get("item")) patchParams({ item: detail.itemId });
+    if (detail.copy.carousel) {
+      const { slides, style, density, mark } = detail.copy.carousel;
+      setCarouselOptions({ slides: slides.length, style, density, mark });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detail]);
 
   useEffect(() => {
     if (!handoff?.input) return;
-    navigate("/generate", {
-      replace: true,
-      state: { prompt: handoff.input, source: "news", style: "brief" },
-    });
+    navigate("/generate", { replace: true, state: { prompt: handoff.input, source: "news", style: "brief" } });
   }, [handoff?.input, navigate]);
 
-  useEffect(() => {
-    if (busy || selectedId || items.length === 0) return;
-    setSelectedId(items[0].id);
-  }, [busy, items, selectedId]);
-
+  // New-arrival tracking: only announce items that appear while the filters stay the same.
+  const snapshotKey = `${sourceId}|${langFilter}|${timeFilter}|${topicFilter}|${query}`;
   useEffect(() => {
     const ids = items.map((item) => item.id);
     if (snapshotKeyRef.current !== snapshotKey) {
@@ -257,476 +254,287 @@ export default function NewsPage() {
     setNewIds((prev) => [...incoming, ...prev.filter((id) => ids.includes(id) && !incoming.includes(id))]);
   }, [items, snapshotKey]);
 
-  function revealNewHeadlines() {
+  useEffect(() => {
+    if (mobileOpen) workRef.current?.focus({ preventScroll: true });
+  }, [mobileOpen]);
+
+  function revealNew() {
     const first = newIds[0];
     setNewIds([]);
     if (!first) return;
-    setMobilePane("feed");
     window.requestAnimationFrame(() => {
       const node = feedScrollRef.current?.querySelector(`[data-headline-id="${CSS.escape(first)}"]`);
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      node?.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      node?.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
     });
   }
 
-  function runSummarize(body: Parameters<typeof summarizeNews>[0]) {
-    if (busy) return;
-    setCopied(false);
-    setCopyError(false);
-    summarizeMutation.mutate(body);
+  // ---- Actions ----------------------------------------------------------
+  function resetWork() {
+    summarizeMutation.reset();
+    reviseMutation.reset();
+    restoreMutation.reset();
+    memoryMutation.reset();
+    setInstruction("");
+    setTab("draft");
   }
 
-  async function onCopy(data: NewsSummarizeData) {
-    try {
-      await copyText(formatSummaryClipboard(data));
-      setCopied(true);
-      setCopyError(false);
-    } catch {
-      setCopied(false);
-      setCopyError(true);
+  function selectHeadline(item: NewsFeedItem) {
+    if (busy) return;
+    resetWork();
+    setPinned(item);
+    setNewIds((prev) => prev.filter((id) => id !== item.id));
+    setSelectedFormat((current) => (current === "briefing" ? "desk" : current));
+    patchParams({ item: item.id, c: null }, isDesktop);
+  }
+
+  function closeWork() {
+    const id = itemParam;
+    patchParams({ item: null, c: null }, false);
+    resetWork();
+    if (id) {
+      window.requestAnimationFrame(() => {
+        feedScrollRef.current?.querySelector<HTMLElement>(`[data-headline-id="${CSS.escape(id)}"]`)?.focus({ preventScroll: true });
+      });
     }
   }
 
-  useEffect(() => {
-    if (!copied) return;
-    const timer = window.setTimeout(() => setCopied(false), 2500);
-    return () => window.clearTimeout(timer);
-  }, [copied]);
-
-  function selectFormat(format: NewsSummarizeData["format"]) {
-    setSelectedFormat(format);
-    setCopied(false);
+  function backToStory() {
+    if (busy) return;
+    resetWork();
+    patchParams({ c: null });
   }
 
-  function storyRequest(format: NewsSummarizeData["format"]) {
-    if (format === "briefing") return { briefing: true as const, language: "ar" as const };
+  function storyRequest(format: Format): Parameters<typeof summarizeNews>[0] {
+    if (format === "briefing") return { briefing: true, language: "ar" };
     return {
-      itemId: conversationDetailQuery.data?.itemId ?? selected?.id,
-      language: "ar" as const,
+      itemId: detail?.itemId ?? selected?.id,
+      language: "ar",
       format,
       ...(format === "carousel" ? { carousel: carouselOptions } : {}),
     };
   }
 
-  function generateSummary() {
-    if (!selected && selectedFormat !== "briefing") return;
-    setCopied(false);
-    runSummarize(storyRequest(selectedFormat));
+  function generate(format: Format = selectedFormat) {
+    if (busy) return;
+    if (format !== "briefing" && !(detail?.itemId ?? selected)) return;
+    setSelectedFormat(format);
+    summarizeMutation.mutate(storyRequest(format));
   }
 
-  function runStoryFormat(format: NewsStoryFormat) {
-    if (!conversationDetailQuery.data?.itemId && !selected) return;
+  function rewrite(format: Format) {
+    if (busy) return;
+    const request = storyRequest(format); // read the item id before the conversation is detached
+    reviseMutation.reset();
+    restoreMutation.reset();
+    patchParams({ c: null });
     setSelectedFormat(format);
-    runSummarize(storyRequest(format));
+    summarizeMutation.mutate(request);
+  }
+
+  function submitRevision(text = instruction) {
+    const value = text.trim();
+    if (busy || !conversationId || !value) return;
+    reviseMutation.mutate({ id: conversationId, text: value });
   }
 
   function changeFilters(patch: Partial<FeedFilters>) {
-    if (patch.query !== undefined) setQuery(patch.query);
+    if (patch.query !== undefined) setSearch(patch.query);
     if (patch.language !== undefined) setLangFilter(patch.language);
     if (patch.source !== undefined) setSourceId(patch.source);
     if (patch.time !== undefined) setTimeFilter(patch.time);
     if (patch.topic !== undefined) setTopicFilter(patch.topic);
   }
 
-  function selectHeadline(id: string) {
-    if (busy) return;
-    setSelectedId(id);
-    setNewIds((prev) => prev.filter((itemId) => itemId !== id));
-    summarizeMutation.reset();
-    reviseMutation.reset();
-    restoreMutation.reset();
-    memoryMutation.reset();
-    setConversationId(null);
-    setInstruction("");
-    setCopied(false);
-    setCopyError(false);
-    setEditorialPane("draft");
-    setMobilePane("desk");
-    setSelectedFormat((current) => (current === "briefing" ? "desk" : current));
+  function clearFilters() {
+    setTimeFilter("all");
+    setTopicFilter("all");
+    setLangFilter("all");
+    setSourceId("all");
+    setSearch("");
   }
 
-  function submitRevision() {
-    if (busy || !conversationId || !instruction.trim()) return;
-    reviseMutation.mutate({ id: conversationId, text: instruction.trim() });
-  }
-
-  useEffect(() => {
-    const detail = conversationDetailQuery.data;
-    if (!detail) return;
-    setSelectedFormat(detail.format);
-    if (detail.itemId) setSelectedId(detail.itemId);
-    if (detail.copy.carousel) {
-      const { slides, style, density, mark } = detail.copy.carousel;
-      setCarouselOptions({ slides: slides.length, style, density, mark });
-    }
-  }, [conversationDetailQuery.data]);
+  const feedError = feedQuery.error ?? sourcesQuery.error;
+  const refreshing = feedQuery.isFetching && !feedQuery.isLoading;
 
   return (
-    <div className={`news-desk newsroom is-${mobilePane}`}>
-      <header className="news-desk-head">
-        <div className="news-kicker">
-          <span className="news-pulse" aria-hidden="true" />
-          <Newspaper size={16} weight="regular" aria-hidden="true" />
-          <span>غرفة الأخبار</span>
+    <div className="nr" data-work={workOpen ? "open" : "closed"}>
+      <header className="nr-head">
+        <div className="nr-title">
+          <h1 className="page-title">غرفة الأخبار</h1>
+          <p className="nr-lede">تابع المصادر، صُغ الخبر، وراجعه مع المحرّر.</p>
         </div>
-        <div className="news-desk-head-row">
-          <div>
-            <h1 className="news-title">غرفة الأخبار</h1>
-            <p className="news-lede">تابع المصادر، وصُغ الخبر، وراجعه مع المحرّر.</p>
-          </div>
-          <div className="news-live">
-            <button type="button" className="news-btn-secondary newsroom-history" onClick={() => setDrawerOpen(true)} aria-haspopup="dialog">
-              <Chats size={18} aria-hidden="true" /><span>المحادثات</span>
-            </button>
-            <p className="news-count" aria-live="polite">
-              {feedQuery.isFetching && !feedQuery.isLoading ? (
-                <CircleNotch className="news-spin" size={14} aria-hidden="true" />
-              ) : null}
-              {feedQuery.isLoading ? "جاري التحميل" : `${items.length} عنوان`}
-            </p>
-            {feedQuery.dataUpdatedAt ? (
-              <p className="news-updated" title={feedQuery.data?.fetchedAt ? formatStamp(feedQuery.data.fetchedAt) : undefined}>
-                {feedQuery.data?.fetchedAt
-                  ? formatRelative(feedQuery.data.fetchedAt)
-                  : "—"}
-              </p>
-            ) : null}
-            <button
-              type="button"
-              className="news-refresh"
-              disabled={feedQuery.isFetching}
-              aria-label="حدّث الآن"
-              onClick={() => void feedQuery.refetch()}
-            >
-              <ArrowClockwise className={feedQuery.isFetching ? "news-spin" : undefined} size={15} aria-hidden="true" />
-              <span className="news-refresh-label">تحديث</span>
-            </button>
-            {newIds.length > 0 ? (
-              <button type="button" className="news-new-badge" onClick={revealNewHeadlines}>
-                {newIds.length} جديدة
-              </button>
-            ) : null}
-          </div>
+        <div className="nr-tools">
+          <p className="nr-status" aria-live="polite">
+            <span className={`dot ${feedQuery.isError ? "is-danger" : "is-live"}`} aria-hidden="true" />
+            {feedQuery.isLoading ? "جارٍ التحميل" : `${items.length} عنوان`}
+            {feedQuery.data?.fetchedAt ? <span className="nr-updated" title={formatStamp(feedQuery.data.fetchedAt)}>· {formatRelative(feedQuery.data.fetchedAt)}</span> : null}
+          </p>
+          <button type="button" className="icon-btn" aria-label="تحديث العناوين" disabled={feedQuery.isFetching} onClick={() => void feedQuery.refetch()}>
+            <ArrowClockwise size={20} className={refreshing ? "nr-spin" : undefined} aria-hidden="true" />
+          </button>
+          <button type="button" className="btn btn-quiet btn-sm" onClick={() => setDrawerOpen(true)} aria-haspopup="dialog" aria-label="المحادثات المحفوظة">
+            <Chats size={18} aria-hidden="true" />
+            <span className="nr-history-label">المحادثات</span>
+          </button>
         </div>
       </header>
 
-      <NewsFilters
-        filters={{ query, language: langFilter, source: sourceId, time: timeFilter, topic: topicFilter }}
+      <NewsToolbar
+        filters={{ query: search, language: langFilter, source: sourceId, time: timeFilter, topic: topicFilter }}
         sources={sources}
         timeCounts={timeCounts}
         topicCounts={topicCounts}
         onChange={changeFilters}
       />
 
-      <div className="newsroom-pane-tabs" role="group" aria-label="أقسام الغرفة">
-        <button type="button" aria-pressed={mobilePane === "feed"} aria-controls="news-feed-pane" className={mobilePane === "feed" ? "is-active" : ""} onClick={() => setMobilePane("feed")}>
-          <Newspaper size={18} aria-hidden="true" />العناوين <span className="newsroom-tab-count">{items.length}</span>
-        </button>
-        <button type="button" aria-pressed={mobilePane === "desk"} aria-controls="news-desk-pane" className={mobilePane === "desk" ? "is-active" : ""} onClick={() => setMobilePane("desk")}>
-          <FileText size={18} aria-hidden="true" />التحرير {showEditorial && <span className="newsroom-tab-dot" aria-label="توجد مسودة" />}
-        </button>
-      </div>
-
-      <div className={`news-panes ${showEditorial ? "is-editorial" : ""}`}>
-        <section id="news-feed-pane" className={`news-pane newsroom-feed-pane ${mobilePane === "feed" ? "" : "is-mobile-hidden"}`} aria-label="العناوين">
-          <div className="news-pane-bar">
-            <p className="news-pane-label"><Newspaper size={17} aria-hidden="true" />العناوين</p>
-            <p className="news-pane-meta">
-              {items.length}
-              {timeFilter !== "all"
-                ? ` · ${TIME_FILTERS.find((option) => option.id === timeFilter)?.label}`
-                : ""}
-              {topicFilter !== "all"
-                ? ` · ${TOPIC_FILTERS.find((option) => option.id === topicFilter)?.label}`
-                : ""}
-            </p>
-          </div>
-          <div className="news-pane-scroll" ref={feedScrollRef} tabIndex={-1} aria-label="قائمة العناوين">
-            {feedQuery.error || sourcesQuery.error ? <DeskError error={feedQuery.error ?? sourcesQuery.error} /> : null}
-            {feedQuery.isLoading && (
-              <p className="news-state">
-                <CircleNotch className="news-spin" size={18} aria-hidden="true" />
-                جاري جلب العناوين...
-              </p>
-            )}
-            {!feedQuery.isLoading && !feedQuery.error && !sourcesQuery.error && items.length === 0 && (
-              <div className="news-state news-state--empty">
-                <p>لا توجد عناوين في هذه النافذة. غيّر الوقت أو الموضوع أو المصدر أو كلمة البحث.</p>
-                {timeFilter !== "all" ? (
-                  <button type="button" className="news-chip" onClick={() => setTimeFilter("all")}>
-                    عرض كل الأوقات
-                  </button>
-                ) : null}
-                {topicFilter !== "all" ? (
-                  <button type="button" className="news-chip" onClick={() => setTopicFilter("all")}>
-                    عرض كل المواضيع
-                  </button>
-                ) : null}
+      <div className="nr-body">
+        <section className="nr-feed" aria-label="العناوين" aria-busy={feedQuery.isLoading} inert={mobileOpen || undefined}>
+          {newIds.length > 0 ? (
+            <button type="button" className="nr-new" onClick={revealNew}>
+              {newIds.length} {newIds.length === 1 ? "خبر جديد" : "أخبار جديدة"}
+            </button>
+          ) : null}
+          <div className="nr-feed-scroll" ref={feedScrollRef}>
+            {feedError ? <DeskError error={feedError} /> : null}
+            {feedQuery.isLoading ? <WireSkeleton rows={7} /> : null}
+            {!feedQuery.isLoading && !feedError && items.length === 0 ? (
+              <EmptyState
+                icon={<Newspaper size={26} />}
+                title="لا عناوين بهذه التصفية"
+                action={<button type="button" className="btn btn-quiet btn-sm" onClick={clearFilters}>مسح التصفية</button>}
+              >
+                غيّر الوقت أو الموضوع أو المصدر، أو امسح كلمة البحث.
+              </EmptyState>
+            ) : null}
+            {items.length > 0 ? (
+              <div className="wire">
+                {items.map((item) => (
+                  <WireRow
+                    key={item.id}
+                    item={item}
+                    active={selected?.id === item.id && (isDesktop || workOpen)}
+                    arrived={newIds.includes(item.id)}
+                    disabled={busy}
+                    onSelect={() => selectHeadline(item)}
+                  />
+                ))}
               </div>
-            )}
-            {items.map((item) => (
-              <HeadlineRow
-                key={item.id}
-                item={item}
-                active={selected?.id === item.id}
-                disabled={busy}
-                justArrived={newIds.includes(item.id)}
-                onSelect={() => selectHeadline(item.id)}
-              />
-            ))}
+            ) : null}
           </div>
         </section>
 
         <section
-          id="news-desk-pane"
-          ref={deskPaneRef}
+          className="nr-work"
+          ref={workRef}
           tabIndex={-1}
-          className={`news-pane news-desk-pane newsroom-desk-pane ${showEditorial ? "is-editorial" : ""} ${mobilePane === "desk" ? "" : "is-mobile-hidden"}`}
           aria-label="التحرير"
+          inert={!isDesktop && !workOpen ? true : undefined}
         >
-          <div className="news-pane-bar news-desk-bar">
-            <div className="newsroom-desk-heading">
-              <button type="button" className="newsroom-back" aria-label="العودة إلى العناوين" onClick={() => setMobilePane("feed")}><ArrowLeft size={18} aria-hidden="true" /></button>
-              <p className="news-pane-label"><FileText size={17} aria-hidden="true" />{showEditorial ? "المسودة والمحرّر" : "الخبر وأدوات الكتابة"}</p>
-            </div>
-            <div className="news-desk-bar-tools">
-              {busy ? (
-                <p className="news-desk-busy" aria-live="polite">
-                  <CircleNotch className="news-spin" size={14} aria-hidden="true" />
-                  جاري الكتابة...
-                </p>
-              ) : null}
-              {!busy && <span className="news-pane-meta">{showEditorial ? storyFormatMeta(resultFormat).label : "معاينة المصدر"}</span>}
-            </div>
-          </div>
-
-          {showEditorial && conversationId && (
-            <div className="newsroom-editor-tabs" role="group" aria-label="أدوات التحرير">
-              <button type="button" className={editorialPane === "draft" ? "is-active" : ""} aria-pressed={editorialPane === "draft"} aria-controls="news-editorial-draft" onClick={() => setEditorialPane("draft")}><FileText size={16} aria-hidden="true" />المسودة</button>
-              <button type="button" className={editorialPane === "revision" ? "is-active" : ""} aria-pressed={editorialPane === "revision"} aria-controls="news-editorial-revision" onClick={() => setEditorialPane("revision")}><Chats size={16} aria-hidden="true" />تعديل النص <span className="newsroom-tab-note">والنسخ السابقة</span></button>
-            </div>
-          )}
-
-          <div className="news-desk-main">
-            <div className="news-pane-scroll news-desk-body">
-              {showEditorial ? (
-                conversationLoading && !summary ? (
-                  <div className="news-editorial news-editorial--loading">
-                    <p className="news-state" aria-live="polite">
-                      <CircleNotch className="news-spin" size={18} aria-hidden="true" />
-                      جاري فتح المحادثة…
-                    </p>
-                  </div>
-                ) : summary ? (
-                  <div className="news-editorial">
-                    <div className={`news-editorial-stage is-${editorialPane} ${conversationId ? "has-revision" : ""}`}>
-                      <div className="news-editorial-main" id="news-editorial-draft">
-                        <div className="news-editorial-toolbar">
-                          <DeskFormatBar
-                            mode="switch"
-                            selected={resultFormat}
-                            busy={busy}
-                            briefingDisabled={busy}
-                            carouselOptions={carouselOptions}
-                            onCarouselOptions={setCarouselOptions}
-                            onApplyCarousel={() => runStoryFormat("carousel")}
-                            onSelectFormat={(next) => {
-                              summarizeMutation.reset();
-                              setConversationId(null);
-                              if (next === "briefing") runSummarize({ briefing: true, language: "ar" });
-                              else runStoryFormat(next);
-                            }}
-                          />
-                          <div className="news-editorial-actions">
-                            <button
-                              type="button"
-                              className="news-editorial-action"
-                              onClick={() => void onCopy(summary)}
-                              disabled={busy}
-                              aria-label={copied ? "تم النسخ" : "نسخ المسودة"}
-                              title={copied ? "تم النسخ" : "نسخ"}
-                            >
-                              {copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}
-                              <span>{copied ? "تم النسخ" : "نسخ"}</span>
-                            </button>
-                            <button
-                              type="button"
-                              className="news-editorial-action"
-                              onClick={() => {
-                                summarizeMutation.reset();
-                                setConversationId(null);
-                                setCopied(false);
-                                setInstruction("");
-                              }}
-                              disabled={busy}
-                              aria-label="خبر آخر"
-                              title="خبر آخر"
-                            >
-                              <Newspaper size={15} aria-hidden="true" />
-                              <span>خبر آخر</span>
-                            </button>
-                          </div>
-                        </div>
-                        <div className="news-editorial-doc">
-                          <EditorialDraft
-                            data={summary}
-                            format={resultFormat}
-                            busy={busy}
-                            copied={copied}
-                            hideCopy
-                            onCopy={() => void onCopy(summary)}
-                          />
-                          {error ? <DeskError error={error} /> : null}
-                        </div>
-                      </div>
-                      {conversationId ? (
-                        <RevisionThread
-                          id="news-editorial-revision"
-                          messages={conversationDetailQuery.data?.messages ?? []}
-                          versions={conversationDetailQuery.data?.versions ?? []}
-                          currentVersionId={conversationDetailQuery.data?.currentVersionId ?? summary.versionId ?? ""}
-                          pendingMemory={conversationDetailQuery.data?.pendingMemory ?? []}
-                          instruction={instruction}
-                          busy={busy}
-                          format={resultFormat}
-                          onInstructionChange={setInstruction}
-                          onSubmit={submitRevision}
-                          onQuickAction={(value) => {
-                            setInstruction(value);
-                            if (conversationId) reviseMutation.mutate({ id: conversationId, text: value });
-                          }}
-                          onRestore={(versionId) => restoreMutation.mutate({ id: conversationId, versionId })}
-                          onMemorySave={(id) => memoryMutation.mutate({ id, status: "approved" })}
-                          onMemoryEdit={(id, next) => memoryMutation.mutate({ id, status: "approved", instruction: next })}
-                          onMemoryDismiss={(id) => memoryMutation.mutate({ id, status: "rejected" })}
-                        />
-                      ) : null}
-                    </div>
-                  </div>
-                ) : null
-              ) : (
+          <div className="nr-work-bar">
+            <button type="button" className="icon-btn nr-back" aria-label="العودة إلى العناوين" onClick={closeWork}>
+              <ArrowRight size={20} className="flip-rtl-back" aria-hidden="true" />
+            </button>
+            <p className="nr-work-title">
+              {hasDraft ? <PencilSimple size={18} aria-hidden="true" /> : <FileText size={18} aria-hidden="true" />}
+              {hasDraft ? storyFormatMeta(resultFormat).label : "الخبر"}
+            </p>
+            <div className="nr-work-actions">
+              {hasDraft && summary ? (
                 <>
-                  {error ? <DeskError error={error} /> : null}
-
-                  {selected ? (
-                    <article
-                      className={[
-                        "news-story-card",
-                        `is-${newsRecency(selected.publishedAt)}`,
-                      ].join(" ")}
-                    >
-                      <div className="news-story-copy">
-                        <div className="news-story-card-meta">
-                          <div className="news-feed-source">
-                            <SourceMarkStack sources={selected.sources} size={24} />
-                            {selected.sources[0] ? (
-                              <span className="news-source-name">{selected.sources[0].name}</span>
-                            ) : null}
-                            {selected.sources.length > 1 ? (
-                              <span className="news-cluster">+{selected.sources.length - 1}</span>
-                            ) : null}
-                          </div>
-                          <div className="news-feed-meta">
-                            <time
-                              className={`news-time is-${newsRecency(selected.publishedAt)}`}
-                              dateTime={selected.publishedAt}
-                              title={formatStamp(selected.publishedAt)}
-                            >
-                              {formatRelative(selected.publishedAt)}
-                            </time>
-                          </div>
-                        </div>
-
-                        <h2 className="news-story-title" dir={hasArabic(selected.title) ? "rtl" : "ltr"}>
-                          {selected.title}
-                        </h2>
-
-                        {selected.excerpt ? (
-                          <div className="news-story-brief">
-                            <p className="news-story-kicker">من المصدر</p>
-                            <p className="news-story-excerpt" dir={hasArabic(selected.excerpt) ? "rtl" : "ltr"}>
-                              {selected.excerpt}
-                            </p>
-                          </div>
-                        ) : (
-                          <p className="news-story-excerpt is-empty">لا يتوفر موجز من المصدر. افتح الرابط الأصلي.</p>
-                        )}
-
-                        {selected.sources.length > 0 ? (
-                          <ul className="news-story-origin">
-                            {selected.sources.map((source) => {
-                              const host = hostFromUrl(source.url);
-                              return (
-                                <li key={`${source.id}-${source.url}`}>
-                                  <a href={source.url} target="_blank" rel="noreferrer">
-                                    <SourceMark id={source.id} name={source.name} url={source.url} size={24} />
-                                    <span className="news-story-origin-copy">
-                                      <span>اقرأ في {source.name}</span>
-                                      {host ? <span className="news-story-origin-host">{host}</span> : null}
-                                    </span>
-                                    <ArrowSquareOut size={14} weight="regular" aria-hidden="true" />
-                                  </a>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        ) : null}
-                      </div>
-
-                      <div className="news-desk-actions">
-                        <DeskFormatBar
-                          mode="picker"
-                          selected={selectedFormat}
-                          busy={busy}
-                          briefingDisabled={busy || items.length === 0}
-                          showHint
-                          carouselOptions={carouselOptions}
-                          onCarouselOptions={setCarouselOptions}
-                          onSelectFormat={selectFormat}
-                        />
-                      </div>
-                    </article>
-                  ) : (
-                    !busy &&
-                    !error && (
-                      <div className="news-desk-empty">
-                        <p>اختر خبراً من العناوين لعرضه هنا ثم اطلب ملخصاً تحريرياً.</p>
-                      </div>
-                    )
-                  )}
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={backToStory} disabled={busy}>
+                    الخبر الأصلي
+                  </button>
+                  <CopyButton className="btn btn-quiet btn-sm" label="نسخ" disabled={busy} getText={() => formatSummaryClipboard(summary)} toastMessage="تم نسخ المسودة" />
                 </>
-              )}
+              ) : null}
             </div>
-
-            {copyError && <p className="newsroom-copy-error" role="alert">تعذّر النسخ. يمكنك تحديد النص ونسخه يدوياً.</p>}
-            {!showEditorial && selected && (
-              <div className="newsroom-generate-dock">
-                <p><span>الصيغة المختارة</span><strong>{storyFormatMeta(selectedFormat).label}</strong></p>
-                <button type="button" className="news-btn-primary" disabled={busy || (selectedFormat === "briefing" && items.length === 0)} onClick={generateSummary}>
-                  {busy ? <CircleNotch className="news-spin" size={18} aria-hidden="true" /> : <FileText size={18} aria-hidden="true" />}
-                  {busy ? "جارٍ إعداد المحتوى…" : "توليد المحتوى"}
-                </button>
-              </div>
-            )}
-
-            <Link
-              to="/generate"
-              state={{
-                prompt: selected?.sources[0]?.url ?? "",
-                source: "news",
-                style: "brief",
-              }}
-              className="news-compose-link"
-            >
-              <span className="news-compose-toggle-label">
-                <LinkSimple size={14} aria-hidden="true" />
-                لصق رابط وتوليد ملخص
-              </span>
-              <ArrowLeft size={16} weight="bold" aria-hidden="true" />
-            </Link>
           </div>
+
+          {hasDraft && conversationId ? (
+            <div className="nr-tabs">
+              <Segmented
+                value={tab}
+                onChange={setTab}
+                ariaLabel="أدوات التحرير"
+                block
+                options={[
+                  { id: "draft", label: "المسودة" },
+                  { id: "chat", label: "المحرّر" },
+                ]}
+              />
+            </div>
+          ) : null}
+
+          {hasDraft || opening ? (
+            <div className={`nr-editor ${hasDraft && conversationId ? "has-chat" : ""} tab-${tab}`}>
+              <div className="nr-draft" id="news-draft">
+                <div className="nr-scroll">
+                  {workError ? <DeskError error={workError} /> : null}
+                  {summary ? (
+                    <FormatSwitch
+                      selected={resultFormat}
+                      busy={busy}
+                      briefingDisabled={busy}
+                      carouselOptions={carouselOptions}
+                      onCarouselOptions={setCarouselOptions}
+                      onApplyCarousel={() => rewrite("carousel")}
+                      onSelect={rewrite}
+                    />
+                  ) : null}
+                  {opening ? (
+                    <Working label="جارٍ فتح المحادثة…" />
+                  ) : summarizeMutation.isPending ? (
+                    <Working label={`جارٍ كتابة ${storyFormatMeta(pendingFormat).label}…`} />
+                  ) : summary ? (
+                    <div className={reviseMutation.isPending || restoreMutation.isPending ? "nr-doc is-busy" : "nr-doc"} aria-busy={busy}>
+                      <EditorialDraft key={summary.versionId ?? summary.title} data={summary} format={resultFormat} />
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              {conversationId && summary ? (
+                <RevisionThread
+                  id="news-revision"
+                  messages={detail?.messages ?? []}
+                  versions={detail?.versions ?? []}
+                  currentVersionId={detail?.currentVersionId ?? summary.versionId ?? ""}
+                  pendingMemory={detail?.pendingMemory ?? []}
+                  instruction={instruction}
+                  busy={busy}
+                  format={resultFormat}
+                  onInstructionChange={setInstruction}
+                  onSubmit={() => submitRevision()}
+                  onQuickAction={(value) => submitRevision(value)}
+                  onRestore={(versionId) => restoreMutation.mutate({ id: conversationId, versionId })}
+                  onMemorySave={(id) => memoryMutation.mutate({ id, status: "approved" })}
+                  onMemoryEdit={(id, next) => memoryMutation.mutate({ id, status: "approved", instruction: next })}
+                  onMemoryDismiss={(id) => memoryMutation.mutate({ id, status: "rejected" })}
+                />
+              ) : null}
+            </div>
+          ) : summarizeMutation.isPending ? (
+            <div className="nr-scroll">
+              <Working label={`جارٍ كتابة ${storyFormatMeta(pendingFormat).label}…`} />
+            </div>
+          ) : (
+            <StoryPanel
+              story={selected}
+              error={workError}
+              selectedFormat={selectedFormat}
+              carouselOptions={carouselOptions}
+              busy={busy}
+              hasItems={items.length > 0}
+              missing={Boolean(itemParam) && !selected && !feedQuery.isLoading}
+              onFormat={setSelectedFormat}
+              onCarousel={setCarouselOptions}
+              onGenerate={() => generate()}
+            />
+          )}
         </section>
       </div>
+
       <ConversationDrawer
         busy={busy}
         open={drawerOpen}
@@ -736,28 +544,34 @@ export default function NewsPage() {
         activeId={conversationId}
         listLoading={conversationListQuery.isFetching}
         error={conversationListQuery.error || memoryQuery.error || memoryMutation.error ? toolErrorMessage(conversationListQuery.error ?? memoryQuery.error ?? memoryMutation.error) : undefined}
-        onSearch={(value) => setConversationQuery(value)}
+        onSearch={setConversationQuery}
         onClose={() => {
           setDrawerOpen(false);
           setConversationQuery("");
         }}
         onSelect={(id) => {
           if (busy) return;
-          setConversationId(id);
-          summarizeMutation.reset();
-          reviseMutation.reset();
-          restoreMutation.reset();
-          memoryMutation.reset();
-          setCopied(false);
-          setCopyError(false);
-          setEditorialPane("draft");
-          setInstruction("");
+          resetWork();
           setDrawerOpen(false);
-          setMobilePane("desk");
+          setConversationQuery("");
+          patchParams({ c: id }, false);
         }}
         onDisableMemory={(id) => memoryMutation.mutate({ id, status: "disabled" })}
       />
-      <p className="sr-only" role="status">{copied ? "تم نسخ المسودة" : ""}</p>
+    </div>
+  );
+}
+
+function Working({ label }: { label: string }) {
+  return (
+    <div className="nr-working" role="status" aria-live="polite">
+      <p className="working">
+        <span className="working-dots" aria-hidden="true"><i /><i /><i /></span>
+        {label}
+      </p>
+      <div className="ink-lines" aria-hidden="true">
+        <span /><span /><span /><span /><span />
+      </div>
     </div>
   );
 }
@@ -765,251 +579,117 @@ export default function NewsPage() {
 function DeskError({ error }: { error: unknown }) {
   if (isOpenAIQuotaError(error)) return <QuotaNotice />;
   return (
-    <p className="news-state is-error" role="alert">
-      <WarningCircle size={18} aria-hidden="true" />
-      {toolErrorMessage(error)}
-    </p>
+    <div className="notice is-error" role="alert">
+      <WarningCircle size={20} weight="fill" aria-hidden="true" />
+      <div>{toolErrorMessage(error)}</div>
+    </div>
   );
 }
 
-function DeskFormatBar({
-  mode,
-  selected,
-  busy,
-  briefingDisabled,
-  showHint = false,
+function StoryPanel({
+  story,
+  error,
+  selectedFormat,
   carouselOptions,
-  onCarouselOptions,
-  onApplyCarousel,
-  onSelectFormat,
-}: {
-  mode: "picker" | "switch";
-  selected: NewsSummarizeData["format"];
-  busy: boolean;
-  briefingDisabled: boolean;
-  showHint?: boolean;
-  carouselOptions?: CarouselOptions;
-  onCarouselOptions?: (next: CarouselOptions) => void;
-  onApplyCarousel?: () => void;
-  onSelectFormat: (format: NewsSummarizeData["format"]) => void;
-}) {
-  const hintId = showHint ? "news-format-hint-story" : "news-format-hint-result";
-  const meta = storyFormatMeta(selected);
-  const isPicker = mode === "picker";
-  const choices = [
-    ...STORY_FORMATS,
-    { id: "briefing" as const, label: "موجز", hint: "أعلى 8 عناوين في الغرفة" },
-  ];
-
-  return (
-    <div className={`news-format-bar ${showHint ? "" : "is-compact"} ${isPicker ? "is-picker" : "is-switch"}`}>
-      {showHint ? (
-        <p className="news-format-caption" id={hintId}>
-          <span>اختر صيغة المحتوى</span>
-          <span>للخبر أو لموجز العناوين</span>
-        </p>
-      ) : (
-        <span className="sr-only" id={hintId}>
-          {meta.hint}
-        </span>
-      )}
-
-      <div className="news-format-toolbar">
-        <div className="news-seg news-seg--formats" role="group" aria-label="شكل التلخيص" aria-describedby={hintId}>
-          {choices.map((option) => {
-            const Icon = FORMAT_ICONS[option.id];
-            const active = selected === option.id;
-            const isBriefing = option.id === "briefing";
-            return (
-              <button
-                key={option.id}
-                type="button"
-                className={`news-seg-btn ${isBriefing ? "news-seg-btn--split" : ""} ${active ? "is-active" : ""}`}
-                disabled={isBriefing ? briefingDisabled : busy}
-                aria-pressed={active}
-                title={option.hint}
-                onClick={() => onSelectFormat(option.id)}
-              >
-                {busy && active ? <CircleNotch className="news-spin" size={18} aria-hidden="true" /> : <Icon size={18} aria-hidden="true" />}
-                <span className="newsroom-format-copy"><span>{option.label}</span>{isPicker && <span className="newsroom-format-hint">{option.hint}</span>}</span>
-                {isPicker && active && <Check className="newsroom-format-check" size={14} aria-hidden="true" />}
-              </button>
-            );
-          })}
-        </div>
-
-      </div>
-      {selected === "carousel" && carouselOptions && onCarouselOptions ? (
-        isPicker ? (
-          <CarouselControls options={carouselOptions} busy={busy} showApply={false} onChange={onCarouselOptions} />
-        ) : (
-          <details className="newsroom-carousel-settings">
-            <summary>إعدادات الكاروسيل</summary>
-            <CarouselControls options={carouselOptions} busy={busy} showApply onChange={onCarouselOptions} onApply={onApplyCarousel} />
-          </details>
-        )
-      ) : null}
-    </div>
-  );
-}
-
-export function CarouselControls({
-  options,
   busy,
-  showApply,
-  onChange,
-  onApply,
+  hasItems,
+  missing,
+  onFormat,
+  onCarousel,
+  onGenerate,
 }: {
-  options: CarouselOptions;
+  story: NewsFeedItem | null;
+  error: unknown;
+  selectedFormat: Format;
+  carouselOptions: CarouselOptions;
   busy: boolean;
-  showApply: boolean;
-  onChange: (next: CarouselOptions) => void;
-  onApply?: () => void;
+  hasItems: boolean;
+  missing: boolean;
+  onFormat: (format: Format) => void;
+  onCarousel: (next: CarouselOptions) => void;
+  onGenerate: () => void;
 }) {
+  const briefing = selectedFormat === "briefing";
+  const canGenerate = !busy && (briefing ? hasItems : Boolean(story));
+
   return (
-    <div className="news-carousel-controls">
-      <div className="news-carousel-field">
-        <span className="news-field-label">عدد الشرائح</span>
-        <div className="news-carousel-pills" role="group" aria-label="عدد الشرائح">
-          {[3, 4, 5, 6].map((count) => (
-            <button
-              key={count}
-              type="button"
-              className={`news-seg-btn ${options.slides === count ? "is-active" : ""}`}
-              aria-pressed={options.slides === count}
-              disabled={busy}
-              onClick={() => onChange({ ...options, slides: count })}
-            >
-              {count}
-            </button>
-          ))}
+    <>
+      <div className="nr-scroll">
+        {error ? <DeskError error={error} /> : null}
+
+        {story ? (
+          <article className={`story is-${newsRecency(story.publishedAt)}`}>
+            <div className="story-meta">
+              <SourceMarkStack sources={story.sources} size={24} />
+              <span className="story-source">
+                {story.sources[0]?.name}
+                {story.sources.length > 1 ? ` +${story.sources.length - 1}` : ""}
+              </span>
+              {isBreaking(story) ? <span className="badge badge-live">عاجل</span> : null}
+              <time dateTime={story.publishedAt} title={formatStamp(story.publishedAt)}>{formatRelative(story.publishedAt)}</time>
+            </div>
+            <h2 className="story-title" dir={hasArabic(story.title) ? "rtl" : "ltr"}>{story.title}</h2>
+            {story.excerpt ? (
+              <p className="story-excerpt" dir={hasArabic(story.excerpt) ? "rtl" : "ltr"}>{story.excerpt}</p>
+            ) : (
+              <p className="hint">لا يتوفر موجز من المصدر. افتح الرابط الأصلي لقراءة الخبر.</p>
+            )}
+            {story.sources.length > 0 ? (
+              <ul className="story-origins">
+                {story.sources.map((source) => {
+                  const host = hostFromUrl(source.url);
+                  return (
+                    <li key={`${source.id}-${source.url}`}>
+                      <a href={source.url} target="_blank" rel="noreferrer">
+                        <SourceMark id={source.id} name={source.name} url={source.url} size={22} />
+                        <span>
+                          <strong>اقرأ في {source.name}</strong>
+                          {host ? <small dir="ltr">{host}</small> : null}
+                        </span>
+                        <ArrowSquareOut size={16} aria-hidden="true" />
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
+          </article>
+        ) : (
+          <EmptyState icon={<Newspaper size={26} />} title={missing ? "الخبر لم يعد في القائمة" : "اختر خبراً للبدء"}>
+            {missing
+              ? "قد يكون خرج من نافذة المصادر أو غيّرت التصفية. اختر خبراً آخر، أو ولّد موجز الغرفة."
+              : "اختر عنواناً من القائمة لتعرض تفاصيله وتكتبه بالصيغة المناسبة."}
+          </EmptyState>
+        )}
+
+        <div className="story-formats">
+          <h3 className="story-formats-title">اكتب الخبر بصيغة</h3>
+          <FormatCards
+            selected={selectedFormat}
+            busy={busy}
+            briefingDisabled={!hasItems}
+            carouselOptions={carouselOptions}
+            onCarouselOptions={onCarousel}
+            onSelect={onFormat}
+          />
         </div>
+
+        <Link to="/generate" state={{ prompt: story?.sources[0]?.url ?? "", source: "news", style: "brief" }} className="story-link">
+          <LinkSimple size={18} aria-hidden="true" />
+          لديك رابط آخر؟ الصقه في صفحة التوليد
+        </Link>
       </div>
-      <div className="news-carousel-field">
-        <span className="news-field-label">الأسلوب</span>
-        <div className="news-carousel-pills" role="group" aria-label="أسلوب النص">
-          <StyleButton
-            active={options.style === "cinematic"}
-            disabled={busy}
-            onClick={() => onChange({ ...options, style: "cinematic" })}
-          >
-            قصة
-          </StyleButton>
-          <StyleButton
-            active={options.style === "frame"}
-            disabled={busy}
-            onClick={() => onChange({ ...options, style: "frame" })}
-          >
-            بطاقة
-          </StyleButton>
-        </div>
-      </div>
-      <div className="news-carousel-field">
-        <span className="news-field-label">كثافة النص</span>
-        <div className="news-carousel-pills" role="group" aria-label="كثافة نص الشرائح">
-          {([{ id: "headline", label: "عنوان" }, { id: "banner", label: "عنوان وشريط" }, { id: "line", label: "سطر توضيحي" }] as const).map((option) => <StyleButton key={option.id} active={options.density === option.id} disabled={busy} onClick={() => onChange({ ...options, density: option.id })}>{option.label}</StyleButton>)}
-        </div>
-      </div>
-      <label className="newsroom-carousel-mark"><input type="checkbox" checked={options.mark} disabled={busy} onChange={(event) => onChange({ ...options, mark: event.target.checked })} />إظهار علامة Newsplus</label>
-      {showApply && onApply ? (
-        <button type="button" className="news-btn-primary news-carousel-apply" disabled={busy} onClick={onApply}>
-          تحديث الشرائح
+
+      <div className="nr-dock">
+        <p className="nr-dock-pick">
+          <span>الصيغة</span>
+          <strong>{storyFormatMeta(selectedFormat).label}</strong>
+        </p>
+        <button type="button" className="btn btn-primary" disabled={!canGenerate} onClick={onGenerate}>
+          {busy ? <span className="spinner" aria-hidden="true" /> : <PencilSimple size={18} aria-hidden="true" />}
+          {busy ? "جارٍ الإعداد…" : "ولّد المحتوى"}
         </button>
-      ) : null}
-    </div>
-  );
-}
-
-function StyleButton({
-  active,
-  disabled,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  disabled: boolean;
-  onClick: () => void;
-  children: string;
-}) {
-  return (
-    <button type="button" className={`news-seg-btn ${active ? "is-active" : ""}`} aria-pressed={active} disabled={disabled} onClick={onClick}>
-      {children}
-    </button>
-  );
-}
-
-function RecencyMarks({ justArrived = false }: { justArrived?: boolean }) {
-  if (!justArrived) return null;
-
-  return (
-    <span className="news-feed-badges">
-      <span className="news-arrived">ظهر الآن</span>
-    </span>
-  );
-}
-
-function HeadlineRow({
-  item,
-  active,
-  justArrived,
-  disabled,
-  onSelect,
-}: {
-  item: NewsFeedItem;
-  active: boolean;
-  justArrived: boolean;
-  disabled: boolean;
-  onSelect: () => void;
-}) {
-  const recency = newsRecency(item.publishedAt);
-  const primarySource = item.sources[0];
-
-  return (
-    <button
-      type="button"
-      id={`news-headline-${item.id}`}
-      data-headline-id={item.id}
-      disabled={disabled}
-      aria-pressed={active}
-      className={[
-        "news-feed-item",
-        `is-${recency}`,
-        active ? "is-active" : "",
-        justArrived ? "is-arrived" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      onClick={onSelect}
-    >
-      <div className="news-feed-row">
-        <div className="news-feed-source">
-          <SourceMarkStack sources={item.sources} size={24} />
-          {primarySource ? (
-            <bdi className="news-source-name">{primarySource.name}</bdi>
-          ) : null}
-          {item.sources.length > 1 ? (
-            <span className="news-cluster">+{item.sources.length - 1}</span>
-          ) : null}
-        </div>
-        <div className="news-feed-meta">
-          <RecencyMarks justArrived={justArrived} />
-          <time
-            className={`news-time is-${recency}`}
-            dateTime={item.publishedAt}
-            title={formatStamp(item.publishedAt)}
-          >
-            {formatRelative(item.publishedAt)}
-          </time>
-        </div>
       </div>
-
-      <p className="news-feed-title" dir={hasArabic(item.title) ? "rtl" : "ltr"} lang={hasArabic(item.title) ? "ar" : "en"}>
-        {item.title}
-      </p>
-      <div className="newsroom-feed-bottom">
-        <span className="newsroom-feed-tags">{item.breaking && <span className="newsroom-breaking">عاجل</span>}<span>{TOPIC_FILTERS.find((topic) => topic.id === item.topic)?.label ?? "أخرى"}</span></span>
-        <span className="newsroom-read-label">عرض الخبر <ArrowLeft size={14} aria-hidden="true" /></span>
-      </div>
-    </button>
+    </>
   );
 }

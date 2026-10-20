@@ -1,266 +1,198 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowsLeftRight, Check, CircleNotch, Copy, FileText, Translate } from "@phosphor-icons/react";
-import { readDeskHandoff } from "@/services/deskHandoff";
-import { translateContent } from "@/services/translateService";
-import { QuotaNotice } from "@/components/QuotaNotice";
-import { copyText, isOpenAIQuotaError, toolErrorMessage } from "@/services/toolErrors";
+import { ArrowsLeftRight, FileText, Translate, WarningCircle } from "@phosphor-icons/react";
 import type { TranslateLanguage } from "@newsplus/shared";
-import "../translate.css";
+import { QuotaNotice } from "@/components/QuotaNotice";
+import { CopyButton } from "@/components/ui/CopyButton";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Segmented } from "@/components/ui/Segmented";
+import { readDeskHandoff } from "@/services/deskHandoff";
+import { isOpenAIQuotaError, toolErrorMessage } from "@/services/toolErrors";
+import { translateContent } from "@/services/translateService";
+import { formatNumber } from "@/utils/format";
 
-type MobilePane = "source" | "output";
+type Pane = "source" | "output";
 
-function charCount(value: string) {
-  return value.trim().length;
-}
+const TARGETS = [
+  { id: "ar" as const, label: "عربي" },
+  { id: "en" as const, label: "English" },
+];
+
+const languageName = (language: string) => (language === "ar" ? "العربية" : language === "en" ? "الإنجليزية" : "لغة أخرى");
+const chars = (value: string) => value.trim().length;
 
 export default function TranslatePage() {
   const handoff = readDeskHandoff(useLocation().state);
   const [source, setSource] = useState(() => handoff?.source ?? "");
   const [target, setTarget] = useState<TranslateLanguage>("en");
-  const [copied, setCopied] = useState(false);
-  const [copyError, setCopyError] = useState(false);
-  const [mobilePane, setMobilePane] = useState<MobilePane>("source");
+  const [pane, setPane] = useState<Pane>("source");
 
   const mutation = useMutation({
     mutationFn: translateContent,
-    onSuccess: () => setMobilePane("output"),
-    onError: () => setMobilePane("source"),
+    onSuccess: () => setPane("output"),
+    onError: () => setPane("source"),
   });
 
   const result = mutation.data;
   const translated = result?.translated ?? "";
   const looksUrl = /^https?:\/\/\S+$/i.test(source.trim());
-  const sourceLimit = looksUrl ? 2_000 : 20_000;
-  const sourceTooLong = charCount(source) > sourceLimit;
-  const extractedSource = looksUrl && result ? result.original : null;
-  const displayedSource = extractedSource ?? source;
-  const languageName = (language: string) => language === "ar" ? "العربية" : language === "en" ? "الإنجليزية" : "لغة أخرى";
+  const limit = looksUrl ? 2_000 : 20_000;
+  const tooLong = chars(source) > limit;
+  const extracted = looksUrl && result ? result.original : null;
+  const shown = extracted ?? source;
 
-  function resetResult() {
+  function reset() {
     mutation.reset();
-    setCopied(false);
-    setCopyError(false);
   }
 
   function changeTarget(next: TranslateLanguage) {
     if (mutation.isPending || next === target) return;
     setTarget(next);
-    resetResult();
-    setMobilePane("source");
+    reset();
+    setPane("source");
   }
-
-  useEffect(() => {
-    if (!copied) return;
-    const timer = window.setTimeout(() => setCopied(false), 1600);
-    return () => window.clearTimeout(timer);
-  }, [copied]);
 
   function swap() {
     if (mutation.isPending) return;
-    setTarget(result?.sourceLanguage === "ar" || result?.sourceLanguage === "en"
-      ? result.sourceLanguage
-      : target === "ar" ? "en" : "ar");
-    if (result) {
-      setSource(result.translated);
-    }
-    resetResult();
-    setMobilePane("source");
+    const detected = result?.sourceLanguage;
+    setTarget(detected === "ar" || detected === "en" ? detected : target === "ar" ? "en" : "ar");
+    if (result) setSource(result.translated);
+    reset();
+    setPane("source");
   }
 
-  function onSubmit() {
-    const trimmed = source.trim();
-    if (!trimmed || mutation.isPending || sourceTooLong) return;
-    setCopied(false);
-    setCopyError(false);
-    mutation.mutate(looksUrl ? { url: trimmed, target } : { text: trimmed, target });
+  function submit() {
+    const value = source.trim();
+    if (!value || mutation.isPending || tooLong) return;
+    mutation.mutate(looksUrl ? { url: value, target } : { text: value, target });
   }
 
   return (
-    <div className="news-desk translate-desk">
-      <header className="news-desk-head">
-        <div className="news-desk-head-row">
-          <div>
-            <h1 className="news-title">ترجمة صحفية</h1>
-            <p className="translate-intro">من المصدر إلى صياغة صحفية دقيقة، مع الحفاظ على المعنى والتفاصيل.</p>
-          </div>
-          <div className="news-live">
-            <span className="translate-control-label">الترجمة إلى</span>
-            <div className="news-seg" role="group" aria-label="لغة الهدف">
-              <button
-                type="button"
-                className={`news-seg-btn ${target === "ar" ? "is-active" : ""}`}
-                aria-pressed={target === "ar"}
-                disabled={mutation.isPending}
-                onClick={() => changeTarget("ar")}
-              >
-                عربي
-              </button>
-              <button
-                type="button"
-                className={`news-seg-btn ${target === "en" ? "is-active" : ""}`}
-                aria-pressed={target === "en"}
-                disabled={mutation.isPending}
-                onClick={() => changeTarget("en")}
-              >
-                <span lang="en">English</span>
-              </button>
-            </div>
-            <button type="button" className="news-refresh" onClick={swap} disabled={mutation.isPending} aria-label="تبديل اتجاه الترجمة">
-              <ArrowsLeftRight size={15} aria-hidden="true" />
-              <span className="news-refresh-label">تبديل</span>
-            </button>
-          </div>
+    <div className="ws">
+      <header className="ws-head">
+        <div className="ws-title">
+          <h1 className="page-title">ترجمة صحفية</h1>
+          <p className="ws-lede">من المصدر إلى صياغة صحفية دقيقة، مع حفظ الأسماء والأرقام والاقتباسات.</p>
+        </div>
+        <div className="ws-head-tools">
+          <span className="field-label">الترجمة إلى</span>
+          <Segmented value={target} onChange={changeTarget} options={TARGETS} ariaLabel="لغة الهدف" size="sm" disabled={mutation.isPending} />
+          <button type="button" className="icon-btn" onClick={swap} disabled={mutation.isPending} aria-label="تبديل اتجاه الترجمة" title="تبديل الاتجاه">
+            <ArrowsLeftRight size={20} aria-hidden="true" />
+          </button>
         </div>
       </header>
 
-      <div className="news-pane-tabs md:hidden" role="group" aria-label="أقسام الترجمة">
-        <button
-          type="button"
-          aria-pressed={mobilePane === "source"}
-          aria-controls="translate-source-pane"
-          className={mobilePane === "source" ? "is-active" : ""}
-          onClick={() => setMobilePane("source")}
-        >
-          <FileText size={16} aria-hidden="true" />
-          الأصل
-        </button>
-        <button
-          type="button"
-          aria-pressed={mobilePane === "output"}
-          aria-controls="translate-output-pane"
-          className={mobilePane === "output" ? "is-active" : ""}
-          onClick={() => setMobilePane("output")}
-        >
-          <Translate size={16} aria-hidden="true" />
-          الترجمة
-        </button>
+      <div className="ws-tabs">
+        <Segmented
+          value={pane}
+          onChange={setPane}
+          ariaLabel="أقسام الترجمة"
+          block
+          options={[
+            { id: "source", label: "الأصل" },
+            { id: "output", label: "الترجمة", disabled: !translated && !mutation.isPending },
+          ]}
+        />
       </div>
 
       <form
-        className="news-panes"
+        className="ws-body"
         onSubmit={(event) => {
           event.preventDefault();
-          onSubmit();
+          submit();
         }}
       >
-        <section id="translate-source-pane" className={`news-pane ${mobilePane === "source" ? "" : "max-md:hidden"}`} aria-label="المصدر">
-          <div className="news-pane-bar">
-            <p className="news-pane-label"><FileText size={16} aria-hidden="true" />{extractedSource ? "النص المستخرج" : looksUrl ? "رابط المصدر" : "النص الأصلي"}</p>
-            <p className="news-pane-meta"><bdi>{charCount(displayedSource).toLocaleString("ar-EG")}</bdi> حرف</p>
+        <section className={`ws-pane ${pane === "source" ? "" : "is-off"}`} aria-label="الأصل">
+          <div className="ws-pane-head">
+            <p className="panel-title"><FileText size={18} aria-hidden="true" />{extracted ? "النص المستخرج" : looksUrl ? "رابط المصدر" : "النص الأصلي"}</p>
+            <p className="panel-meta"><bdi>{formatNumber(chars(shown))}</bdi> حرف</p>
           </div>
-          {extractedSource && (
-            <div className="translate-source-link">
-              <span dir="ltr" title={source}>{source}</span>
-              <button type="button" onClick={resetResult} disabled={mutation.isPending}>تعديل المصدر</button>
+          {extracted ? (
+            <div className="source-strip">
+              <span title={source}>{source}</span>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={reset} disabled={mutation.isPending}>تعديل المصدر</button>
             </div>
-          )}
-          <div className="news-pane-scroll news-pane-editor">
-            <label className="sr-only" htmlFor="translate-source">
-              النص الأصلي
-            </label>
+          ) : null}
+          <div className="ws-fill">
+            <label className="sr-only" htmlFor="translate-source">النص الأصلي</label>
             <textarea
               id="translate-source"
-              className="tool-desk-textarea tool-desk-textarea--fill"
-              value={displayedSource}
-              readOnly={Boolean(extractedSource)}
+              className="textarea"
+              dir="auto"
+              value={shown}
+              readOnly={Boolean(extracted)}
               disabled={mutation.isPending}
-              aria-invalid={sourceTooLong}
+              aria-invalid={tooLong || undefined}
+              aria-describedby="translate-hint"
+              placeholder="الصق نص الخبر أو رابط المقال هنا…"
               onChange={(event) => {
                 setSource(event.target.value);
-                resetResult();
+                reset();
               }}
-              placeholder="الصق نص الخبر أو رابط المقال هنا…"
-              aria-describedby="translate-source-hint"
-              dir="auto"
             />
-          </div>
-          <div className="news-desk-actions gen-assign-foot">
-            <p id="translate-source-hint" className={sourceTooLong ? "tool-desk-hint is-error" : "translate-footnote"}>
-              {sourceTooLong
-                ? `المصدر يتجاوز ${sourceLimit.toLocaleString("ar-EG")} حرف. ${looksUrl ? "استخدم رابطاً أقصر أو الصق نص المقال." : "قسّم النص إلى أجزاء كاملة للترجمة."}`
-                : "نص كامل وفقرات متسقة، مع الحفاظ على الأسماء والأرقام والاقتباسات."}
+            <p id="translate-hint" className={`hint ${tooLong ? "is-error" : ""}`}>
+              {tooLong
+                ? `المصدر يتجاوز ${formatNumber(limit)} حرف. ${looksUrl ? "استخدم رابطاً أقصر أو الصق نص المقال." : "قسّم النص إلى أجزاء كاملة."}`
+                : "الصق نصاً كاملاً أو رابط مقال. الفقرات المتسقة تعطي ترجمة أدق."}
             </p>
-            {mutation.error ? (
-              isOpenAIQuotaError(mutation.error) ? (
-                <QuotaNotice />
-              ) : (
-                <p className="tool-desk-hint is-error" role="alert">{toolErrorMessage(mutation.error)}</p>
-              )
-            ) : null}
-            <button type="submit" className="news-btn-primary news-format-generate" disabled={mutation.isPending || !source.trim() || sourceTooLong}>
-              {mutation.isPending ? <CircleNotch className="news-spin" size={18} aria-hidden="true" /> : <Translate size={18} aria-hidden="true" />}
-              {mutation.isPending ? "جارٍ إعداد الترجمة…" : `ترجمة إلى ${languageName(target)}`}
+          </div>
+          <div className="ws-dock">
+            {mutation.error ? <ErrorBlock error={mutation.error} /> : null}
+            <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={mutation.isPending || !source.trim() || tooLong}>
+              {mutation.isPending ? <span className="spinner" aria-hidden="true" /> : <Translate size={20} aria-hidden="true" />}
+              {mutation.isPending ? "جارٍ الترجمة…" : `ترجم إلى ${languageName(target)}`}
             </button>
           </div>
         </section>
 
-        <section id="translate-output-pane" className={`news-pane news-desk-pane ${mobilePane === "output" ? "" : "max-md:hidden"}`} aria-label="الترجمة" aria-busy={mutation.isPending}>
-          <div className="news-pane-bar news-desk-bar">
-            <p className="news-pane-label"><Translate size={16} aria-hidden="true" />الترجمة الصحفية</p>
-            {mutation.isPending ? (
-              <p className="news-desk-busy" aria-live="polite">
-                <CircleNotch className="news-spin" size={14} aria-hidden="true" />
-                جارٍ الترجمة…
-              </p>
-            ) : translated ? (
-              <p className="news-pane-meta">
-                {languageName(result?.targetLanguage ?? target)}
-              </p>
-            ) : <p className="news-pane-meta">{languageName(target)}</p>}
+        <section className={`ws-pane ${pane === "output" ? "" : "is-off"}`} aria-label="الترجمة" aria-busy={mutation.isPending}>
+          <div className="ws-pane-head">
+            <p className="panel-title"><Translate size={18} aria-hidden="true" />الترجمة</p>
+            <p className="panel-meta">{languageName(result?.targetLanguage ?? target)}</p>
           </div>
-          <div className="news-desk-main">
-            <div className="news-pane-scroll news-desk-body">
-              {!translated && !mutation.isPending && (
-                <div className="news-desk-empty">
-                  <Translate size={32} weight="thin" aria-hidden="true" />
-                  <h2>الخبر بلغته الجديدة</h2>
-                  <p>أضف المصدر واختر لغة الترجمة. سيظهر النص هنا للمراجعة جنباً إلى جنب مع الأصل.</p>
-                  <span className="translate-empty-note">صياغة طبيعية · تفاصيل محفوظة</span>
-                </div>
-              )}
-              {mutation.isPending && (
-                <p className="news-state" role="status">
-                  <CircleNotch className="news-spin" size={18} aria-hidden="true" />
+          <div className="ws-scroll">
+            {mutation.isPending ? (
+              <div className="ws-working" role="status">
+                <p className="working">
+                  <span className="working-dots" aria-hidden="true"><i /><i /><i /></span>
                   جارٍ ترجمة النص ومراجعة الصياغة…
                 </p>
-              )}
-              {translated && !mutation.isPending && (
-                <article className="translate-copy" dir={result?.targetLanguage === "ar" ? "rtl" : "ltr"} lang={result?.targetLanguage ?? target} aria-label="النص المترجم">
-                  {translated}
-                </article>
-              )}
-            </div>
-            {translated && !mutation.isPending && (
-              <div className="translate-result-footer">
-                <div>
-                  <p className="translate-result-meta">{languageName(result?.sourceLanguage ?? "other")} إلى {languageName(result?.targetLanguage ?? target)} · <bdi>{charCount(translated).toLocaleString("ar-EG")}</bdi> حرف</p>
-                  <p className="translate-footnote">راجع النص قبل النشر.</p>
-                </div>
-                <button
-                  type="button"
-                  className="news-btn-secondary"
-                  onClick={async () => {
-                    try {
-                      await copyText(translated);
-                      setCopied(true);
-                      setCopyError(false);
-                    } catch {
-                      setCopyError(true);
-                    }
-                  }}
-                >
-                  {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
-                  {copied ? "تم النسخ" : "نسخ الترجمة"}
-                </button>
-                {copyError && <p className="translate-copy-error" role="alert">تعذّر النسخ. يمكنك تحديد النص ونسخه يدوياً.</p>}
+                <div className="ink-lines" aria-hidden="true"><span /><span /><span /><span /><span /></div>
               </div>
+            ) : translated ? (
+              <article className="translated" dir={result?.targetLanguage === "ar" ? "rtl" : "ltr"} lang={result?.targetLanguage ?? target} aria-label="النص المترجم">
+                {translated}
+              </article>
+            ) : (
+              <EmptyState icon={<Translate size={26} />} title="الخبر بلغته الجديدة">
+                أضف المصدر واختر لغة الترجمة، وستظهر النتيجة هنا للمراجعة.
+              </EmptyState>
             )}
           </div>
+          {translated && !mutation.isPending ? (
+            <div className="ws-dock">
+              <div className="ws-dock-row">
+                <CopyButton className="btn btn-primary btn-sm" label="نسخ الترجمة" getText={() => translated} toastMessage="تم نسخ الترجمة" />
+                <p className="pair-note">
+                  {languageName(result?.sourceLanguage ?? "other")} إلى {languageName(result?.targetLanguage ?? target)} · <bdi>{formatNumber(chars(translated))}</bdi> حرف · راجع النص قبل النشر
+                </p>
+              </div>
+            </div>
+          ) : null}
         </section>
       </form>
-      <p className="sr-only" role="status">{copied ? "تم نسخ الترجمة" : translated && !mutation.isPending ? "اكتملت الترجمة وأصبحت متاحة للمراجعة" : ""}</p>
+    </div>
+  );
+}
+
+function ErrorBlock({ error }: { error: unknown }) {
+  if (isOpenAIQuotaError(error)) return <QuotaNotice />;
+  return (
+    <div className="notice is-error" role="alert">
+      <WarningCircle size={20} weight="fill" aria-hidden="true" />
+      <div>{toolErrorMessage(error)}</div>
     </div>
   );
 }

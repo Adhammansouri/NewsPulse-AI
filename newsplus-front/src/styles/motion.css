@@ -1,0 +1,42 @@
+/* Motion language
+   1. Answer the user's action (press, open, confirm) — fast, 110–300ms.
+   2. One orchestrated moment per screen load (the "wire" stagger), nothing else moves on its own.
+   3. Everything collapses to instant under prefers-reduced-motion (see base.css). */
+
+@keyframes np-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes np-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes np-pop { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes np-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes np-sheet-down { from { transform: none; } to { transform: translateY(100%); } }
+@keyframes np-sheet-side { from { transform: translateX(var(--side-from, -100%)); } to { transform: none; } }
+@keyframes np-sheet-side-out { from { transform: none; } to { transform: translateX(var(--side-from, -100%)); } }
+@keyframes np-scrim-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes np-spin { to { transform: rotate(360deg); } }
+@keyframes np-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@keyframes np-pulse-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--live) 55%, transparent); }
+  80%, 100% { box-shadow: 0 0 0 9px transparent; }
+}
+@keyframes np-arrive {
+  0% { opacity: 0; transform: translateY(-12px); background: var(--brand-soft); }
+  60% { opacity: 1; transform: none; background: var(--brand-soft); }
+  100% { background: transparent; }
+}
+@keyframes np-shake { 0%, 100% { transform: none; } 20% { transform: translateX(-6px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
+@keyframes np-draw { to { stroke-dashoffset: 0; } }
+@keyframes np-ink {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@keyframes np-toast-in { from { opacity: 0; transform: translateY(14px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes np-toast-out { to { opacity: 0; transform: translateY(8px) scale(0.98); } }
+@keyframes np-float-dot { 0%, 100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-3px); opacity: 1; } }
+
+/* Route enter: a plain fade. Sections do not slide in one by one. */
+.page-enter { animation: np-fade var(--dur-2) var(--ease-out) both; }
+
+/* The orchestrated moment: children rise in sequence. Use on a list wrapper. */
+.wire-in > * {
+  animation: np-rise var(--dur-4) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}

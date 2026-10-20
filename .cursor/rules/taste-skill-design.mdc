@@ -1,27 +1,16 @@
 ---
-description: Hybrid design system — Newsplus brand vs Nothing tools
+description: Newsplus unified design system
 globs: newsplus-front/**/*,design-system/**/*
 alwaysApply: false
 ---
 
-# Hybrid design (mandatory)
+# Design system (mandatory)
 
-Read `design-system/HYBRID.md` before UI work.
+Read `design-system/DESIGN-SYSTEM.md` before UI work. There is one system for every route (no brand/tools split).
 
-## Route split
+- Tokens only (`design-system/tokens.css`); logical CSS properties for RTL.
+- Reuse `components/ui/*` and the classes in `src/styles/components.css`.
+- Motion confirms user actions; respect `prefers-reduced-motion`.
+- Verify at 360 / 768 / 1280px, light + dark.
 
-| Routes | System | Classes / folder |
-|--------|--------|------------------|
-| `/` (Home), Header, Footer | **Newsplus brand** | `brand-*`, `components/brand/`, `tokens.css` |
-| `/news`, `/generate`, `/translate` | **Nothing tools** | `.theme-tools`, `nd-*`, `ToolPage` |
-
-## Before coding
-
-1. Identify surface: marketing vs tool.
-2. Marketing: Taste Skill + Newsplus palette (navy/teal/coral). No monochrome takeover.
-3. Tools: Nothing skill — monochrome, Space Mono labels, segmented bars, inline `[STATUS]` text.
-4. Never apply Nothing styles to Header/Footer or Home hero.
-
-## Stack
-
-React 19 + Vite + Tailwind v4 · fonts: Geist + Noto Arabic (brand) · Space Grotesk/Mono (tools).
+Stack: React 19 + Vite + Tailwind v4 · Readex Pro + IBM Plex Sans Arabic.

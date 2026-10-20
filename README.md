@@ -18,7 +18,7 @@ newsplus-workspace/
 ├── newsplus-API/           # Backend (Fastify)
 ├── newsplus-front/         # Frontend (React/Vite)
 ├── packages/shared/        # Shared TypeScript types
-├── design-system/          # Brand tokens & assets
+├── design-system/          # Design tokens, system doc & assets
 └── docs/                   # Business docs & scripts
 ```
 
@@ -70,7 +70,7 @@ npm run install:all  # Install all workspaces
 
 ## Design System
 
-See `design-system/newsplus-design-system.md`.
+See `design-system/DESIGN-SYSTEM.md`.
 
 ## Production
 

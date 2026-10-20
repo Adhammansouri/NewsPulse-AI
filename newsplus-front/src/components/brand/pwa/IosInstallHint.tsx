@@ -1,11 +1,6 @@
+import { ShareNetwork } from "@phosphor-icons/react";
 import { useState } from "react";
-import {
-  IOS_HINT_DISMISS_KEY,
-  isIosSafari,
-  isStandaloneDisplay,
-  readDismissed,
-  writeDismissed,
-} from "@/services/pwaDetect";
+import { IOS_HINT_DISMISS_KEY, isIosSafari, isStandaloneDisplay, readDismissed, writeDismissed } from "@/services/pwaDetect";
 
 export function IosInstallHint() {
   const [dismissed, setDismissed] = useState(() => readDismissed(IOS_HINT_DISMISS_KEY));
@@ -19,16 +14,13 @@ export function IosInstallHint() {
 
   return (
     <div className="pwa-banner" role="dialog" aria-labelledby="pwa-ios-title">
-      <div className="pwa-banner__copy">
-        <p id="pwa-ios-title" className="pwa-banner__title">
-          أضِف Newsplus للشاشة الرئيسية
-        </p>
-        <p className="pwa-banner__text">شارك ← إضافة إلى الشاشة الرئيسية. الإشعارات تعمل بعد التثبيت على iOS.</p>
+      <ShareNetwork size={26} weight="duotone" aria-hidden="true" />
+      <div className="pwa-copy">
+        <p id="pwa-ios-title" className="pwa-title">أضف Newsplus للشاشة الرئيسية</p>
+        <p className="pwa-text">اضغط مشاركة ثم «إضافة إلى الشاشة الرئيسية». الإشعارات تعمل بعد التثبيت على iOS.</p>
       </div>
-      <div className="pwa-banner__actions">
-        <button type="button" className="brand-header-ghost-btn" onClick={handleDismiss}>
-          حسناً
-        </button>
+      <div className="pwa-actions">
+        <button type="button" className="btn btn-quiet btn-sm" onClick={handleDismiss}>حسناً</button>
       </div>
     </div>
   );

@@ -1,4 +1,7 @@
+import { BellRinging, BellSlash, PaperPlaneTilt } from "@phosphor-icons/react";
 import type { PushNotificationStatus } from "@/hooks/usePushNotifications";
+import { Notice } from "@/components/ui/Notice";
+import { formatNumber } from "@/utils/format";
 
 type NotificationsActionsProps = {
   status: PushNotificationStatus;
@@ -9,56 +12,39 @@ type NotificationsActionsProps = {
   onSendTest: () => void;
 };
 
-export function NotificationsActions({
-  status,
-  lastTestSent,
-  error,
-  onEnable,
-  onDisable,
-  onSendTest,
-}: NotificationsActionsProps) {
+export function NotificationsActions({ status, lastTestSent, error, onEnable, onDisable, onSendTest }: NotificationsActionsProps) {
   const busy = status === "busy";
-  const canEnable = status === "idle";
-  const canDisable = status === "subscribed";
-  const canTest = status === "subscribed";
+  const subscribed = status === "subscribed";
 
   return (
-    <section className="notifications-actions" aria-labelledby="notifications-actions-title">
-      <h2 id="notifications-actions-title" className="notifications-actions__title">
-        التحكم
-      </h2>
-      <p className="notifications-actions__copy">
-        التفعيل يطلب إذن المتصفح لهذا الجهاز فقط. الإيقاف يلغي الاشتراك هنا دون حذف حسابك.
-      </p>
-      <div className="notifications-actions__row">
-        {canDisable ? (
-          <button type="button" className="brand-header-ghost-btn" disabled={busy} onClick={onDisable}>
-            إيقاف الإشعارات
-          </button>
-        ) : (
-          <button type="button" className="brand-btn" disabled={!canEnable || busy} onClick={onEnable}>
-            {busy ? "جاري التحديث…" : "تفعيل الإشعارات"}
-          </button>
-        )}
-        <button
-          type="button"
-          className="brand-header-ghost-btn"
-          disabled={!canTest || busy}
-          onClick={onSendTest}
-        >
-          إرسال تجريبي
-        </button>
+    <section className="panel settings-block" aria-labelledby="notif-actions-title">
+      <div className="panel-head">
+        <h2 id="notif-actions-title" className="panel-title">التحكم</h2>
       </div>
-      {lastTestSent != null ? (
-        <p className="notifications-actions__note" role="status">
-          أُرسلت تجربة إلى هذا الجهاز ({lastTestSent}).
-        </p>
-      ) : null}
-      {error ? (
-        <p className="notifications-actions__error" role="alert">
-          {error}
-        </p>
-      ) : null}
+      <div className="settings-body">
+        <p className="hint">التفعيل يطلب إذن المتصفح لهذا الجهاز فقط. الإيقاف يلغي الاشتراك هنا دون المساس بحسابك.</p>
+        <div className="settings-actions">
+          {subscribed ? (
+            <button type="button" className="btn btn-quiet" disabled={busy} onClick={onDisable}>
+              <BellSlash size={20} aria-hidden="true" />
+              إيقاف الإشعارات
+            </button>
+          ) : (
+            <button type="button" className="btn btn-primary" disabled={status !== "idle" || busy} onClick={onEnable}>
+              {busy ? <span className="spinner" aria-hidden="true" /> : <BellRinging size={20} aria-hidden="true" />}
+              {busy ? "جارٍ التفعيل…" : "فعّل الإشعارات"}
+            </button>
+          )}
+          <button type="button" className="btn btn-ghost" disabled={!subscribed || busy} onClick={onSendTest}>
+            <PaperPlaneTilt size={20} aria-hidden="true" />
+            إرسال إشعار تجريبي
+          </button>
+        </div>
+        {lastTestSent != null ? (
+          <Notice tone="ok" role="status">وصل إشعار تجريبي إلى هذا الجهاز ({formatNumber(lastTestSent)}).</Notice>
+        ) : null}
+        {error ? <Notice tone="error">{error}</Notice> : null}
+      </div>
     </section>
   );
 }

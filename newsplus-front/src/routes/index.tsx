@@ -1,29 +1,34 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import MainLayout from "@/components/layouts/MainLayout";
+import AppShell from "@/components/shell/AppShell";
 import RequireAuth from "@/components/shared/RequireAuth";
-import GeneratePage from "@/modules/Generate/pages/GeneratePage";
-import HomePage from "@/modules/Home/pages/HomePage";
-import LoginPage from "@/modules/Login/pages/LoginPage";
-import NewsPage from "@/modules/News/pages/NewsPage";
-import NotificationsPage from "@/modules/Notifications/pages/NotificationsPage";
-import TranslatePage from "@/modules/Translate/pages/TranslatePage";
-import UsagePage from "@/modules/Usage/pages/UsagePage";
+import { PageSkeleton } from "@/components/shared/PageSkeleton";
+
+const HomePage = lazy(() => import("@/modules/Home/pages/HomePage"));
+const NewsPage = lazy(() => import("@/modules/News/pages/NewsPage"));
+const GeneratePage = lazy(() => import("@/modules/Generate/pages/GeneratePage"));
+const TranslatePage = lazy(() => import("@/modules/Translate/pages/TranslatePage"));
+const NotificationsPage = lazy(() => import("@/modules/Notifications/pages/NotificationsPage"));
+const UsagePage = lazy(() => import("@/modules/Usage/pages/UsagePage"));
+const LoginPage = lazy(() => import("@/modules/Login/pages/LoginPage"));
 
 export default function AppRoutes() {
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route element={<RequireAuth />}>
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/news" element={<NewsPage />} />
-          <Route path="/generate" element={<GeneratePage />} />
-          <Route path="/translate" element={<TranslatePage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/usage" element={<UsagePage />} />
+    <Suspense fallback={<PageSkeleton />}>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route element={<RequireAuth />}>
+          <Route element={<AppShell />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/news" element={<NewsPage />} />
+            <Route path="/generate" element={<GeneratePage />} />
+            <Route path="/translate" element={<TranslatePage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/usage" element={<UsagePage />} />
+          </Route>
         </Route>
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }

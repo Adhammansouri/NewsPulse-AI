@@ -9,7 +9,16 @@ type Bucket = {
 
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 15;
+const SWEEP_AT = 500;
 const buckets = new Map<string, Bucket>();
+
+/** Expired buckets are only replaced when the same IP returns, so drop the rest once the map grows. */
+function sweep(now: number) {
+  if (buckets.size < SWEEP_AT) return;
+  for (const [key, bucket] of buckets) {
+    if (bucket.resetAt <= now) buckets.delete(key);
+  }
+}
 
 function clientKey(request: FastifyRequest) {
   return request.ip || "unknown";
@@ -19,6 +28,7 @@ export async function loginRateLimit(request: FastifyRequest, _reply: FastifyRep
   if (env.nodeEnv !== "production") return;
 
   const now = Date.now();
+  sweep(now);
   const key = clientKey(request);
   const current = buckets.get(key);
 

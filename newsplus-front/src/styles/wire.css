@@ -1,0 +1,61 @@
+/* The live wire: headline list shared by Home and the Newsroom. */
+@layer components {
+  .wire { display: block; }
+  .wire-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.6rem 1rem minmax(0, 1fr) auto;
+    column-gap: var(--s-3);
+    align-items: start;
+    width: 100%;
+    padding: var(--s-3) var(--s-4) var(--s-3) var(--s-3);
+    text-align: start;
+    color: inherit;
+    border-radius: var(--r-md);
+    transition: background-color var(--dur-2) var(--ease-out);
+  }
+  .wire-item:hover:not(:disabled):not(.is-skeleton) { background: var(--surface-3); }
+  .wire-item:disabled { cursor: progress; opacity: 0.6; }
+  .wire-item.is-active { background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+  [dir="rtl"] .wire-item.is-active { box-shadow: inset -3px 0 0 var(--brand); }
+  .wire-item.is-arrived { animation: np-arrive 2.2s var(--ease-out) both; }
+
+  .wire-time {
+    padding-top: 0.2rem; text-align: end; white-space: nowrap;
+    font-size: var(--t-xs); font-weight: 600; color: var(--ink-3); font-variant-numeric: tabular-nums;
+  }
+  .wire-item.is-now .wire-time, .wire-item.is-fresh .wire-time { color: var(--live); }
+
+  .wire-rail { position: relative; align-self: stretch; }
+  .wire-rail::before {
+    content: ""; position: absolute; inset-block: 0; inset-inline-start: 50%; width: 2px; margin-inline-start: -1px;
+    background: var(--line);
+  }
+  .wire-item:first-child .wire-rail::before { inset-block-start: 0.9rem; }
+  .wire-item:last-child .wire-rail::before { inset-block-end: calc(100% - 0.9rem); }
+  .wire-dot {
+    position: absolute; inset-block-start: 0.55rem; inset-inline-start: 50%;
+    width: 0.62rem; height: 0.62rem; margin-inline-start: -0.31rem; border-radius: 50%;
+    background: var(--surface); border: 2px solid var(--line-strong);
+    transition: background-color var(--dur-2), border-color var(--dur-2), transform var(--dur-3) var(--ease-spring);
+  }
+  .wire-item.is-now .wire-dot, .wire-item.is-fresh .wire-dot { background: var(--live); border-color: var(--live); }
+  .wire-item.is-hour .wire-dot, .wire-item.is-recent .wire-dot { background: var(--brand); border-color: var(--brand); }
+  .wire-dot.is-breaking { animation: np-pulse-ring 1.8s ease-out infinite; }
+  .wire-item.is-active .wire-dot { transform: scale(1.35); }
+
+  .wire-body { display: grid; gap: 0.3rem; min-width: 0; }
+  .wire-source { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; font-size: var(--t-xs); color: var(--ink-3); font-weight: 600; min-height: 1.4rem; }
+  .wire-source-name { color: var(--ink-2); }
+  .wire-more { color: var(--ink-3); }
+  .wire-title {
+    font-family: var(--font-display); font-weight: 500; font-size: var(--t-md); line-height: 1.55; color: var(--ink);
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-wrap: pretty;
+  }
+  .wire-item.is-active .wire-title { font-weight: 600; }
+  .wire-item.is-lead .wire-title { font-size: var(--t-lg); font-weight: 600; -webkit-line-clamp: 4; }
+  .wire-tags { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+  .wire-tags:empty { display: none; }
+  .wire-topic { font-size: var(--t-xs); color: var(--ink-3); }
+  .wire-item.is-old .wire-title, .wire-item.is-aging .wire-title { color: var(--ink-2); }
+}

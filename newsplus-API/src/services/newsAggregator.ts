@@ -127,7 +127,7 @@ function jaccard(a: Set<string>, b: Set<string>) {
   for (const token of a) {
     if (b.has(token)) intersection += 1;
   }
-  return intersection / new Set([...a, ...b]).size;
+  return intersection / (a.size + b.size - intersection);
 }
 
 function clusterId(seedTitle: string) {
@@ -146,18 +146,20 @@ function dedupeSourceLinks(links: AggregatedSourceLink[]) {
 function cluster(items: RawItem[]): AggregatedItem[] {
   const used = new Set<number>();
   const groups: AggregatedItem[] = [];
+  // Tokenise each headline once; the pairwise loop below would otherwise redo it O(n²) times.
+  const tokens = items.map((item) => tokenize(item.title));
 
   for (let i = 0; i < items.length; i += 1) {
     if (used.has(i)) continue;
     const seed = items[i];
-    const seedTokens = tokenize(seed.title);
+    const seedTokens = tokens[i];
     const members = [seed];
     used.add(i);
 
     for (let j = i + 1; j < items.length; j += 1) {
       if (used.has(j)) continue;
       const candidate = items[j];
-      if (jaccard(seedTokens, tokenize(candidate.title)) < SIMILARITY) continue;
+      if (jaccard(seedTokens, tokens[j]) < SIMILARITY) continue;
       members.push(candidate);
       used.add(j);
     }

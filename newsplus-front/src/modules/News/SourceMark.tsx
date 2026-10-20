@@ -9,24 +9,21 @@ type SourceMarkProps = {
   size?: number;
 };
 
-export function SourceMark({ id, name, url, size = 18 }: SourceMarkProps) {
+export function SourceMark({ id, name, url, size = 20 }: SourceMarkProps) {
   const host = sourceHost(id, url);
   const [failedHost, setFailedHost] = useState<string | null>(null);
+  const box = { width: size, height: size, fontSize: size };
 
   if (!host || failedHost === host) {
     return (
-      <span
-        className="news-source-mark news-source-mark--fallback"
-        style={{ width: size, height: size, background: sourceTone(id) }}
-        aria-hidden="true"
-      >
+      <span className="src-mark is-fallback" style={{ ...box, background: sourceTone(id || name) }} aria-hidden="true">
         {sourceInitial(name)}
       </span>
     );
   }
 
   return (
-    <span className="news-source-mark" style={{ width: size, height: size }} title={name}>
+    <span className="src-mark" style={box} title={name}>
       <img
         src={faviconUrl(host)}
         alt=""
@@ -45,7 +42,7 @@ export function SourceMark({ id, name, url, size = 18 }: SourceMarkProps) {
 export function SourceMarkStack({
   sources,
   max = 3,
-  size = 18,
+  size = 20,
 }: {
   sources: Array<{ id: string; name: string; url?: string }>;
   max?: number;
@@ -53,9 +50,8 @@ export function SourceMarkStack({
 }) {
   const shown = sources.slice(0, max);
   if (shown.length === 0) return null;
-
   return (
-    <span className="news-logo-stack" aria-hidden="true">
+    <span className="src-stack" aria-hidden="true">
       {shown.map((source) => (
         <SourceMark key={`${source.id}-${source.url ?? ""}`} id={source.id} name={source.name} url={source.url} size={size} />
       ))}

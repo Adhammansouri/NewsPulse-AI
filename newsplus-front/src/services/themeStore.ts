@@ -5,8 +5,8 @@ const LEGACY_THEME_KEY = "newsplus-login-theme";
 const THEME_EVENT = "newsplus-theme-changed";
 
 const THEME_COLORS: Record<Theme, string> = {
-  light: "#F8FAFC",
-  dark: "#0F172A",
+  light: "#F3F5F8",
+  dark: "#0A1220",
 };
 
 function parseTheme(value: string | null): Theme | null {
