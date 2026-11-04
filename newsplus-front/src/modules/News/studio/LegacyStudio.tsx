@@ -1,10 +1,10 @@
-// TRANSITIONAL (S04 → S05/S06): the pre-Pulse story preview + editorial desk, moved out of NewsPage as-is and
-// shown in the legacy content area next to the new wire. S05 (story / formats) and S06 (draft) replace it.
+// TRANSITIONAL (S05 → S06): the pre-Pulse draft view (draft, revisions, format switch) in the legacy content area.
+// S05 rebuilt the story, the formats and «المحرّر يكتب» around it (StoryPanel, FormatDeck, StudioFooter,
+// StudioGenerating, mobile/*); S06 replaces this view with the Pulse draft editor.
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
-  ArrowSquareOut,
   Chats,
   Check,
   CircleNotch,
@@ -24,12 +24,9 @@ import type { CarouselOptions, NewsFeedItem, NewsSummarizeData } from "@newsplus
 import { QuotaNotice } from "@/components/QuotaNotice";
 import { LegacyContent } from "@/components/shell/LegacyContent";
 import { isOpenAIQuotaError, toolErrorMessage } from "@/services/toolErrors";
-import { ConversationDrawer } from "../components/editorial/ConversationDrawer";
 import { EditorialDraft } from "../components/editorial/EditorialDraft";
 import { RevisionThread } from "../components/editorial/RevisionThread";
-import { formatRelative, formatStamp, hasArabic, newsRecency, STORY_FORMATS, storyFormatMeta } from "../newsFormat";
-import { SourceMark, SourceMarkStack } from "../SourceMark";
-import { hostFromUrl } from "../sourceLogos";
+import { STORY_FORMATS, storyFormatMeta } from "../newsFormat";
 import type { EditorialDesk } from "./useEditorialDesk";
 
 const FORMAT_ICONS = {
@@ -46,14 +43,11 @@ const FORMAT_ICONS = {
 export function LegacyStudio({
   desk,
   selected,
-  itemCount,
   mobile,
   onBack,
 }: {
   desk: EditorialDesk;
   selected: NewsFeedItem | null;
-  /** Headlines in the wire (the briefing needs some). */
-  itemCount: number;
   mobile: boolean;
   /** Mobile: back to the wire. */
   onBack: () => void;
@@ -150,7 +144,6 @@ export function LegacyStudio({
                       <div className="news-editorial-main" id="news-editorial-draft">
                         <div className="news-editorial-toolbar">
                           <DeskFormatBar
-                            mode="switch"
                             selected={resultFormat}
                             busy={busy}
                             briefingDisabled={busy}
@@ -220,120 +213,15 @@ export function LegacyStudio({
                     </div>
                   </div>
                 ) : null
-              ) : (
-                <>
-                  {error ? <DeskError error={error} /> : null}
-
-                  {selected ? (
-                    <article className={["news-story-card", `is-${newsRecency(selected.publishedAt)}`].join(" ")}>
-                      <div className="news-story-copy">
-                        <div className="news-story-card-meta">
-                          <div className="news-feed-source">
-                            <SourceMarkStack sources={selected.sources} size={24} />
-                            {selected.sources[0] ? (
-                              <span className="news-source-name">{selected.sources[0].name}</span>
-                            ) : null}
-                            {selected.sources.length > 1 ? (
-                              <span className="news-cluster">+{selected.sources.length - 1}</span>
-                            ) : null}
-                          </div>
-                          <div className="news-feed-meta">
-                            <time
-                              className={`news-time is-${newsRecency(selected.publishedAt)}`}
-                              dateTime={selected.publishedAt}
-                              title={formatStamp(selected.publishedAt)}
-                            >
-                              {formatRelative(selected.publishedAt)}
-                            </time>
-                          </div>
-                        </div>
-
-                        <h2 className="news-story-title" dir={hasArabic(selected.title) ? "rtl" : "ltr"}>
-                          {selected.title}
-                        </h2>
-
-                        {selected.excerpt ? (
-                          <div className="news-story-brief">
-                            <p className="news-story-kicker">من المصدر</p>
-                            <p className="news-story-excerpt" dir={hasArabic(selected.excerpt) ? "rtl" : "ltr"}>
-                              {selected.excerpt}
-                            </p>
-                          </div>
-                        ) : (
-                          <p className="news-story-excerpt is-empty">لا يتوفر موجز من المصدر. افتح الرابط الأصلي.</p>
-                        )}
-
-                        {selected.sources.length > 0 ? (
-                          <ul className="news-story-origin">
-                            {selected.sources.map((source) => {
-                              const host = hostFromUrl(source.url);
-                              return (
-                                <li key={`${source.id}-${source.url}`}>
-                                  <a href={source.url} target="_blank" rel="noreferrer">
-                                    <SourceMark id={source.id} name={source.name} url={source.url} size={24} />
-                                    <span className="news-story-origin-copy">
-                                      <span>اقرأ في {source.name}</span>
-                                      {host ? <span className="news-story-origin-host">{host}</span> : null}
-                                    </span>
-                                    <ArrowSquareOut size={14} weight="regular" aria-hidden="true" />
-                                  </a>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        ) : null}
-                      </div>
-
-                      <div className="news-desk-actions">
-                        <DeskFormatBar
-                          mode="picker"
-                          selected={desk.selectedFormat}
-                          busy={busy}
-                          briefingDisabled={busy || itemCount === 0}
-                          showHint
-                          carouselOptions={desk.carouselOptions}
-                          onCarouselOptions={desk.setCarouselOptions}
-                          onSelectFormat={desk.selectFormat}
-                        />
-                      </div>
-                    </article>
-                  ) : (
-                    !busy &&
-                    !error && (
-                      <div className="news-desk-empty">
-                        <p>اختر خبراً من العناوين لعرضه هنا ثم اطلب ملخصاً تحريرياً.</p>
-                      </div>
-                    )
-                  )}
-                </>
-              )}
+              ) : error ? (
+                <DeskError error={error} />
+              ) : null}
             </div>
 
             {desk.copyError && (
               <p className="newsroom-copy-error" role="alert">
                 تعذّر النسخ. يمكنك تحديد النص ونسخه يدوياً.
               </p>
-            )}
-            {!showEditorial && selected && (
-              <div className="newsroom-generate-dock">
-                <p>
-                  <span>الصيغة المختارة</span>
-                  <strong>{storyFormatMeta(desk.selectedFormat).label}</strong>
-                </p>
-                <button
-                  type="button"
-                  className="news-btn-primary"
-                  disabled={busy || (desk.selectedFormat === "briefing" && itemCount === 0)}
-                  onClick={desk.generateSummary}
-                >
-                  {busy ? (
-                    <CircleNotch className="news-spin" size={18} aria-hidden="true" />
-                  ) : (
-                    <FileText size={18} aria-hidden="true" />
-                  )}
-                  {busy ? "جارٍ إعداد المحتوى…" : "توليد المحتوى"}
-                </button>
-              </div>
             )}
 
             <Link
@@ -353,20 +241,6 @@ export function LegacyStudio({
             </Link>
           </div>
         </section>
-        <ConversationDrawer
-          busy={busy}
-          open={desk.drawerOpen}
-          search={desk.conversationQuery}
-          conversations={desk.conversations}
-          memory={desk.memory}
-          activeId={conversationId}
-          listLoading={desk.conversationsLoading}
-          error={desk.drawerError ? toolErrorMessage(desk.drawerError) : undefined}
-          onSearch={desk.setConversationQuery}
-          onClose={desk.closeDrawer}
-          onSelect={desk.openConversation}
-          onDisableMemory={desk.disableMemory}
-        />
         <p className="sr-only" role="status">
           {desk.copied ? "تم نسخ المسودة" : ""}
         </p>
@@ -385,44 +259,33 @@ function DeskError({ error }: { error: unknown }) {
   );
 }
 
+/** The draft's format switch (re-generates the story in another format). */
 function DeskFormatBar({
-  mode,
   selected,
   busy,
   briefingDisabled,
-  showHint = false,
   carouselOptions,
   onCarouselOptions,
   onApplyCarousel,
   onSelectFormat,
 }: {
-  mode: "picker" | "switch";
   selected: NewsSummarizeData["format"];
   busy: boolean;
   briefingDisabled: boolean;
-  showHint?: boolean;
   carouselOptions?: CarouselOptions;
   onCarouselOptions?: (next: CarouselOptions) => void;
   onApplyCarousel?: () => void;
   onSelectFormat: (format: NewsSummarizeData["format"]) => void;
 }) {
-  const hintId = showHint ? "news-format-hint-story" : "news-format-hint-result";
+  const hintId = "news-format-hint-result";
   const meta = storyFormatMeta(selected);
-  const isPicker = mode === "picker";
   const choices = [...STORY_FORMATS, { id: "briefing" as const, label: "موجز", hint: "أعلى 8 عناوين في الغرفة" }];
 
   return (
-    <div className={`news-format-bar ${showHint ? "" : "is-compact"} ${isPicker ? "is-picker" : "is-switch"}`}>
-      {showHint ? (
-        <p className="news-format-caption" id={hintId}>
-          <span>اختر صيغة المحتوى</span>
-          <span>للخبر أو لموجز العناوين</span>
-        </p>
-      ) : (
-        <span className="sr-only" id={hintId}>
-          {meta.hint}
-        </span>
-      )}
+    <div className="news-format-bar is-compact is-switch">
+      <span className="sr-only" id={hintId}>
+        {meta.hint}
+      </span>
 
       <div className="news-format-toolbar">
         <div className="news-seg news-seg--formats" role="group" aria-label="شكل التلخيص" aria-describedby={hintId}>
@@ -447,29 +310,23 @@ function DeskFormatBar({
                 )}
                 <span className="newsroom-format-copy">
                   <span>{option.label}</span>
-                  {isPicker && <span className="newsroom-format-hint">{option.hint}</span>}
                 </span>
-                {isPicker && active && <Check className="newsroom-format-check" size={14} aria-hidden="true" />}
               </button>
             );
           })}
         </div>
       </div>
       {selected === "carousel" && carouselOptions && onCarouselOptions ? (
-        isPicker ? (
-          <CarouselControls options={carouselOptions} busy={busy} showApply={false} onChange={onCarouselOptions} />
-        ) : (
-          <details className="newsroom-carousel-settings">
-            <summary>إعدادات الكاروسيل</summary>
-            <CarouselControls
-              options={carouselOptions}
-              busy={busy}
-              showApply
-              onChange={onCarouselOptions}
-              onApply={onApplyCarousel}
-            />
-          </details>
-        )
+        <details className="newsroom-carousel-settings">
+          <summary>إعدادات الكاروسيل</summary>
+          <CarouselControls
+            options={carouselOptions}
+            busy={busy}
+            showApply
+            onChange={onCarouselOptions}
+            onApply={onApplyCarousel}
+          />
+        </details>
       ) : null}
     </div>
   );

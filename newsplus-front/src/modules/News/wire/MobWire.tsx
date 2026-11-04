@@ -1,12 +1,12 @@
 // Mobile wire screen (MobWire): large `m-head` (title + live line, «موجز الساعة», search + filter button,
 // topic chips — or the active filters as removable chips when nothing matches), then the list with its states,
 // pull-to-refresh and swipe actions, and the filters sheet. Inline styles are the board's own.
-import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { NewsFeedItem } from "@newsplus/shared";
 import { Chip } from "@/ui/Chip";
 import { Icon } from "@/ui/Icon";
 import { PulseLine } from "@/ui/PulseLine";
+import { storyPath } from "../studio/studioLink";
 import { COPY } from "./copy";
 import { FilterSheet } from "./FilterSheet";
 import { NewItemsPill } from "./NewItemsPill";
@@ -22,14 +22,16 @@ export function MobWire({
   onBriefing,
   onWrite,
   onPin,
+  restoreScrollTop = null,
 }: {
   wire: Wire;
   onOpen: (item: NewsFeedItem) => void;
   onBriefing: () => void;
   onWrite: (item: NewsFeedItem) => void;
   onPin: (item: NewsFeedItem) => void;
+  /** Back from a story: where the list was (listMemory.ts), applied once its rows are on screen. */
+  restoreScrollTop?: number | null;
 }) {
-  const [params] = useSearchParams();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [swipedId, setSwipedId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLElement | null>(null);
@@ -50,11 +52,13 @@ export function MobWire({
     };
   }, [swipedId]);
 
-  const hrefFor = (id: string) => {
-    const next = new URLSearchParams(params);
-    next.set("item", id);
-    return `?${next.toString()}`;
-  };
+  const pendingScroll = useRef(restoreScrollTop);
+  const hasRows = wire.rows.length > 0;
+  useLayoutEffect(() => {
+    if (pendingScroll.current === null || !hasRows || !scrollRef.current) return;
+    scrollRef.current.scrollTop = pendingScroll.current;
+    pendingScroll.current = null;
+  }, [hasRows]);
 
   const { empty } = wire;
 
@@ -130,7 +134,7 @@ export function MobWire({
               <SwipeRow
                 key={row.id}
                 row={row}
-                href={hrefFor(row.id)}
+                href={storyPath(row.id)}
                 open={swipedId === row.id}
                 onOpenChange={(open) => setSwipedId(open ? row.id : (current) => (current === row.id ? null : current))}
                 onTap={onOpen}

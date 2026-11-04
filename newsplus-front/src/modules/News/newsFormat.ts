@@ -47,30 +47,9 @@ export function formatRelative(iso: string) {
   }
 }
 
-export function formatStamp(iso: string) {
-  try {
-    return new Date(iso).toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" });
-  } catch {
-    return iso;
-  }
-}
-
-export type NewsRecency = "now" | "fresh" | "hour" | "recent" | "aging";
-
-const NOW_MS = 5 * 60 * 1000;
 const FRESH_MS = 20 * 60 * 1000;
 const HOUR_MS = 60 * 60 * 1000;
 const RECENT_MS = 3 * 60 * 60 * 1000;
-
-export function newsRecency(iso: string): NewsRecency {
-  const diff = Date.now() - new Date(iso).getTime();
-  if (!Number.isFinite(diff)) return "aging";
-  if (diff < NOW_MS) return "now";
-  if (diff < FRESH_MS) return "fresh";
-  if (diff < HOUR_MS) return "hour";
-  if (diff < RECENT_MS) return "recent";
-  return "aging";
-}
 
 export type TimeFilter = "all" | "fresh" | "hour" | "three" | "today";
 

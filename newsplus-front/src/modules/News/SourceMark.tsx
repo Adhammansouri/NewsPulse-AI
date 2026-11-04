@@ -41,24 +41,3 @@ export function SourceMark({ id, name, url, size = 18 }: SourceMarkProps) {
     </span>
   );
 }
-
-export function SourceMarkStack({
-  sources,
-  max = 3,
-  size = 18,
-}: {
-  sources: Array<{ id: string; name: string; url?: string }>;
-  max?: number;
-  size?: number;
-}) {
-  const shown = sources.slice(0, max);
-  if (shown.length === 0) return null;
-
-  return (
-    <span className="news-logo-stack" aria-hidden="true">
-      {shown.map((source) => (
-        <SourceMark key={`${source.id}-${source.url ?? ""}`} id={source.id} name={source.name} url={source.url} size={size} />
-      ))}
-    </span>
-  );
-}

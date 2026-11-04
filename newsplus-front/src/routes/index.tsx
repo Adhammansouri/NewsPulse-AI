@@ -11,6 +11,7 @@ import "@/modules/News/newsroom.css";
 const LoginPage = lazy(() => import("@/modules/Login/pages/LoginPage"));
 const HomePage = lazy(() => import("@/modules/Home/pages/HomePage"));
 const NewsPage = lazy(() => import("@/modules/News/pages/NewsPage"));
+const NewsStoryPage = lazy(() => import("@/modules/News/pages/NewsStoryPage"));
 const GeneratePage = lazy(() => import("@/modules/Generate/pages/GeneratePage"));
 const TranslatePage = lazy(() => import("@/modules/Translate/pages/TranslatePage"));
 const NotificationsPage = lazy(() => import("@/modules/Notifications/pages/NotificationsPage"));
@@ -53,6 +54,7 @@ export default function AppRoutes() {
         <Route element={<MainLayout />}>
           <Route path="/" element={page(<HomePage />, "stack")} />
           <Route path="/news" element={page(<NewsPage />, "split")} />
+          <Route path="/news/:itemId" element={page(<NewsStoryPage />, "split")} />
           <Route path="/generate" element={page(<GeneratePage />, "split")} />
           <Route path="/translate" element={page(<TranslatePage />, "stack")} />
           <Route path="/notifications" element={page(<NotificationsPage />, "stack")} />

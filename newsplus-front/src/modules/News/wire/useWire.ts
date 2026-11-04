@@ -106,10 +106,11 @@ function useMinuteClock() {
   return now;
 }
 
-export function useWire({ mobile }: { mobile: boolean }): Wire {
+export function useWire({ mobile, initialQuery = "" }: { mobile: boolean; initialQuery?: string }): Wire {
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = useMemo(() => readFilters(searchParams), [searchParams]);
-  const [query, setQuery] = useState("");
+  /** Mobile, back from a story: the search the list had (listMemory.ts). */
+  const [query, setQuery] = useState(initialQuery);
   const debouncedQuery = useDebouncedValue(query.trim(), SEARCH_DEBOUNCE_MS);
   const listRef = useRef<HTMLElement | null>(null);
   const tick = useMinuteClock();

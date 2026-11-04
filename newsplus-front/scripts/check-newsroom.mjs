@@ -31,6 +31,11 @@ try {
   const { RevisionThread } = await vite.ssrLoadModule("/src/modules/News/components/editorial/RevisionThread.tsx");
   const { sourceHost } = await vite.ssrLoadModule("/src/modules/News/sourceLogos.ts");
   const { SourceMark } = await vite.ssrLoadModule("/src/modules/News/SourceMark.tsx");
+  const formats = await vite.ssrLoadModule("/src/modules/News/studio/formats.ts");
+  const runs = await vite.ssrLoadModule("/src/modules/News/studio/draftRuns.ts");
+  const { MobStory } = await vite.ssrLoadModule("/src/modules/News/studio/MobStory.tsx");
+  const { MobCarouselSheet } = await vite.ssrLoadModule("/src/modules/News/studio/MobCarouselSheet.tsx");
+  const { storyModel } = await vite.ssrLoadModule("/src/modules/News/studio/storyModel.ts");
   const sources = [{ id: "ar-desk", name: "المصدر العربي", language: "ar" }, { id: "en-desk", name: "English Desk", language: "en" }];
   const items = [{
     id: "fixture-story",
@@ -49,7 +54,9 @@ try {
 
   await test("newsroom exposes all eight editorial formats and preserves the source preview", () => {
     const html = renderPage();
-    for (const name of ["مكتبي", "نشرة", "حقائق", "سياق", "سوشيال", "فيديو", "كاروسيل", "موجز"]) assert.ok(html.includes(name), `Missing format: ${name}`);
+    for (const name of ["منشور سوشيال", "سكريبت فيديو", "كاروسيل بصور AI", "خبر مكتبي", "نشرة", "حقائق", "سياق", "موجز الساعة"]) {
+      assert.ok(html.includes(name), `Missing format: ${name}`);
+    }
     assert.ok(html.includes(items[0].title));
     assert.ok(html.includes(items[0].excerpt));
     assert.ok(html.includes('href="https://example.com/report"'));
@@ -59,11 +66,95 @@ try {
 
   await test("generation stays outside the scrolling article and the wire names the open story", () => {
     const html = renderPage();
-    assert.ok(html.indexOf('class="newsroom-generate-dock"') > html.lastIndexOf("</article>"));
+    const footer = html.slice(html.indexOf("<footer"));
+    assert.ok(html.indexOf("<footer") > html.lastIndexOf("</article>"));
+    assert.ok(footer.includes("الأرشيف"));
+    assert.ok(footer.includes('اكتب المنشور<span class="kbd">Ctrl ↵</span>'));
+    assert.ok(footer.includes("٤٠–٧٠ كلمة + وسوم · من مصدر واحد · بأسلوب فريقك"));
+    assert.match(html, /class="tile" type="button" aria-pressed="true"><span class="tile__shape"[^]*?منشور سوشيال/);
+    assert.equal(html.match(/class="tile[^"]*" type="button" aria-pressed="true"/g)?.length, 1, "one format tile is pressed");
+    assert.doesNotMatch(html, /ذاكرة الفريق/, "the memory chip is hidden with no approved rule");
     assert.match(html, /<section aria-label="العناوين"/);
     assert.match(html, /class="wire-row is-breaking" aria-pressed="true"/);
-    assert.match(html, /id="news-desk-pane"/);
-    assert.match(html, /newsroom-history/);
+  });
+
+  await test("format copy, action labels and AI steps follow the interactive Main board", () => {
+    const actions = { social: "اكتب المنشور", video: "اكتب السكريبت", carousel: "اكتب وارسم الشرائح", desk: "اكتب الخبر", bulletin: "اكتب النشرة", facts: "اكتب الحقائق", context: "اكتب السياق", briefing: "اكتب الموجز" };
+    for (const [format, action] of Object.entries(actions)) assert.equal(formats.formatCopy(format, 4).action, action);
+    assert.equal(formats.formatCopy("carousel", 5).hint, "٥ شرائح + كابشن");
+    assert.deepEqual(formats.deskSteps("social", 3, 4), ["قراءة ٣ مصادر", "كتابة منشور سوشيال", "تطبيق أسلوب الفريق والإسناد"]);
+    assert.deepEqual(formats.deskSteps("carousel", 3, 4), ["قراءة ٣ مصادر", "تخطيط ٤ شرائح وكتابة العناوين", "تجهيز رسم الصور"]);
+    assert.deepEqual(formats.deskSteps("briefing", 0, 4), ["جمع أهم ٥ عناوين", "ترتيبها حسب الأهمية", "صياغة الموجز"]);
+    assert.deepEqual(formats.mobileSteps("social", 3, 4, 4), ["قرأ ٣ مصادر", "يكتب الخطاف والنص", "يطبّق ٤ قواعد من ذاكرة الفريق"]);
+    assert.equal(formats.mobileCtaHint("carousel", formats.formatCopy("carousel", 4), 3), "كاروسيل · ٤ شرائح + كابشن · من ٣ مصادر");
+    assert.equal(formats.carouselSheetAction(4), "اكتب وارسم ٤ شرائح");
+    assert.equal(formats.sourceLine(["العربية", "BBC", "رويترز"], false), "العربية و٢ مصادر أخرى");
+    assert.equal(formats.sourceLine(["العربية", "BBC", "رويترز"], true), "العربية و٢ مصادر");
+    assert.equal(formats.STUDIO_COPY.memoryChip(4), "ذاكرة الفريق: ٤ قواعد تُطبَّق تلقائياً");
+  });
+
+  await test("draft runs outlive the studio: cancel aborts, an unwatched run toasts «المسودة جاهزة» with «افتح»", async () => {
+    const originalFetch = globalThis.fetch;
+    const pending = [];
+    globalThis.fetch = (_url, init) =>
+      new Promise((resolve, reject) => {
+        pending.push({ resolve, signal: init.signal });
+        init.signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")));
+      });
+    const respond = (index, data) => pending[index].resolve(new Response(JSON.stringify({ status: "success", data })));
+    const settle = () => new Promise((done) => setTimeout(done, 20));
+    const runClient = new QueryClient();
+    const shown = [];
+    const opened = [];
+    const notify = { toast: { show: (message, options) => shown.push({ message, options }), dismiss() {} }, open: (id) => opened.push(id) };
+    const info = { format: "social", itemId: "fixture-story", slides: 4 };
+    const body = { itemId: "fixture-story", language: "ar", format: "social" };
+    try {
+      const cancelled = runs.startDraftRun(runClient, { body, info, notify });
+      await settle();
+      runs.cancelDraftRun(cancelled);
+      await settle();
+      assert.equal(pending[0].signal.aborted, true);
+      assert.equal(runs.readDraftRun(runClient, cancelled), null);
+
+      const watched = runs.startDraftRun(runClient, { body, info, notify });
+      const release = runs.watchDraftRun(watched);
+      await settle();
+      respond(1, { format: "social", conversationId: "c1" });
+      await settle();
+      assert.equal(runs.readDraftRun(runClient, watched)?.status, "success");
+      release();
+
+      const left = runs.startDraftRun(runClient, { body, info, notify });
+      await settle();
+      respond(2, { format: "social", conversationId: "c2" });
+      await settle();
+      assert.equal(shown.length, 1, "only the run nobody watched toasts");
+      assert.equal(shown[0].message, "المسودة جاهزة: منشور سوشيال");
+      assert.equal(shown[0].options.action.label, "افتح");
+      shown[0].options.action.onAction();
+      assert.deepEqual(opened, [left]);
+      assert.ok(runs.draftRunEstimate() >= 1);
+    } finally {
+      globalThis.fetch = originalFetch;
+      runClient.clear();
+    }
+  });
+
+  await test("mobile story offers the social carousel and the web grid; the carousel sheet maps CarouselOptions", () => {
+    const story = storyModel(items[0], sourceLanguages(sources), true);
+    const html = renderToStaticMarkup(h(MobStory, { story, selected: "carousel", hint: "كاروسيل · ٤ شرائح + كابشن · من مصدر واحد", action: "اكتب وارسم الشرائح", onSelect() {}, onGenerate() {} }));
+    assert.match(html, /class="m-fmt" role="group" aria-label="صيغ السوشيال"/);
+    assert.match(html, /aria-pressed="true"><span class="tile__shape" style="height:92px">[^]*?كاروسيل بصور AI/);
+    assert.equal(html.match(/class="tile tile--row"/g)?.length, 4);
+    assert.ok(html.indexOf('class="m-cta"') > html.lastIndexOf("</main>"));
+    const sheet = renderToStaticMarkup(h(MobCarouselSheet, { open: true, options: { slides: 6, style: "frame", density: "line", mark: false }, onChange() {}, onClose() {}, onGenerate() {} }));
+    assert.match(sheet, /role="dialog" aria-modal="true"[^>]*aria-labelledby="cs-title"/);
+    assert.match(sheet, /aria-pressed="true">٦<\/button>/);
+    assert.match(sheet, /aria-pressed="true"[^>]*><span class="tile__shape"[^]*?بطاقة/);
+    assert.match(sheet, /aria-pressed="true">سطر توضيحي<\/button>/);
+    assert.match(sheet, /role="switch" aria-checked="false" aria-label="علامة Newsplus"/);
+    assert.ok(sheet.includes("اكتب وارسم ٦ شرائح"));
   });
 
   await test("filters survive the URL and select several sources across both languages", () => {

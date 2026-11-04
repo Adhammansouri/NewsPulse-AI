@@ -109,12 +109,6 @@
 .newsroom-back:is(button,input,textarea,select,a):is(.np *) {
   color: var(--nd-text-primary);
 }
-.newsroom .news-story-origin a:is(a:not([class])):is(.np.m *) {
-  min-height: 44px;
-}
-.newsroom-generate-dock > p:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 0;
-}
 .newsroom-editor-tabs button:is(button,input,textarea,select):is(.np *) {
   font-size: 12px;
 }
