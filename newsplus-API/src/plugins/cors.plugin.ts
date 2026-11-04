@@ -21,6 +21,7 @@ const corsPluginImpl: FastifyPluginAsync = async (app) => {
     },
     methods: ["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Retry-After", "X-RateLimit-Remaining"],
   });
 
   app.addHook("onSend", async (request, reply, payload) => {

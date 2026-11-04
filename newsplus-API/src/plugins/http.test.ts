@@ -4,6 +4,7 @@ import Fastify from "fastify";
 import { corsPlugin } from "./cors.plugin.js";
 import { errorHandlerPlugin } from "./errorHandler.plugin.js";
 import { env } from "../config/index.js";
+import { TooManyRequestsError } from "../utils/errors.js";
 
 test("API routes registered beside the CORS plugin expose headers on success and failure", async () => {
   const app = Fastify();
@@ -18,6 +19,23 @@ test("API routes registered beside the CORS plugin expose headers on success and
     const bad = await app.inject({ method: "POST", url: "/api/probe", headers: { origin: env.corsOrigin, "content-type": "application/json" }, payload: "{" });
     assert.equal(bad.headers["access-control-allow-origin"], env.corsOrigin);
     assert.equal(bad.statusCode, 400);
+  } finally { await app.close(); }
+});
+
+test("rate-limit headers stay readable by a cross-origin front-end on a 429", async () => {
+  const app = Fastify();
+  await app.register(corsPlugin);
+  await app.register(errorHandlerPlugin);
+  app.post("/api/probe", async (_request, reply) => {
+    reply.header("X-RateLimit-Remaining", 0).header("Retry-After", 30);
+    throw new TooManyRequestsError();
+  });
+  try {
+    const response = await app.inject({ method: "POST", url: "/api/probe", headers: { origin: env.corsOrigin } });
+    assert.equal(response.statusCode, 429);
+    assert.equal(response.headers["access-control-expose-headers"], "Retry-After, X-RateLimit-Remaining");
+    assert.equal(response.headers["retry-after"], "30");
+    assert.equal(response.headers["x-ratelimit-remaining"], "0");
   } finally { await app.close(); }
 });
 
