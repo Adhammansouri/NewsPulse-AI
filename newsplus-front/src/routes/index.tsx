@@ -2,7 +2,6 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "@/components/layouts/MainLayout";
 import RequireAuth from "@/components/shared/RequireAuth";
-import { LegacyContent } from "@/components/shell/LegacyContent";
 import { PageSkeleton, type PageSkeletonLayout } from "@/components/shell/PageSkeleton";
 // TRANSITIONAL: the legacy pages' own stylesheets stay in the entry bundle. Imported here (before
 // index.css, as when the pages were eager) they keep their place in the cascade that styles/legacy-bridge.css
@@ -24,16 +23,9 @@ const DesignGalleryPage = import.meta.env.DEV
   ? lazy(() => import("@/modules/DesignGallery/DesignGalleryPage"))
   : null;
 
-/**
- * A lazy page inside the shell: its RouteLoader-shaped skeleton while the chunk loads. `legacy` pages
- * (not yet rebuilt on the Pulse boards) render in the transitional legacy content area.
- */
-function page(element: ReactNode, layout: PageSkeletonLayout, legacy?: "page") {
-  return (
-    <Suspense fallback={<PageSkeleton layout={layout} />}>
-      {legacy ? <LegacyContent>{element}</LegacyContent> : element}
-    </Suspense>
-  );
+/** A lazy page inside the shell: its RouteLoader-shaped skeleton while the chunk loads. */
+function page(element: ReactNode, layout: PageSkeletonLayout) {
+  return <Suspense fallback={<PageSkeleton layout={layout} />}>{element}</Suspense>;
 }
 
 export default function AppRoutes() {
@@ -59,7 +51,7 @@ export default function AppRoutes() {
       />
       <Route element={<RequireAuth />}>
         <Route element={<MainLayout />}>
-          <Route path="/" element={page(<HomePage />, "stack", "page")} />
+          <Route path="/" element={page(<HomePage />, "stack")} />
           <Route path="/news" element={page(<NewsPage />, "split")} />
           <Route path="/generate" element={page(<GeneratePage />, "split")} />
           <Route path="/translate" element={page(<TranslatePage />, "stack")} />

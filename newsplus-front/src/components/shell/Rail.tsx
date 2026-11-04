@@ -1,4 +1,3 @@
-import { useSyncExternalStore } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { features } from "@/config/features";
 import { useSession } from "@/hooks/useSession";
@@ -8,37 +7,12 @@ import { cx } from "@/ui/cx";
 import { AvatarMenu } from "./AvatarMenu";
 import { isSectionActive } from "./routeMeta";
 import { useRoutePending } from "./routePending";
+import { useNotificationNudge } from "./useNotificationNudge";
 
 type RailItem = { to: string; label: string; icon: IconName; visible: boolean };
 
 /** Main.dc.html `rail__btn` style for the notifications link while it is the current page (DeskNotifications). */
 const CURRENT_BTN_STYLE = { background: "rgb(45 212 191 / .14)", color: "#5eead4" } as const;
-
-/* Push permission: the rail's notification dot is a nudge shown only while it was never asked («default»). */
-function readNotificationPermission(): NotificationPermission | null {
-  return typeof Notification === "undefined" ? null : Notification.permission;
-}
-
-function subscribeNotificationPermission(onChange: () => void) {
-  let status: PermissionStatus | null = null;
-  let cancelled = false;
-  navigator.permissions
-    ?.query({ name: "notifications" })
-    .then((result) => {
-      if (cancelled) return;
-      status = result;
-      status.addEventListener("change", onChange);
-    })
-    .catch(() => {
-      /* Permissions API without `notifications`: the visibility check below still refreshes it. */
-    });
-  document.addEventListener("visibilitychange", onChange);
-  return () => {
-    cancelled = true;
-    status?.removeEventListener("change", onChange);
-    document.removeEventListener("visibilitychange", onChange);
-  };
-}
 
 /**
  * Desktop navigation rail (S02 §2, `nav.rail` on the desktop boards): logo · sections · spacer ·
@@ -50,7 +24,7 @@ export function Rail() {
   const session = useSession();
   const { toggleTheme } = useTheme();
   const pending = useRoutePending();
-  const permission = useSyncExternalStore(subscribeNotificationPermission, readNotificationPermission, () => null);
+  const nudge = useNotificationNudge();
 
   const items: RailItem[] = [
     { to: "/", label: "الرئيسية", icon: "home", visible: true },
@@ -63,7 +37,6 @@ export function Rail() {
   ];
 
   const notificationsCurrent = isSectionActive(pathname, "/notifications");
-  const nudge = permission === "default";
 
   return (
     <nav className="rail" aria-label="التنقل الرئيسي" style={{ position: "relative" }}>

@@ -1,26 +1,20 @@
-import { DeskCompose } from "@/components/brand/desk/DeskCompose";
-import { DeskGreeting } from "@/components/brand/desk/DeskGreeting";
-import { DeskHeadlines } from "@/components/brand/desk/DeskHeadlines";
-import { useSession } from "@/hooks/useSession";
-import { useNewsFeed } from "@/hooks/useNewsFeed";
+// / — «مكتب اليوم» (S07): DeskHome at ≥ 1024px, MobHome below, with their loading and offline states.
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { useOnline } from "@/hooks/useOnline";
+import { DeskHome } from "../components/DeskHome";
+import { MobHome } from "../components/MobHome";
+import { useCompose } from "../useCompose";
+import { useHome } from "../useHome";
 
 export default function HomePage() {
-  const session = useSession();
+  const mobile = useIsMobile();
+  const online = useOnline();
+  const home = useHome({ mobile });
+  const compose = useCompose({ online });
 
-  const feedQuery = useNewsFeed();
-
-  const headlines = (feedQuery.data?.items ?? []).slice(0, 8);
-
-  return (
-    <div className="desk-page">
-      <DeskGreeting displayName={session?.user.displayName ?? session?.user.identifier ?? "محرر"} />
-
-      <div className="desk-layout">
-        <div className="desk-rail">
-          <DeskCompose />
-        </div>
-        <DeskHeadlines items={headlines} isLoading={feedQuery.isLoading} isError={feedQuery.isError} />
-      </div>
-    </div>
+  return mobile ? (
+    <MobHome home={home} compose={compose} online={online} />
+  ) : (
+    <DeskHome home={home} compose={compose} online={online} />
   );
 }
