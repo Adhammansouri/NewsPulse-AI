@@ -74,13 +74,27 @@ export function newsRecency(iso: string): NewsRecency {
 
 export type TimeFilter = "all" | "fresh" | "hour" | "three" | "today";
 
-export const TIME_FILTERS: Array<{ id: TimeFilter; label: string; hint: string }> = [
-  { id: "all", label: "الكل", hint: "كل الأوقات" },
-  { id: "fresh", label: "جديد", hint: "آخر 20 دقيقة" },
-  { id: "hour", label: "ساعة", hint: "آخر ساعة" },
-  { id: "three", label: "3 ساعات", hint: "آخر ثلاث ساعات" },
-  { id: "today", label: "اليوم", hint: "منذ منتصف الليل" },
+/** The wire's time segments (Main / MobFilters `seg seg--block`), widest last but «الكل» first. */
+export const TIME_FILTERS: Array<{ id: TimeFilter; label: string }> = [
+  { id: "all", label: "الكل" },
+  { id: "fresh", label: "٢٠ د" },
+  { id: "hour", label: "ساعة" },
+  { id: "three", label: "٣ س" },
+  { id: "today", label: "اليوم" },
 ];
+
+/** Wire row freshness (np4 `wire-row` / npm2 `m-row` modifiers): < 20 min `is-now`, < 60 min `is-hour`, older none. */
+export type WireFreshness = "is-breaking" | "is-now" | "is-hour" | "";
+
+/** Main board: `is-breaking` only for breaking items that are still fresh (< 20 min), then `is-now` / `is-hour`. */
+export function wireFreshness(iso: string, breaking: boolean, now = Date.now()): WireFreshness {
+  const time = publishedAt(iso);
+  if (time == null) return "";
+  const age = now - time;
+  if (age < FRESH_MS) return breaking ? "is-breaking" : "is-now";
+  if (age < HOUR_MS) return "is-hour";
+  return "";
+}
 
 function publishedAt(iso: string) {
   const value = new Date(iso).getTime();
@@ -98,23 +112,6 @@ export function matchesTimeFilter(iso: string, filter: TimeFilter) {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   return time >= start.getTime();
-}
-
-export function timeFilterCounts(items: Array<{ publishedAt: string }>) {
-  const counts: Record<TimeFilter, number> = {
-    all: items.length,
-    fresh: 0,
-    hour: 0,
-    three: 0,
-    today: 0,
-  };
-  for (const item of items) {
-    if (matchesTimeFilter(item.publishedAt, "fresh")) counts.fresh += 1;
-    if (matchesTimeFilter(item.publishedAt, "hour")) counts.hour += 1;
-    if (matchesTimeFilter(item.publishedAt, "three")) counts.three += 1;
-    if (matchesTimeFilter(item.publishedAt, "today")) counts.today += 1;
-  }
-  return counts;
 }
 
 export type TopicFilter = "all" | NewsTopic;

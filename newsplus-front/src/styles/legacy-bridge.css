@@ -106,47 +106,6 @@
 .newsroom-editor-tabs button.is-active:is(button,input,textarea,select,a):is(.np *) {
   color: var(--nd-surface);
 }
-.newsroom-filter-toggle:is(button,input,textarea,select):is(.np *) {
-  font-size: 14px;
-}
-.newsroom-filter-toggle:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-text-primary);
-}
-.newsroom-source-browse:is(button,input,textarea,select):is(.np *),
-.newsroom-source-chip:is(button,input,textarea,select):is(.np *) {
-  font-size: 12px;
-}
-.newsroom-source-browse:is(button,input,textarea,select,a):is(.np *),
-.newsroom-source-chip:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-text-primary);
-}
-.newsroom-source-chip.is-active:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-surface);
-}
-.newsroom-source-head h2:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 0;
-}
-.newsroom-source-head p:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 4px 0 0;
-}
-.newsroom-source-search input:is(button,input,textarea,select):is(.np *) {
-  font-size: 16px;
-}
-.newsroom-source-search input:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-text-primary);
-}
-.newsroom-source-search input:focus-visible:is(.np *) {
-  outline: 0;
-}
-.newsroom-source-option:is(button,input,textarea,select):is(.np *) {
-  font-size: 14px;
-}
-.newsroom-source-option:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-text-primary);
-}
-.newsroom-source-group h3:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 20px 0 12px;
-}
 .newsroom-back:is(button,input,textarea,select,a):is(.np *) {
   color: var(--nd-text-primary);
 }

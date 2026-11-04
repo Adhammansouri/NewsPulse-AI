@@ -44,7 +44,7 @@ function sameLocalDay(a: Date, b: Date): boolean {
 }
 
 /** «٨:١٠ م» — 12-hour local clock, ص before noon, م from noon. */
-function clockAr(d: Date): string {
+export function clockAr(d: Date): string {
   const h24 = d.getHours();
   const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
   const mm = String(d.getMinutes()).padStart(2, "0");
@@ -71,4 +71,16 @@ export function relativeTimeAr(iso: string, now: Date = new Date()): string {
 
   const date = `${toArabicDigits(then.getDate())} ${MONTHS_AR[then.getMonth()]}`;
   return then.getFullYear() === now.getFullYear() ? date : `${date} ${toArabicDigits(then.getFullYear())}`;
+}
+
+/**
+ * The compact form of the mobile wire rows (MobWire): minutes shorten to «قبل ٣ د» / «قبل ٤٨ د»;
+ * everything else is `relativeTimeAr` («الآن», «قبل ساعة», «أمس ٨:١٠ م», …).
+ */
+export function relativeTimeArShort(iso: string, now: Date = new Date()): string {
+  const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) return "";
+  const diff = now.getTime() - then.getTime();
+  if (diff >= MINUTE_MS && diff < HOUR_MS) return `قبل ${toArabicDigits(Math.floor(diff / MINUTE_MS))} د`;
+  return relativeTimeAr(iso, now);
 }

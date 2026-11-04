@@ -63,7 +63,7 @@ export default function AppRoutes() {
       <Route element={<RequireAuth />}>
         <Route element={<MainLayout />}>
           <Route path="/" element={page(<HomePage />, "stack", "page")} />
-          <Route path="/news" element={page(<NewsPage />, "split", "tools")} />
+          <Route path="/news" element={page(<NewsPage />, "split")} />
           <Route path="/generate" element={page(<GeneratePage />, "split", "tools")} />
           <Route path="/translate" element={page(<TranslatePage />, "stack", "tools")} />
           <Route path="/notifications" element={page(<NotificationsPage />, "stack", "page")} />
