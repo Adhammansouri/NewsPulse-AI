@@ -1,0 +1,68 @@
+/* Newsplus Pulse — mobile layer (loaded after np4.css) */
+.np.m{position:relative;width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.np .m-head{display:flex;flex-direction:column;gap:2px;padding:18px 20px 12px;background:var(--surface)}
+.np .m-head__row{display:flex;align-items:center;gap:8px}
+.np .m-title{font-family:var(--f-display);font-size:28px;line-height:1.3;font-weight:700;flex:1;min-width:0}
+.np .m-bar{display:flex;align-items:center;gap:6px;height:56px;padding:0 8px;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);flex:none}
+.np .m-bar__title{flex:1;min-width:0;font-weight:700;font-size:16.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np .m-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden}
+.np .m-pad{padding:16px}
+.np .m-section{display:flex;flex-direction:column;gap:10px}
+.np .m-section__head{display:flex;align-items:center;justify-content:space-between}
+.np .m-cta{flex:none;display:flex;flex-direction:column;gap:8px;padding:12px 16px 26px;background:var(--surface);border-top:1px solid var(--line)}
+.np .m-cta__hint{font-size:12.5px;color:var(--ink-3);text-align:center}
+.np .m-tabbar{flex:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:end;height:84px;padding:8px 8px 24px;background:var(--surface);border-top:1px solid var(--line)}
+.np .m-tab{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink-3);font-size:11px;font-weight:500}
+.np .m-tab__ic{display:grid;place-items:center;width:56px;height:32px;border-radius:999px;transition:background .25s}
+.np .m-tab[aria-current="page"]{color:var(--ink);font-weight:600}
+.np .m-tab[aria-current="page"] .m-tab__ic{background:var(--teal-soft);color:var(--teal)}
+.np .m-tab--ai .m-tab__ic{width:52px;height:52px;margin-top:-22px;border-radius:17px;background:var(--ai);color:#fff;box-shadow:var(--glow),0 0 0 5px var(--surface)}
+.np .m-tab--ai[aria-current="page"] .m-tab__ic{background:var(--ai);color:#fff}
+
+/* wire row, mobile density */
+.np .m-row{position:relative;display:block;padding:14px 18px 14px 16px;padding-inline-start:34px;background:var(--surface);border-bottom:1px solid var(--line);color:var(--ink)}
+.np .m-row::before{content:"";position:absolute;inset-inline-start:16px;top:0;bottom:0;width:2px;background:var(--line)}
+.np .m-row .tick{position:absolute;inset-inline-start:11px;top:19px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--fresh-old)}
+.np .m-row.is-now .tick{border-color:var(--fresh-now);background:var(--fresh-now);box-shadow:0 0 0 4px var(--teal-soft)}
+.np .m-row.is-hour .tick{border-color:var(--fresh-hour)}
+.np .m-row.is-breaking .tick{border-color:var(--breaking-dot);background:var(--breaking-dot);box-shadow:0 0 0 4px var(--breaking-soft)}
+.np .m-row__meta{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-3)}
+.np .m-row__title{display:block;margin-top:5px;font-size:16px;line-height:1.6;font-weight:600}
+.np .m-row__foot{display:flex;align-items:center;gap:6px;margin-top:8px}
+.np .swipe{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+.np .swipe__actions{position:absolute;inset:0;display:flex;justify-content:flex-start}
+.np .swipe__act{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:96px;color:#fff;font-size:12px;font-weight:600}
+.np .swipe .m-row{transform:translateX(-192px);border-bottom:0;box-shadow:12px 0 24px -12px rgb(12 35 64/.3);transition:transform .4s var(--ease-out)}
+.np .ptr{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 0 10px;color:var(--ink-3);font-size:12.5px}
+
+/* lists + settings */
+.np .m-list{display:flex;flex-direction:column;background:var(--surface);border-radius:18px;border:1px solid var(--line);overflow:hidden}
+.np .m-item{display:flex;align-items:center;gap:14px;min-height:58px;padding:0 16px;border-bottom:1px solid var(--line);color:var(--ink);background:transparent;width:100%;text-align:start;border-inline:0;border-top:0}
+.np .m-item:last-child{border-bottom:0}
+.np .m-item__label{flex:1;min-width:0;display:flex;flex-direction:column;font-weight:600;font-size:15px}
+.np .m-item__label small{font-weight:400;font-size:12.5px;color:var(--ink-3)}
+.np .chev{width:16px;height:16px;color:var(--ink-3)}
+
+/* format carousel */
+.np .m-fmt{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-16px;padding:4px 16px 8px;scrollbar-width:none}
+.np .m-fmt::-webkit-scrollbar{display:none}
+.np .m-fmt .tile{flex:none;width:146px;scroll-snap-align:start}
+
+/* overlays */
+.np .m-dialog{position:absolute;inset-inline:24px;top:50%;transform:translateY(-50%);background:var(--surface);border-radius:26px;padding:24px 20px 16px;box-shadow:var(--shadow-3);display:flex;flex-direction:column;gap:10px;text-align:center;animation:np-pop-in .35s var(--ease-spring) both;z-index:5}
+.np .m-banner{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:13px;line-height:1.6}
+.np .m-toast{position:absolute;inset-inline:16px;bottom:104px;display:flex;justify-content:center;z-index:6}
+.np .m-float{position:absolute;inset-inline:12px;bottom:100px;z-index:6;border-radius:20px;background:var(--surface);box-shadow:var(--shadow-3);border:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:10px;animation:np-drop .55s var(--ease-spring) both}
+.np .kb{flex:none;height:260px;background:var(--bg-sunken);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(10,1fr);gap:6px;padding:10px 6px 30px;align-content:start}
+.np .kb span{height:40px;border-radius:7px;background:var(--surface);box-shadow:0 1px 0 rgb(0 0 0/.12)}
+
+/* v2 — QA fixes */
+.np .m-scroll>*{flex-shrink:0}
+.np .m-scroll::after{content:"";display:block;height:28px;flex:none}
+.np.m .block__copy{height:36px;padding:0 12px}
+.np.m .vchip{min-width:34px;height:32px}
+.np.m .switch{width:52px;height:32px}
+.np.m .switch::after{width:26px;height:26px}
+.np.m .switch[aria-checked="true"]::after{inset-inline-start:23px}
+.np.m a:not([class]){display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px}
+.np.m .icon-btn{width:44px;height:44px}

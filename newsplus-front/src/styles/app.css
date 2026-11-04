@@ -1,0 +1,17 @@
+/* Newsplus "Pulse" design system — ported as-is from docs/redesign/design/css (see GLOBAL-RULES §3). */
+@import "./design/np4.css";
+@import "./design/npm2.css";
+@import "./design/npx.css";
+
+html,
+body {
+  margin: 0;
+}
+
+/* Page background follows the design token of the active theme (the root .np element owns the tokens). */
+body {
+  background: #f3f5f8; /* np4 --bg (light) */
+}
+html[data-theme="dark"] body {
+  background: #07111c; /* np4 --bg (dark) */
+}

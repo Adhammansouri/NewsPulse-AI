@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "../../design-system/tokens.css";
+@import "./styles/app.css";
+@import "./styles/legacy-bridge.css"; /* transitional, see file header */
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
@@ -44,9 +46,9 @@
 }
 
 :root {
-  --font-display: "Doto", "Space Mono", monospace;
-  --font-nd-body: "Space Grotesk", "Noto Sans Arabic", system-ui, sans-serif;
-  --font-nd-mono: "Space Mono", ui-monospace, monospace;
+  --font-display: "Alexandria", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-nd-body: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-nd-mono: "IBM Plex Sans", "IBM Plex Sans Arabic", ui-monospace, monospace;
   --ease-nd: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 

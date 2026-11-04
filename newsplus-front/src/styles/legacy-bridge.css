@@ -1,0 +1,381 @@
+/* =============================================================================================
+   TRANSITIONAL — legacy (pre-Pulse) screens inside the Pulse `.np` root (S01).
+
+   src/styles/design is unlayered and scoped to `.np`, so once AppRoot wraps every route its
+   root text baseline, its element resets (`.np button`, `.np a`, `.np p`, … = specificity 0,1,1)
+   and the mobile frame (`.np.m`) also hit the legacy screens, beating single-class legacy rules
+   and every Tailwind utility. This file hands those properties back to the legacy cascade,
+   only under the legacy roots: MainLayout's `.brand-app-shell` and LoginPage's `.np-login`.
+
+   It is imported right after the design CSS (top of index.css), so the legacy index.css rules
+   that tie with these selectors still win by order (module CSS loads earlier, see §4).
+   Delete a scope as soon as no legacy screen renders under it:
+   `.np-login` with S03 (login rebuild); `.brand-app-shell` once its last legacy page is rebuilt
+   (S10 at the latest). S02 replaces MainLayout: if legacy pages then render inside the new
+   shell, move the `.brand-app-shell` scope to a wrapper around those pages.
+   ============================================================================================= */
+
+/* 1 · Text baseline the legacy screens inherited from html/body (index.css `body`, preflight). */
+:where(.np) > .brand-app-shell {
+  font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+:where(.np) > .np-login {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* 2 · Undo the `.np` element resets (same specificity, later) → back to preflight, Tailwind and
+   layered legacy rules. Unlayered legacy rules that lose to the resets are restored in §4. */
+:is(.brand-app-shell, .np-login) :is(button, input, textarea, select) {
+  font: revert-layer;
+  color: revert-layer;
+}
+
+:is(.brand-app-shell, .np-login) button {
+  cursor: revert-layer;
+}
+
+:is(.brand-app-shell, .np-login) :is(h1, h2, h3, h4, p, ul, ol, figure) {
+  margin: revert-layer;
+}
+
+:is(.brand-app-shell, .np-login) :is(ul, ol) {
+  padding: revert-layer;
+  list-style: revert-layer;
+}
+
+:is(.brand-app-shell, .np-login) a {
+  color: revert-layer;
+  text-decoration: revert-layer;
+}
+
+:is(.brand-app-shell, .np-login) :focus-visible {
+  outline: revert-layer;
+  outline-offset: revert-layer;
+}
+
+/* 3 · Below 1024px: no `.np.m` app frame (legacy screens scroll the document) and no 44px
+   box on class-less links (npm2 `.np.m a:not([class])`). */
+.np.m:has(> .brand-app-shell, > .np-login) {
+  position: static;
+  display: block;
+  height: auto;
+  overflow: visible;
+}
+
+.m > :is(.brand-app-shell, .np-login) a:not([class]) {
+  display: revert-layer;
+  align-items: revert-layer;
+  justify-content: revert-layer;
+  min-height: revert-layer;
+  min-width: revert-layer;
+}
+
+/* 4 · Legacy declarations that lose to the `.np` resets, re-declared verbatim from their source
+   rule, in source order. Each selector gets the same suffix per property family (the reset's
+   element list plus `:is(.np *)`), so the copies outrank the resets while keeping their
+   specificity and order relative to each other. Module CSS loads before index.css, so its rules
+   also lose ties with the resets. Generated from the live CSSOM over every legacy route plus
+   scripted states (source sheet, filters, history drawer, editorial view, collapsed rail, menu,
+   login error and reset, usage not configured, generate and translate results), at desktop and
+   mobile, light and dark. A rule is copied when it sets a reset property on an element the
+   reset hits, with lower specificity than the reset (or equal and loaded earlier), together
+   with every other legacy rule competing for that property on the same elements. */
+
+/* modules/Login/login.css */
+.np-login__chrome-btn:is(button):is(.np *) {
+  cursor: pointer;
+}
+.np-login__chrome-btn:is(button,input,textarea,select,a):is(.np *) {
+  color: #0d9b8a;
+}
+.np-login__chrome-btn:hover:is(button,input,textarea,select,a):is(.np *) {
+  color: #0c2340;
+}
+.np-login.is-dark .np-login__chrome-btn:is(button,input,textarea,select,a):is(.np *) {
+  color: #5eead4;
+}
+.np-login.is-dark .np-login__chrome-btn:hover:is(button,input,textarea,select,a):is(.np *) {
+  color: #f8fafc;
+}
+.np-login__chrome-btn:focus-visible:focus-visible:is(.np *) {
+  outline: none;
+}
+@media (min-width: 1024px) {
+  .np-login.is-dark .np-login__form-wrap .np-login__input:is(button,input,textarea,select,a):is(.np *) {
+    color: #e2e8f0;
+  }
+  .np-login.is-dark .np-login__form-wrap .np-login__toggle:is(button,input,textarea,select,a):is(.np *) {
+    color: #94a3b8;
+  }
+  .np-login.is-dark .np-login__form-wrap .np-login__toggle:hover:is(button,input,textarea,select,a):is(.np *) {
+    color: var(--login-primary-soft);
+  }
+  .np-login.is-dark .np-login__form-wrap .np-login__submit:is(button,input,textarea,select,a):is(.np *) {
+    color: #fff;
+  }
+}
+.np-login__title:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 0 0 0.5rem;
+}
+.np-login__subtitle:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 0;
+}
+.np-login__dev-hint:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 0.65rem 0 0;
+}
+.np-login__input:is(button,input,textarea,select):is(.np *) {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  font-family: inherit;
+  line-height: 1.5;
+}
+.np-login__input:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--login-text);
+}
+.np-login__input:focus:focus-visible:is(.np *) {
+  outline: none;
+}
+.np-login__toggle:is(button):is(.np *) {
+  cursor: pointer;
+}
+.np-login__toggle:is(button,input,textarea,select,a):is(.np *) {
+  color: #64748b;
+}
+.np-login__toggle:hover:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--login-primary);
+}
+.np-login__forgot:is(button):is(.np *) {
+  cursor: pointer;
+}
+.np-login__forgot:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--login-link);
+}
+.np-login__forgot:is(button,input,textarea,select):is(.np *) {
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+}
+.np-login__forgot:hover:not(:disabled):is(button,input,textarea,select,a):is(.np *) {
+  color: var(--login-primary-hover);
+}
+.np-login__auth-switch:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 2rem 0 0;
+}
+.np-login__auth-switch-link:is(button):is(.np *) {
+  cursor: pointer;
+}
+.np-login__auth-switch-link:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--login-link);
+}
+.np-login__auth-switch-link:is(button,input,textarea,select):is(.np *) {
+  font-size: inherit;
+  font-weight: 600;
+  font-family: inherit;
+}
+.np-login__submit:is(button):is(.np *) {
+  cursor: pointer;
+}
+.np-login__submit:is(button,input,textarea,select):is(.np *) {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: inherit;
+}
+.np-login__submit:is(button,input,textarea,select,a):is(.np *) {
+  color: #fff;
+}
+.np-login__submit:focus-visible:focus-visible:is(.np *) {
+  outline: none;
+}
+@media (min-width: 1024px) {
+  .np-login.is-dark .np-login__toggle:is(button,input,textarea,select,a):is(.np *) {
+    color: #94a3b8;
+  }
+}
+@media (max-width: 1023px) {
+  .np-login__title:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+    margin-bottom: 0.3rem;
+  }
+  .np-login__forgot:is(button,input,textarea,select):is(.np *) {
+    font-size: 0.84rem;
+  }
+  .np-login.is-dark .np-login__form-wrap .np-login__submit:is(button,input,textarea,select,a):is(.np *) {
+    color: #fff;
+  }
+  .np-login.is-dark .np-login__form-wrap .np-login__input:is(button,input,textarea,select,a):is(.np *) {
+    color: #e2e8f0;
+  }
+  .np-login.is-dark .np-login__form-wrap .np-login__toggle:is(button,input,textarea,select,a):is(.np *) {
+    color: #94a3b8;
+  }
+  .np-login.is-dark .np-login__form-wrap .np-login__toggle:hover:is(button,input,textarea,select,a):is(.np *) {
+    color: var(--login-primary-soft);
+  }
+}
+
+/* modules/News/newsroom.css */
+.newsroom-pane-tabs button:is(button,input,textarea,select):is(.np *),
+.newsroom-editor-tabs button:is(button,input,textarea,select):is(.np *) {
+  font-size: 14px;
+}
+.newsroom-pane-tabs button:is(button,input,textarea,select,a):is(.np *),
+.newsroom-editor-tabs button:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-text-secondary);
+}
+.newsroom-pane-tabs button.is-active:is(button,input,textarea,select,a):is(.np *),
+.newsroom-editor-tabs button.is-active:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-surface);
+}
+.newsroom-filter-toggle:is(button,input,textarea,select):is(.np *) {
+  font-size: 14px;
+}
+.newsroom-filter-toggle:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-text-primary);
+}
+.newsroom-source-browse:is(button,input,textarea,select):is(.np *),
+.newsroom-source-chip:is(button,input,textarea,select):is(.np *) {
+  font-size: 12px;
+}
+.newsroom-source-browse:is(button,input,textarea,select,a):is(.np *),
+.newsroom-source-chip:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-text-primary);
+}
+.newsroom-source-chip.is-active:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-surface);
+}
+.newsroom-source-head h2:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 0;
+}
+.newsroom-source-head p:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 4px 0 0;
+}
+.newsroom-source-search input:is(button,input,textarea,select):is(.np *) {
+  font-size: 16px;
+}
+.newsroom-source-search input:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-text-primary);
+}
+.newsroom-source-search input:focus-visible:is(.np *) {
+  outline: 0;
+}
+.newsroom-source-option:is(button,input,textarea,select):is(.np *) {
+  font-size: 14px;
+}
+.newsroom-source-option:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-text-primary);
+}
+.newsroom-source-group h3:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 20px 0 12px;
+}
+.newsroom-back:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-text-primary);
+}
+.newsroom .news-story-origin a:is(a:not([class])):is(.np.m *) {
+  min-height: 44px;
+}
+.newsroom-generate-dock > p:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 0;
+}
+.newsroom-editor-tabs button:is(button,input,textarea,select):is(.np *) {
+  font-size: 12px;
+}
+
+/* modules/Translate/translate.css */
+.translate-intro:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 6px 0 0;
+}
+.translate-footnote:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *),
+.translate-result-meta:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 0;
+}
+.translate-source-link button:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-text-primary);
+}
+
+/* modules/Usage/usage.css */
+.usage-page button:is(button,input,textarea,select):is(.np *),
+.usage-page select:is(button,input,textarea,select):is(.np *),
+.usage-page input:is(button,input,textarea,select):is(.np *) {
+  font: inherit;
+}
+.usage-page button:is(button):is(.np *) {
+  cursor: pointer;
+}
+.usage-eyebrow:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 0 0 12px;
+}
+.usage-heading h1:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 0;
+}
+.usage-intro:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 12px 0 0;
+}
+.usage-actions button:is(button,input,textarea,select):is(.np *) {
+  font-size: 12px;
+}
+.usage-presets button:is(button,input,textarea,select,a):is(.np *),
+.usage-chart-switch button:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-text-secondary);
+}
+.usage-presets button:is(button,input,textarea,select):is(.np *),
+.usage-chart-switch button:is(button,input,textarea,select):is(.np *) {
+  font-size: 13px;
+}
+.usage-presets button[aria-pressed="true"]:is(button,input,textarea,select,a):is(.np *),
+.usage-chart-switch button[aria-pressed="true"]:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-black);
+}
+.usage-project select:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-text-primary);
+}
+.usage-date-form input:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-text-primary);
+}
+.usage-date-form input:is(button,input,textarea,select):is(.np *) {
+  font-size: 12px;
+}
+.usage-text-button:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-text-primary);
+}
+.usage-notice h2:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 0 0 8px;
+}
+.usage-external:is(a):is(.np *) {
+  text-decoration: underline;
+}
+.usage-external:is(button,input,textarea,select,a):is(.np *) {
+  color: var(--nd-text-primary);
+}
+.usage-hero p:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 12px 0;
+}
+.usage-section-heading h2:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 0;
+}
+.usage-section-heading h3:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 0;
+}
+.usage-chart-switch button:is(button,input,textarea,select):is(.np *) {
+  font-size: 12px;
+}
+.usage-state:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 14px 0;
+}
+.usage-cost-list:is(ul,ol):is(.np *) {
+  padding: 0;
+}
+.usage-cost-list:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
+  margin: 0;
+}
+.usage-cost-list:is(ul,ol):is(.np *) {
+  list-style: none;
+}
+@media (max-width: 640px) {
+  .usage-presets button:is(button,input,textarea,select):is(.np *) {
+    font-size: 12px;
+  }
+}

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "@/components/layouts/MainLayout";
 import RequireAuth from "@/components/shared/RequireAuth";
@@ -9,9 +10,25 @@ import NotificationsPage from "@/modules/Notifications/pages/NotificationsPage";
 import TranslatePage from "@/modules/Translate/pages/TranslatePage";
 import UsagePage from "@/modules/Usage/pages/UsagePage";
 
+// Dev-only UI-kit gallery (S01 §7). `import.meta.env.DEV` is `false` in production builds, so the
+// lazy import is dead code there and the gallery chunk is never emitted.
+const DesignGalleryPage = import.meta.env.DEV
+  ? lazy(() => import("@/modules/DesignGallery/DesignGalleryPage"))
+  : null;
+
 export default function AppRoutes() {
   return (
     <Routes>
+      {DesignGalleryPage && (
+        <Route
+          path="/__design"
+          element={
+            <Suspense fallback={null}>
+              <DesignGalleryPage />
+            </Suspense>
+          }
+        />
+      )}
       <Route path="/login" element={<LoginPage />} />
       <Route element={<RequireAuth />}>
         <Route element={<MainLayout />}>

@@ -1,8 +1,6 @@
 /// <reference lib="webworker" />
 /// <reference types="vite-plugin-pwa/client" />
 
-import { CacheableResponsePlugin } from "workbox-cacheable-response";
-import { ExpirationPlugin } from "workbox-expiration";
 import {
   cleanupOutdatedCaches,
   createHandlerBoundToURL,
@@ -10,7 +8,7 @@ import {
   precacheAndRoute,
 } from "workbox-precaching";
 import { NavigationRoute, registerRoute, setCatchHandler } from "workbox-routing";
-import { NetworkOnly, StaleWhileRevalidate } from "workbox-strategies";
+import { NetworkOnly } from "workbox-strategies";
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -25,20 +23,6 @@ registerRoute(
 registerRoute(
   ({ request }) => request.headers.has("Authorization"),
   new NetworkOnly(),
-);
-
-registerRoute(
-  ({ url }) =>
-    url.origin === "https://fonts.googleapis.com" ||
-    url.origin === "https://fonts.gstatic.com" ||
-    url.origin === "https://cdn.jsdelivr.net",
-  new StaleWhileRevalidate({
-    cacheName: "newsplus-fonts",
-    plugins: [
-      new CacheableResponsePlugin({ statuses: [0, 200] }),
-      new ExpirationPlugin({ maxEntries: 40, maxAgeSeconds: 60 * 60 * 24 * 365 }),
-    ],
-  }),
 );
 
 registerRoute(
