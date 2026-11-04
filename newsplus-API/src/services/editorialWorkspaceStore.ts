@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { DatabaseSync } from "node:sqlite";
 import type {
   EditorialConversationDetail,
+  EditorialConversationScope,
   EditorialConversationSummary,
   EditorialMemoryRule,
   EditorialMemoryStatus,
@@ -13,8 +14,11 @@ import type {
   NewsLanguage,
   NewsSummarizeData,
   NewsSummaryFormat,
+  EditorialPublishPlatform,
+  EditorialWorkflowStatus,
 } from "@newsplus/shared";
 import { ConflictError, NotFoundError } from "../utils/errors.js";
+import { DEFAULT_WORKFLOW_STATUS, isPublishPlatform, isWorkflowStatus, WORKFLOW_STATUSES } from "./editorialWorkflow.js";
 
 export type StoredEditorialCopy = Omit<NewsSummarizeData, "conversationId" | "versionId" | "versionNumber">;
 
@@ -39,6 +43,20 @@ export type AddVersionInput = {
   expectedVersionId?: string;
 };
 
+/** `GET /editorial/conversations` filters (S15). Empty = the pre-S15 list. */
+export type ConversationListFilter = {
+  scope?: EditorialConversationScope;
+  status?: EditorialWorkflowStatus;
+  /** The caller — required for `scope: "mine"` (creator or assignee). */
+  userId?: string;
+};
+
+export type WorkflowPatch = {
+  status?: EditorialWorkflowStatus;
+  assigneeId?: string;
+  publishedPlatforms?: EditorialPublishPlatform[];
+};
+
 type ConversationRow = {
   id: string;
   title: string;
@@ -51,6 +69,10 @@ type ConversationRow = {
   created_by: string;
   created_at: string;
   updated_at: string;
+  status?: string | null;
+  assignee_id?: string | null;
+  published_platforms?: string | null;
+  comment_count?: number | null;
   version_count?: number;
 };
 
@@ -144,6 +166,16 @@ function mapMemory(row: MemoryRow): EditorialMemoryRule {
   };
 }
 
+function parsePlatforms(raw: string | null | undefined): EditorialPublishPlatform[] {
+  if (!raw) return [];
+  try {
+    const value: unknown = JSON.parse(raw);
+    return Array.isArray(value) ? value.filter(isPublishPlatform) : [];
+  } catch {
+    return [];
+  }
+}
+
 function mapSummary(row: ConversationRow): EditorialConversationSummary {
   return {
     id: row.id,
@@ -156,8 +188,26 @@ function mapSummary(row: ConversationRow): EditorialConversationSummary {
     updatedAt: row.updated_at,
     createdBy: row.created_by,
     versionCount: Number(row.version_count ?? 0),
+    status: isWorkflowStatus(row.status) ? row.status : DEFAULT_WORKFLOW_STATUS,
+    assigneeId: row.assignee_id ?? row.created_by,
+    publishedPlatforms: parsePlatforms(row.published_platforms),
+    commentCount: Number(row.comment_count ?? 0),
   };
 }
+
+/**
+ * S15 workflow columns, added to `editorial_conversations` by `migrateWorkflowColumns`. The CREATE TABLE keeps the
+ * original shape, so fresh and pre-S15 databases take the same path. The defaults back-fill existing rows (status
+ * `draft`, no platforms, no comments); `assignee_id` is then back-filled to the creator.
+ */
+const WORKFLOW_COLUMNS: ReadonlyArray<readonly [name: string, definition: string]> = [
+  ["status", `TEXT NOT NULL DEFAULT '${DEFAULT_WORKFLOW_STATUS}'`],
+  ["assignee_id", "TEXT"],
+  ["published_platforms", "TEXT NOT NULL DEFAULT '[]'"],
+  ["comment_count", "INTEGER NOT NULL DEFAULT 0"],
+];
+
+const LIST_LIMIT = 50;
 
 export class EditorialWorkspaceStore {
   private readonly db: DatabaseSync;
@@ -237,6 +287,30 @@ export class EditorialWorkspaceStore {
       CREATE INDEX IF NOT EXISTS editorial_memory_status_idx
         ON editorial_memory_rules (status, updated_at DESC);
     `);
+    this.migrateWorkflowColumns();
+  }
+
+  /** Idempotent: adds the missing S15 columns, back-fills the assignee, and indexes the board query. */
+  private migrateWorkflowColumns() {
+    const existing = new Set(
+      (this.db.prepare("PRAGMA table_info(editorial_conversations)").all() as Array<{ name: string }>).map(
+        (column) => column.name,
+      ),
+    );
+    this.db.exec("BEGIN");
+    try {
+      for (const [name, definition] of WORKFLOW_COLUMNS) {
+        if (!existing.has(name)) this.db.exec(`ALTER TABLE editorial_conversations ADD COLUMN ${name} ${definition}`);
+      }
+      this.db.exec("UPDATE editorial_conversations SET assignee_id = created_by WHERE assignee_id IS NULL");
+      this.db.exec(
+        "CREATE INDEX IF NOT EXISTS editorial_conversations_status_idx ON editorial_conversations (status, updated_at DESC)",
+      );
+      this.db.exec("COMMIT");
+    } catch (error) {
+      this.db.exec("ROLLBACK");
+      throw error;
+    }
   }
 
   createConversation(input: CreateConversationInput): EditorialConversationDetail {
@@ -253,8 +327,9 @@ export class EditorialWorkspaceStore {
         .prepare(
           `INSERT INTO editorial_conversations (
             id, title, format, language, item_id, source_label, source_packet,
-            current_version_id, created_by, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            current_version_id, created_by, created_at, updated_at,
+            status, assignee_id, published_platforms, comment_count
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '[]', 0)`,
         )
         .run(
           conversationId,
@@ -268,6 +343,8 @@ export class EditorialWorkspaceStore {
           input.createdBy,
           createdAt,
           createdAt,
+          DEFAULT_WORKFLOW_STATUS,
+          input.createdBy,
         );
 
       this.db
@@ -303,19 +380,116 @@ export class EditorialWorkspaceStore {
     return this.getConversation(conversationId);
   }
 
-  listConversations(query = ""): EditorialConversationSummary[] {
-    const trimmed = query.trim();
+  /**
+   * Newest first, at most 50. Without a filter this is the pre-S15 list (title / source search only).
+   * `status` keeps one board column; `scope: "mine"` keeps the caller's drafts (creator or assignee).
+   */
+  listConversations(query = "", filter: ConversationListFilter = {}): EditorialConversationSummary[] {
+    const where = this.listWhere(query, filter);
     const sql = `
       SELECT c.*,
         (SELECT COUNT(*) FROM editorial_versions v WHERE v.conversation_id = c.id) AS version_count
       FROM editorial_conversations c
-      WHERE (? = '' OR c.title LIKE ? ESCAPE '\\' OR IFNULL(c.source_label, '') LIKE ? ESCAPE '\\')
+      WHERE ${where.sql}${filter.status ? " AND c.status = ?" : ""}
       ORDER BY c.updated_at DESC
-      LIMIT 50
+      LIMIT ${LIST_LIMIT}
     `;
-    const like = trimmed ? `%${escapeLike(trimmed)}%` : "";
-    const rows = this.db.prepare(sql).all(trimmed, like, like) as ConversationRow[];
+    const params = filter.status ? [...where.params, filter.status] : where.params;
+    const rows = this.db.prepare(sql).all(...params) as ConversationRow[];
     return rows.map(mapSummary);
+  }
+
+  /** Totals per workflow status for the same search and scope (the board's column badges). */
+  countByStatus(query = "", filter: Omit<ConversationListFilter, "status"> = {}): Record<EditorialWorkflowStatus, number> {
+    const where = this.listWhere(query, filter);
+    const rows = this.db
+      .prepare(
+        `SELECT c.status AS status, COUNT(*) AS total FROM editorial_conversations c WHERE ${where.sql} GROUP BY c.status`,
+      )
+      .all(...where.params) as Array<{ status: string; total: number }>;
+    const counts = Object.fromEntries(WORKFLOW_STATUSES.map((status) => [status, 0])) as Record<
+      EditorialWorkflowStatus,
+      number
+    >;
+    for (const row of rows) {
+      if (isWorkflowStatus(row.status)) counts[row.status] += Number(row.total);
+    }
+    return counts;
+  }
+
+  /** The search (pre-S15) and scope part of the list / count WHERE clause. */
+  private listWhere(query: string, filter: Omit<ConversationListFilter, "status">) {
+    const trimmed = query.trim();
+    const like = trimmed ? `%${escapeLike(trimmed)}%` : "";
+    let sql = "(? = '' OR c.title LIKE ? ESCAPE '\\' OR IFNULL(c.source_label, '') LIKE ? ESCAPE '\\')";
+    const params: string[] = [trimmed, like, like];
+    if (filter.scope === "mine") {
+      const userId = filter.userId ?? "";
+      sql += " AND (c.assignee_id = ? OR c.created_by = ?)";
+      params.push(userId, userId);
+    }
+    return { sql, params };
+  }
+
+  getConversationSummary(id: string): EditorialConversationSummary {
+    const row = this.db
+      .prepare(
+        `SELECT c.*,
+          (SELECT COUNT(*) FROM editorial_versions v WHERE v.conversation_id = c.id) AS version_count
+         FROM editorial_conversations c WHERE c.id = ?`,
+      )
+      .get(id) as ConversationRow | undefined;
+    if (!row) throw new NotFoundError();
+    return mapSummary(row);
+  }
+
+  /**
+   * S15 `PATCH`: sets the given workflow fields. When anything changed it bumps `updated_at` (the board and
+   * «كمّل شغلك» order by it) and logs `systemMessage`, if given, as a `system` message on the current version.
+   */
+  updateWorkflow(
+    id: string,
+    patch: WorkflowPatch,
+    options: { actorId: string; systemMessage?: string },
+  ): EditorialConversationSummary {
+    const current = this.getConversationSummary(id);
+    const next = {
+      status: patch.status ?? current.status,
+      assigneeId: patch.assigneeId ?? current.assigneeId,
+      publishedPlatforms: patch.publishedPlatforms ?? current.publishedPlatforms,
+    };
+    const changed =
+      next.status !== current.status ||
+      next.assigneeId !== current.assigneeId ||
+      JSON.stringify(next.publishedPlatforms) !== JSON.stringify(current.publishedPlatforms);
+    if (!changed) return current;
+
+    const updatedAt = nowIso();
+    this.db.exec("BEGIN");
+    try {
+      this.db
+        .prepare(
+          "UPDATE editorial_conversations SET status = ?, assignee_id = ?, published_platforms = ?, updated_at = ? WHERE id = ?",
+        )
+        .run(next.status, next.assigneeId, JSON.stringify(next.publishedPlatforms), updatedAt, id);
+      if (options.systemMessage) {
+        const row = this.db
+          .prepare("SELECT current_version_id FROM editorial_conversations WHERE id = ?")
+          .get(id) as { current_version_id: string | null } | undefined;
+        this.db
+          .prepare(
+            `INSERT INTO editorial_messages (
+              id, conversation_id, role, content, version_id, created_by, created_at
+            ) VALUES (?, ?, 'system', ?, ?, ?, ?)`,
+          )
+          .run(randomUUID(), id, options.systemMessage, row?.current_version_id ?? null, options.actorId, updatedAt);
+      }
+      this.db.exec("COMMIT");
+    } catch (error) {
+      this.db.exec("ROLLBACK");
+      throw error;
+    }
+    return this.getConversationSummary(id);
   }
 
   getConversation(id: string): EditorialConversationDetail {

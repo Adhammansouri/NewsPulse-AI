@@ -1,5 +1,5 @@
 import Fastify from "fastify";
-import { createAuthService, createToolServices } from "./container.js";
+import { createAuthService, createToolServices, createWorkflowServices } from "./container.js";
 import { corsPlugin } from "./plugins/cors.plugin.js";
 import { errorHandlerPlugin } from "./plugins/errorHandler.plugin.js";
 import { jwtPlugin } from "./plugins/jwt.plugin.js";
@@ -30,6 +30,7 @@ export async function buildApp() {
       authService,
       pushService,
       ...toolServices,
+      ...createWorkflowServices(authService, workspace),
     }),
     { prefix: "/api" },
   );

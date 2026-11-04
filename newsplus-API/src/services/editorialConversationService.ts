@@ -15,7 +15,6 @@ import { arcLabel, carouselRevisionInstructions, mergeCarouselSlides } from "../
 import type { OpenAIClient } from "../ai/openaiClient.js";
 import type {
   EditorialConversationDetail,
-  EditorialConversationListData,
   EditorialMemoryListData,
   EditorialMemoryStatus,
   EditorialReviseData,
@@ -42,10 +41,6 @@ function storedCopy(copy: StoredEditorialCopy, format: StoredEditorialCopy["form
 
 export class EditorialConversationService {
   constructor(private readonly deps: EditorialConversationServiceDeps) {}
-
-  listConversations(query?: string): EditorialConversationListData {
-    return { items: this.deps.workspace.listConversations(query) };
-  }
 
   getConversation(id: string): EditorialConversationDetail {
     return this.deps.workspace.getConversation(id);
@@ -90,7 +85,8 @@ export class EditorialConversationService {
         memoryBlock: buildGenerationMemoryPrefix(memoryRules).trim(),
         sourcePacket: conversation.sourcePacket,
         currentCopy: conversation.copy,
-        messages: conversation.messages,
+        // Workflow lines («نقلتها سارة لمراجعة», S15) are not desk notes for the model.
+        messages: conversation.messages.filter((message) => message.role !== "system"),
         instruction: note,
       }),
       schemaName: "news_revision",

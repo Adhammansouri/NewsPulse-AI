@@ -17,10 +17,26 @@ export type {
   PushVapidKeyData,
 } from "./types/push.js";
 export { NEWS_TOPICS } from "./types/news.js";
+export { EDITORIAL_PUBLISH_PLATFORMS, EDITORIAL_WORKFLOW_STATUSES } from "./types/workflow.js";
+export type {
+  EditorialConversationScope,
+  EditorialPublishPlatform,
+  EditorialWorkflowStatus,
+  PresenceActivity,
+  PresenceData,
+  PresenceEntry,
+  PresenceHeartbeatData,
+  PresenceHeartbeatRequest,
+  TeamData,
+  TeamMember,
+  TeamMemberRef,
+} from "./types/workflow.js";
 export type {
   EditorialConversationDetail,
   EditorialConversationListData,
+  EditorialConversationListQuery,
   EditorialConversationSummary,
+  EditorialConversationUpdateRequest,
   EditorialMemoryCandidate,
   EditorialMemoryListData,
   EditorialMemoryRule,

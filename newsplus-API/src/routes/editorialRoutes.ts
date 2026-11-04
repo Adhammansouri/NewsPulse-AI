@@ -7,15 +7,20 @@ import { validateQuery } from "../middleware/validateQuery.js";
 import {
   editorialConversationIdParamsSchema,
   editorialConversationListQuerySchema,
+  editorialConversationUpdateBodySchema,
   editorialMemoryListQuerySchema,
   editorialMemoryUpdateBodySchema,
   editorialRestoreBodySchema,
   editorialReviseBodySchema,
 } from "../schemas/editorial.schema.js";
 import type { EditorialConversationService } from "../services/editorialConversationService.js";
+import type { EditorialWorkflowService } from "../services/editorialWorkflowService.js";
 
-export function createEditorialRoutes(service: EditorialConversationService): FastifyPluginAsync {
-  const controller = createEditorialController(service);
+export function createEditorialRoutes(
+  service: EditorialConversationService,
+  workflow: EditorialWorkflowService,
+): FastifyPluginAsync {
+  const controller = createEditorialController(service, workflow);
 
   return async (app) => {
     app.get("/editorial/conversations", {
@@ -26,6 +31,14 @@ export function createEditorialRoutes(service: EditorialConversationService): Fa
     app.get("/editorial/conversations/:id", {
       preHandler: [validateParams(editorialConversationIdParamsSchema)],
       handler: controller.get,
+    });
+
+    app.patch("/editorial/conversations/:id", {
+      preHandler: [
+        validateParams(editorialConversationIdParamsSchema),
+        validateBody(editorialConversationUpdateBodySchema),
+      ],
+      handler: controller.update,
     });
 
     app.post("/editorial/conversations/:id/revise", {

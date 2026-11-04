@@ -19,7 +19,7 @@ const corsPluginImpl: FastifyPluginAsync = async (app) => {
     origin: (origin, callback) => {
       callback(null, resolveCorsOrigin(origin));
     },
-    methods: ["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     exposedHeaders: ["Retry-After", "X-RateLimit-Remaining"],
   });

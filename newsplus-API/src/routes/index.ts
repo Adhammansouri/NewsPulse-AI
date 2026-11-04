@@ -8,6 +8,8 @@ import { createEditorialRoutes } from "./editorialRoutes.js";
 import { createGenerateRoutes } from "./generateRoutes.js";
 import { createTranslateRoutes } from "./translateRoutes.js";
 import { createOpenAIUsageRoutes } from "./openaiUsageRoutes.js";
+import { createPresenceRoutes } from "./presenceRoutes.js";
+import { createTeamRoutes } from "./teamRoutes.js";
 import { OpenAIUsageService } from "../services/openaiUsageService.js";
 import type { AuthService } from "../services/authService.js";
 import type { PushService } from "../services/pushService.js";
@@ -15,6 +17,9 @@ import type { NewsService } from "../services/newsService.js";
 import type { EditorialConversationService } from "../services/editorialConversationService.js";
 import type { GenerateService } from "../services/generateService.js";
 import type { TranslateService } from "../services/translateService.js";
+import type { EditorialWorkflowService } from "../services/editorialWorkflowService.js";
+import type { PresenceService } from "../services/presenceService.js";
+import type { TeamService } from "../services/teamService.js";
 
 type ApiServices = {
   authService: AuthService;
@@ -23,6 +28,9 @@ type ApiServices = {
   editorialService: EditorialConversationService;
   generateService: GenerateService;
   translateService: TranslateService;
+  workflowService: EditorialWorkflowService;
+  presenceService: PresenceService;
+  teamService: TeamService;
 };
 
 export function createApiRoutes(services: ApiServices): FastifyPluginAsync {
@@ -32,7 +40,9 @@ export function createApiRoutes(services: ApiServices): FastifyPluginAsync {
     await app.register(createAuthRoutes(services.authService));
     await app.register(createPushRoutes(services.pushService));
     await app.register(createNewsRoutes(services.newsService));
-    await app.register(createEditorialRoutes(services.editorialService));
+    await app.register(createEditorialRoutes(services.editorialService, services.workflowService));
+    await app.register(createPresenceRoutes(services.presenceService));
+    await app.register(createTeamRoutes(services.teamService));
     await app.register(createGenerateRoutes(services.generateService));
     await app.register(createTranslateRoutes(services.translateService));
     await app.register(createOpenAIUsageRoutes(new OpenAIUsageService(), services.authService));

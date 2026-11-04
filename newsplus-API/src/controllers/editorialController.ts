@@ -1,22 +1,31 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { successResponse } from "../utils/apiResponse.js";
 import type { EditorialConversationService } from "../services/editorialConversationService.js";
+import type { EditorialWorkflowService } from "../services/editorialWorkflowService.js";
 import type {
   EditorialConversationIdParams,
   EditorialConversationListQuery,
+  EditorialConversationUpdateBody,
   EditorialMemoryListQuery,
   EditorialMemoryUpdateBody,
   EditorialRestoreBody,
   EditorialReviseBody,
 } from "../schemas/editorial.schema.js";
 
-export function createEditorialController(service: EditorialConversationService) {
+export function createEditorialController(service: EditorialConversationService, workflow: EditorialWorkflowService) {
   return {
     async list(
       request: FastifyRequest<{ Querystring: EditorialConversationListQuery }>,
       _reply: FastifyReply,
     ) {
-      return successResponse(service.listConversations(request.query.q));
+      return successResponse(await workflow.list(request.query, request.user.sub));
+    },
+
+    async update(
+      request: FastifyRequest<{ Params: EditorialConversationIdParams; Body: EditorialConversationUpdateBody }>,
+      _reply: FastifyReply,
+    ) {
+      return successResponse(await workflow.update(request.params.id, request.body, request.user.sub));
     },
 
     async get(

@@ -40,6 +40,11 @@ export class AuthService {
     return toAuthUser(user);
   }
 
+  /** Every account, as the public user shape (S15 team directory). */
+  async listUsers(): Promise<AuthUser[]> {
+    return (await this.deps.users.listAll()).map(toAuthUser);
+  }
+
   async requestPasswordReset(email: string): Promise<void> {
     const user = await this.deps.users.findByEmail(normalizeEmail(email));
     if (!user?.email) return;

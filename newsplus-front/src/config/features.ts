@@ -4,7 +4,7 @@
  */
 export const features = {
   /** «سير العمل» board, rail item and «المزيد» row — S15. */
-  workflow: false,
+  workflow: true,
   /** Keyboard shortcuts sheet and the rail keyboard button — S11. */
   shortcuts: false,
   /** «تطور القصة» story timeline — S14. */

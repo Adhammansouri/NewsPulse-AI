@@ -1,3 +1,10 @@
+import type {
+  EditorialConversationScope,
+  EditorialPublishPlatform,
+  EditorialWorkflowStatus,
+  TeamMemberRef,
+} from "./workflow.js";
+
 export type NewsLanguage = "ar" | "en";
 
 export const NEWS_TOPICS = [
@@ -176,6 +183,15 @@ export type EditorialConversationSummary = {
   updatedAt: string;
   createdBy: string;
   versionCount: number;
+  /** S15 workflow column. Rows created before S15 are migrated to `draft`. */
+  status: EditorialWorkflowStatus;
+  /** Defaults to the creator. */
+  assigneeId: string;
+  publishedPlatforms: EditorialPublishPlatform[];
+  /** Always 0 until comments exist. */
+  commentCount: number;
+  /** The assignee as a team member — set by the list and update endpoints; absent when the user is unknown. */
+  assignee?: TeamMemberRef;
 };
 
 export type EditorialConversationDetail = EditorialConversationSummary & {
@@ -189,6 +205,25 @@ export type EditorialConversationDetail = EditorialConversationSummary & {
 
 export type EditorialConversationListData = {
   items: EditorialConversationSummary[];
+  /**
+   * Totals per workflow status for the same `q` + `scope` (ignoring `status` and the 50-item page).
+   * Present only when the request passed `scope` or `status`.
+   */
+  counts?: Record<EditorialWorkflowStatus, number>;
+};
+
+/** `GET /editorial/conversations` query. Without `scope`/`status` the result is the pre-S15 list. */
+export type EditorialConversationListQuery = {
+  q?: string;
+  scope?: EditorialConversationScope;
+  status?: EditorialWorkflowStatus;
+};
+
+/** `PATCH /editorial/conversations/:id` — any team member; at least one field. Responds with the summary. */
+export type EditorialConversationUpdateRequest = {
+  status?: EditorialWorkflowStatus;
+  assigneeId?: string;
+  publishedPlatforms?: EditorialPublishPlatform[];
 };
 
 export type EditorialReviseRequest = {

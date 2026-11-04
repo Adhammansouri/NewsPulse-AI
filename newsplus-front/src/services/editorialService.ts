@@ -2,6 +2,9 @@ import type {
   ApiSuccessResponse,
   EditorialConversationDetail,
   EditorialConversationListData,
+  EditorialConversationListQuery,
+  EditorialConversationSummary,
+  EditorialConversationUpdateRequest,
   EditorialMemoryListData,
   EditorialMemoryStatus,
   EditorialMemoryUpdateRequest,
@@ -61,6 +64,32 @@ export async function updateEditorialMemory(id: string, body: EditorialMemoryUpd
     API_URLS.EDITORIAL.MEMORY_RULE(id),
     {
       method: "POST",
+      auth: true,
+      body: JSON.stringify(body),
+    },
+  );
+  return response.data;
+}
+
+/** S15 board list: `?scope=team|mine&status=` (+ `q`). The response then carries per-status `counts`. */
+export async function listEditorialConversationsBy(query: EditorialConversationListQuery, signal?: AbortSignal) {
+  const params: Record<string, string> = {};
+  if (query.q?.trim()) params.q = query.q.trim();
+  if (query.scope) params.scope = query.scope;
+  if (query.status) params.status = query.status;
+  const response = await apiRequest<ApiSuccessResponse<EditorialConversationListData>>(
+    API_URLS.EDITORIAL.CONVERSATIONS,
+    { auth: true, params, signal },
+  );
+  return response.data;
+}
+
+/** S15 `PATCH /editorial/conversations/:id` — move a draft between columns, reassign it, set its platforms. */
+export async function updateEditorialConversation(id: string, body: EditorialConversationUpdateRequest) {
+  const response = await apiRequest<ApiSuccessResponse<EditorialConversationSummary>>(
+    API_URLS.EDITORIAL.CONVERSATION(id),
+    {
+      method: "PATCH",
       auth: true,
       body: JSON.stringify(body),
     },

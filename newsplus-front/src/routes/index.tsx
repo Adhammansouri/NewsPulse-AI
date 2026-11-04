@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "@/components/layouts/MainLayout";
 import RequireAuth from "@/components/shared/RequireAuth";
 import { PageSkeleton, type PageSkeletonLayout } from "@/components/shell/PageSkeleton";
+import { features } from "@/config/features";
 // TRANSITIONAL: the legacy pages' own stylesheets stay in the entry bundle. Imported here (before
 // index.css, as when the pages were eager) they keep their place in the cascade that styles/legacy-bridge.css
 // relies on; a lazily loaded stylesheet would land after index.css. Drop each import with its page's rebuild.
@@ -18,6 +19,7 @@ const NotificationsPage = lazy(() => import("@/modules/Notifications/pages/Notif
 const UsagePage = lazy(() => import("@/modules/Usage/pages/UsagePage"));
 const MorePage = lazy(() => import("@/modules/More/pages/MorePage"));
 
+const BoardPage = lazy(() => import("@/modules/Board/pages/BoardPage"));
 // Dev-only UI-kit gallery (S01 §7). `import.meta.env.DEV` is `false` in production builds, so the
 // lazy import is dead code there and the gallery chunk is never emitted.
 const DesignGalleryPage = import.meta.env.DEV
@@ -62,6 +64,7 @@ export default function AppRoutes() {
           <Route path="/more" element={page(<MorePage />, "stack")} />
         </Route>
       </Route>
+          {features.workflow && <Route path="/board" element={page(<BoardPage />, "stack")} />}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
