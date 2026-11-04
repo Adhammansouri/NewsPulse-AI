@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — كل الحالات</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np" data-theme="{{theme}}" style="width: 100%; min-height: 2380px; padding: 48px 56px 64px">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+  <div class="col" style="max-width: 1328px; margin: 0 auto; gap: 44px">
+    <header class="col" style="gap: 6px"><h1 class="t-hero">كل الحالات</h1><p class="t-small">كل حالة في الكود ليها شكل وكلام واضح: إيه اللي حصل، وإيه الخطوة الجاية.</p></header>
+
+    <section class="col" style="gap: 16px" aria-labelledby="s-load">
+      <h2 id="s-load" class="t-title">التحميل</h2>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+        <div class="panel col" style="overflow: hidden">
+          <div style="position: relative; height: 224px; background: var(--bg)">
+            <div class="route-bar"></div>
+            <div class="row" style="height: 100%; align-items: stretch"><div style="width: 44px; background: var(--navy)"></div><div class="grow col" style="padding: 16px; gap: 10px"><div class="sk" style="height: 18px; width: 40%"></div><div class="sk" style="height: 70px"></div><div class="sk" style="height: 70px"></div></div></div>
+          </div>
+          <div class="col" style="padding: 14px 16px; gap: 2px"><span class="t-head">لودر التنقل</span><span class="t-meta">خط بلون الذكاء الاصطناعي أعلى الشاشة + هيكل الصفحة الجاية</span></div>
+        </div>
+        <div class="panel col" style="overflow: hidden">
+          <div class="col" style="height: 224px; overflow: hidden">
+            <sc-for list="{{skRows}}" as="r" hint-placeholder-count="3"><div class="col" style="gap: 8px; padding: 14px 18px; padding-inline-start: 30px; border-bottom: 1px solid var(--line)"><div class="row"><div class="sk" style="width: 22px; height: 22px; border-radius: 7px"></div><div class="sk" style="height: 10px; width: 30%"></div></div><div class="sk" style="height: 13px; width: {{r}}"></div></div></sc-for>
+          </div>
+          <div class="col" style="padding: 14px 16px; gap: 2px"><span class="t-head">تحميل العناوين</span><span class="t-meta">هيكل بنفس شكل صف الخبر، مش دايرة بتلف</span></div>
+        </div>
+        <div class="panel col" style="overflow: hidden">
+          <div class="col" style="height: 224px; padding: 18px; gap: 14px; justify-content: center">
+            <span class="ai-mark t-ai">المحرّر يكتب الآن</span>
+            <svg class="pulse-line" width="100%" height="40" viewBox="0 0 360 40" preserveAspectRatio="none" aria-hidden="true"><path class="base" d="M0 20h110l12-15 16 30 14-24 10 9h198"></path><path d="M0 20h110l12-15 16 30 14-24 10 9h198"></path></svg>
+            <ol class="steps" style="gap: 8px"><li class="step is-done" style="font-size: 13px"><span class="step__dot" style="width: 20px; height: 20px"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>قرأ ٣ مصادر</li><li class="step is-active" style="font-size: 13px"><span class="step__dot" style="width: 20px; height: 20px"></span>يكتب المنشور</li></ol>
+          </div>
+          <div class="col" style="padding: 14px 16px; gap: 2px"><span class="t-head">الذكاء الاصطناعي يشتغل</span><span class="t-meta">نبضة + خطوات حقيقية، عشان المستخدم يعرف بيستنى إيه</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="col" style="gap: 16px" aria-labelledby="s-empty">
+      <h2 id="s-empty" class="t-title">الفراغ</h2>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+        <sc-for list="{{empties}}" as="e" hint-placeholder-count="4">
+          <div class="panel empty" style="padding: 28px 20px">
+            <span class="empty__art {{e.art}}"><svg class="ic ic--xl" viewBox="0 0 24 24" aria-hidden="true"><path d="{{e.path}}"></path></svg></span>
+            <h3 class="t-head">{{e.title}}</h3><p class="t-small">{{e.text}}</p>
+            <button class="btn {{e.btn}} btn--sm" type="button">{{e.cta}}</button>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section class="col" style="gap: 16px" aria-labelledby="s-err">
+      <h2 id="s-err" class="t-title">الأخطاء</h2>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+        <sc-for list="{{errors}}" as="e" hint-placeholder-count="8">
+          <div class="notice {{e.cls}}" role="alert" style="align-items: center">
+            <span class="ic-wrap {{e.ic}}" style="background: var(--surface)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="{{e.path}}"></path></svg></span>
+            <span class="col grow"><b style="font-weight: 600">{{e.title}}</b><span class="t-small">{{e.text}}</span></span>
+            <button class="btn btn--quiet btn--sm" type="button">{{e.cta}}</button>
+          </div>
+        </sc-for>
+      </div>
+      <div class="row" style="gap: 12px; padding: 12px 18px; border-radius: 14px; background: var(--navy); color: #fff">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color: #fbbf24"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18"></path></svg>
+        <span class="grow" style="font-size: 14px">مفيش اتصال. العناوين والمسودات المحفوظة متاحة، والتوليد هيرجع مع رجوع الشبكة.</span>
+        <span class="t-meta" style="color: #a9b8c9">شريط عدم الاتصال · يظهر أعلى أي شاشة</span>
+      </div>
+    </section>
+
+    <section class="col" style="gap: 16px" aria-labelledby="s-toast">
+      <h2 id="s-toast" class="t-title">رسائل التأكيد</h2>
+      <div class="row" style="flex-wrap: wrap; gap: 14px">
+        <sc-for list="{{toasts}}" as="t" hint-placeholder-count="6">
+          <span class="toast" style="animation: none"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color: #5eead4"><path d="{{t.path}}"></path></svg>{{t.text}}<sc-if value="{{t.undo}}" hint-placeholder-val="{{ false }}"><button class="btn" type="button">تراجع</button></sc-if></span>
+        </sc-for>
+      </div>
+    </section>
+
+    <section class="col" style="gap: 16px" aria-labelledby="s-pwa">
+      <h2 id="s-pwa" class="t-title">التطبيق على الجهاز</h2>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: start">
+        <div class="panel col" style="padding: 16px; gap: 12px; box-shadow: var(--shadow-3)">
+          <div class="row"><img src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="" style="width: 44px; height: 44px; border-radius: 12px"><span class="col grow"><b style="font-weight: 600">ثبّت Newsplus</b><span class="t-meta">افتحه من الشاشة الرئيسية واستقبل العاجل</span></span></div>
+          <div class="row"><button class="btn btn--ink btn--sm grow" type="button">تثبيت</button><button class="btn btn--ghost btn--sm" type="button">لاحقاً</button></div>
+        </div>
+        <div class="panel col" style="padding: 16px; gap: 12px; box-shadow: var(--shadow-3)">
+          <div class="row"><span class="ic-wrap ic-wrap--ai"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"></path></svg></span><span class="col grow"><b style="font-weight: 600">إصدار جديد جاهز</b><span class="t-meta">حدّث عشان تاخد آخر التحسينات</span></span></div>
+          <div class="row"><button class="btn btn--ai btn--sm grow" type="button">حدّث الآن</button><button class="btn btn--ghost btn--sm" type="button">بعدين</button></div>
+        </div>
+        <div class="panel col" style="padding: 16px; gap: 10px; box-shadow: var(--shadow-3)">
+          <b style="font-weight: 600">على الآيفون</b>
+          <ol class="steps" style="gap: 10px">
+            <li class="step is-done" style="font-size: 13.5px"><span class="step__dot" style="width: 22px; height: 22px; background: var(--surface-2); border-color: var(--line-strong); color: var(--ink-2)"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 9l5-5 5 5M5 20h14"></path></svg></span>اضغط مشاركة في Safari</li>
+            <li class="step is-done" style="font-size: 13.5px"><span class="step__dot" style="width: 22px; height: 22px; background: var(--surface-2); border-color: var(--line-strong); color: var(--ink-2)"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span>إضافة إلى الشاشة الرئيسية</li>
+          </ol>
+        </div>
+        <div class="col" style="align-items: center; gap: 10px; padding: 26px 18px; border-radius: 20px; background: var(--navy); color: #fff; text-align: center">
+          <svg class="ic ic--xl" viewBox="0 0 24 24" aria-hidden="true" style="color: #fbbf24"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18"></path></svg>
+          <b style="font-family: var(--f-display); font-size: 18px">لا يوجد اتصال</b>
+          <span style="font-size: 13.5px; line-height: 1.7; color: #a9b8c9">الأخبار والتوليد والترجمة محتاجين إنترنت. هنحاول تاني لما الشبكة ترجع.</span>
+          <button class="btn btn--sm" type="button" style="background: #fff; color: #0c2340">حاول تاني</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":2380}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var warn = 'M12 8v5M12 16.5v.5M10.3 4.2L2.8 17.5A2 2 0 0 0 4.5 20.5h15a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0z';
+    var check = 'M5 12l5 5 9-10';
+    return {
+      theme: this.props.theme ?? 'light',
+      skRows: ['88%', '72%', '80%'],
+      empties: [
+        { title: 'لا عناوين بهذا الفلتر', text: 'مفيش أخبار في آخر ٢٠ دقيقة عن الاقتصاد من المصادر المختارة.', cta: 'وسّع الوقت لساعة', btn: 'btn--quiet', art: '', path: 'M4 5h13v14H5a1 1 0 0 1-1-1zM17 9h3v9a1 1 0 0 1-2 0M7 9h7M7 13h7' },
+        { title: 'ابدأ أول مسودة', text: 'اختار خبر من العناوين، والمحرّر يكتب لك منشور أو سكريبت أو كاروسيل.', cta: 'افتح العناوين', btn: 'btn--ai', art: 'ic-wrap--ai', path: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z' },
+        { title: 'مفيش نتائج في الأرشيف', text: 'جرّب كلمة أقصر، أو ابحث بجزء من العنوان.', cta: 'امسح البحث', btn: 'btn--quiet', art: '', path: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4' },
+        { title: 'ذاكرة الفريق فاضية', text: 'لما تعدّل المسودات، المحرّر هيقترح قواعد تتطبّق على كل الفريق.', cta: 'اعرف أكتر', btn: 'btn--ghost', art: '', path: 'M12 3a6 6 0 0 1 6 6c0 2.2-1.2 3.6-2.5 4.7-.7.6-1 1.3-1 2.1V17h-5v-1.2c0-.8-.3-1.5-1-2.1C7.2 12.6 6 11.2 6 9a6 6 0 0 1 6-6zM10 21h4' }
+      ],
+      errors: [
+        { cls: 'notice--error', ic: 'ic-wrap--breaking', title: 'تعذّر جلب العناوين', text: 'السيرفر مش بيرد. العناوين القديمة لسه ظاهرة.', cta: 'حاول تاني', path: 'M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6' },
+        { cls: 'notice--error', ic: 'ic-wrap--breaking', title: 'المحرّر ما قدرش يكمّل', text: 'نموذج الذكاء الاصطناعي ما ردّش. اختيارك محفوظ.', cta: 'أعد المحاولة', path: warn },
+        { cls: 'notice--warn', ic: 'ic-wrap--warn', title: 'رصيد OpenAI خلص', text: 'التوليد متوقف لحد ما يتشحن الرصيد من صفحة الفوترة.', cta: 'اشحن الرصيد', path: 'M3 7h18v10H3zM3 11h18M7 15h3' },
+        { cls: 'notice--warn', ic: 'ic-wrap--warn', title: 'طلبات كتير في وقت قصير', text: 'استخدمت ٢٤ طلب في ربع ساعة. تقدر تكمّل بعد ٤ دقائق.', cta: 'تمام', path: 'M12 7v5l3 2M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z' },
+        { cls: 'notice--info', ic: '', title: 'الجلسة انتهت', text: 'سجّل الدخول تاني. المسودة اللي شغال عليها محفوظة.', cta: 'سجّل الدخول', path: 'M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3' },
+        { cls: 'notice--warn', ic: 'ic-wrap--warn', title: 'الرابط مش متاح', text: 'الموقع رفض الوصول أو الرابط داخلي. الصق نص الخبر بدل الرابط.', cta: 'الصق النص', path: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1' },
+        { cls: 'notice--info', ic: '', title: 'المسودة اتعدّلت من مكان تاني', text: 'فيه نسخة أحدث (ن٤). حدّث وشوفها قبل ما تطلب تعديل.', cta: 'اعرض ن٤', path: 'M3 12a9 9 0 1 0 3-6.7M3 4v5h5' },
+        { cls: 'notice--error', ic: 'ic-wrap--breaking', title: 'تعذّر النسخ', text: 'المتصفح منع الوصول للحافظة. حدّد النص وانسخه يدوياً.', cta: 'حدّد النص', path: 'M9 9h11v11H9zM5 15H4V4h11v1' }
+      ],
+      toasts: [
+        { text: 'نُسخ المنشور كاملاً', path: check, undo: false },
+        { text: 'النسخة ٣ محفوظة', path: check, undo: false },
+        { text: 'رجعت للنسخة ١', path: 'M3 12a9 9 0 1 0 3-6.7M3 4v5h5', undo: true },
+        { text: 'القاعدة اتحفظت لذاكرة الفريق', path: 'M12 3a6 6 0 0 1 6 6c0 2.2-1.2 3.6-2.5 4.7-.7.6-1 1.3-1 2.1V17h-5v-1.2c0-.8-.3-1.5-1-2.1C7.2 12.6 6 11.2 6 9a6 6 0 0 1 6-6z', undo: true },
+        { text: 'وصل إشعار التجربة', path: 'M6 16V11a6 6 0 0 1 12 0v5l2 2H4z', undo: false },
+        { text: 'المسودة جاهزة: منشور سوشيال', path: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z', undo: false }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

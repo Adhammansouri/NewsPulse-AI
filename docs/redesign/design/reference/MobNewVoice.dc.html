@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — إملاء صوتي للمحرّر</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+<link rel="stylesheet" href="/_blob/210170dd5a2fa534503e7d6a475c3fc9">
+<link rel="stylesheet" href="/_blob/a7940d8c65f26d316bd1f2cee73fd657">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np m" data-theme="{{theme}}">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+<header class="m-bar"><a class="icon-btn" href="MobStory.dc.html" aria-label="رجوع"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a><span class="badge badge--ai">منشور سوشيال</span><span class="vchip" aria-current="true">ن١</span><span class="grow"></span><button class="btn btn--ink btn--sm" type="button"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9zM5 15H4V4h11v1"></path></svg>نسخ الكل</button></header>
+<main class="m-scroll col" style="padding:14px 18px;gap:6px;opacity:.55" aria-hidden="true">
+  <div class="block"><div class="block__label">الخطاف</div><p class="t-display" style="font-size:19px">المركزي يثبّت الفائدة للمرة الثالثة.. والتضخم ما زال فوق المستهدف</p></div>
+  <div class="block"><div class="block__label">النص</div><p class="t-body" style="color:var(--ink);font-size:15px">قررت لجنة السياسة النقدية الإبقاء على أسعار الفائدة دون تغيير للمرة الثالثة على التوالي…</p></div>
+</main>
+<section class="col" aria-live="polite" style="flex:none;padding:18px 18px 28px;gap:14px;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -18px 40px -24px rgb(12 35 64 / .35);border-radius:26px 26px 0 0">
+  <div class="row" style="justify-content:space-between"><span class="live" style="color:var(--cyan);font-weight:600">بسمعك…</span><span class="t-meta num">٠:٠٦</span></div>
+  <p style="font-size:17px;line-height:1.8;font-weight:500">اختصر النص لجملتين وخلّي الخطاف سؤال <span style="color:var(--ink-3)">عن القروض</span><span style="display:inline-block;width:2px;height:20px;background:var(--cyan-dot);vertical-align:middle;margin-inline-start:2px"></span></p>
+  <div class="wave" style="justify-content:center"><i style="height:14px;animation-delay:0.00s"></i><i style="height:26px;animation-delay:0.10s"></i><i style="height:36px;animation-delay:0.20s"></i><i style="height:22px;animation-delay:0.30s"></i><i style="height:32px;animation-delay:0.15s"></i><i style="height:40px;animation-delay:0.05s"></i><i style="height:18px;animation-delay:0.25s"></i><i style="height:30px;animation-delay:0.35s"></i><i style="height:24px;animation-delay:0.12s"></i><i style="height:38px;animation-delay:0.22s"></i><i style="height:16px;animation-delay:0.32s"></i><i style="height:28px;animation-delay:0.08s"></i><i style="height:34px;animation-delay:0.18s"></i><i style="height:20px;animation-delay:0.28s"></i></div>
+  <div class="row" style="justify-content:space-between;gap:10px"><button class="btn btn--ghost" type="button">إلغاء</button><button class="send" type="button" aria-label="إيقاف وإرسال للمحرّر" style="width:64px;height:64px;border-radius:22px"><svg class="ic ic--lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10H7z"></path></svg></button><button class="btn btn--quiet" type="button">عدّل النص</button></div>
+  <p class="t-meta" style="text-align:center">بالعربي أو الإنجليزي · هيتبعت للمحرّر أول ما توقف</p>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var s = this.props.state ?? '';
+    return { theme: this.props.theme ?? 'light', s: s };
+  }
+}
+</script>
+</body>
+</html>

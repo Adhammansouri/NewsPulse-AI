@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — ترجمة</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np" data-theme="{{theme}}" style="display: flex; width: 100%; height: 900px; overflow: hidden">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+  <nav class="rail" aria-label="التنقل الرئيسي">
+    <img class="rail__logo" src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="Newsplus">
+    <a class="rail__item" href="DeskHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>الرئيسية</a>
+    <a class="rail__item" href="Main.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H5a1 1 0 0 1-1-1zM17 9h3v9a1 1 0 0 1-2 0M7 9h7M7 13h7M7 16h4"></path></svg>الأخبار</a>
+    <a class="rail__item" href="NewBoard.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v10h-4zM16 4h4v13h-4z"></path></svg>سير العمل</a>
+    <a class="rail__item" href="DeskGenerate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"></path></svg>توليد</a>
+    <a class="rail__item" href="DeskTranslate.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg>ترجمة</a>
+    <a class="rail__item" href="DeskUsage.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"></path></svg>الاستهلاك</a>
+    <div style="flex: 1"></div>
+    <button class="avatar" type="button" aria-label="حساب سارة">س</button>
+  </nav>
+
+  <main class="grow col" style="padding: 24px 32px 28px; gap: 18px">
+    <header class="row" style="justify-content: space-between; flex-wrap: wrap; gap: 16px">
+      <div class="col"><h1 class="t-title" style="font-size: 22px">ترجمة صحفية</h1><p class="t-meta">تحافظ على الأسماء والأرقام والاقتباسات، وتكتب بأسلوب صحفي لا حرفي</p></div>
+      <div class="panel row" style="gap: 4px; padding: 5px; border-radius: 16px">
+        <span class="col" style="padding: 2px 16px; min-width: 140px"><span class="t-meta" style="font-size: 11.5px">من · اكتُشفت تلقائياً</span><span style="font-weight: 700">{{from}}</span></span>
+        <button class="icon-btn icon-btn--line" type="button" aria-label="تبديل الاتجاه" onClick="{{swap}}" style="border-radius: 50%"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h13l-4-4M17 17H4l4 4"></path></svg></button>
+        <span class="col" style="padding: 2px 16px; min-width: 140px"><span class="t-meta" style="font-size: 11.5px">إلى</span><span style="font-weight: 700">{{to}}</span></span>
+      </div>
+    </header>
+
+    <div class="grow" style="min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+      <section class="panel col" aria-label="الأصل" style="overflow: hidden">
+        <div class="row" style="justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line)">
+          <div class="seg" role="group" aria-label="نوع المصدر"><button type="button" aria-pressed="{{modeText}}" onClick="{{setText}}">نص</button><button type="button" aria-pressed="{{modeUrl}}" onClick="{{setUrl}}">رابط</button></div>
+          <span class="t-meta num">{{chars}}</span>
+        </div>
+        <sc-if value="{{isText}}" hint-placeholder-val="{{ true }}">
+          <label class="grow" style="display: flex; padding: 20px 22px"><span class="sr">النص الأصلي</span><textarea style="flex: 1; border: 0; outline: 0; resize: none; background: transparent; font-size: 17px; line-height: 1.9; color: var(--ink)" dir="{{srcDir}}" value="{{srcText}}" readOnly="{{ true }}"></textarea></label>
+        </sc-if>
+        <sc-if value="{{isUrl}}" hint-placeholder-val="{{ false }}">
+          <div class="grow col" style="padding: 20px 22px; gap: 12px">
+            <div class="field is-valid"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--teal)"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path></svg><input dir="ltr" value="https://www.reuters.com/markets/oil-opec-cuts" style="text-align: right" aria-label="رابط المقال"></div>
+            <p class="hint">المحرّر يستخرج نص المقال فقط، بدون القوائم والإعلانات</p>
+            <sc-if value="{{isDone}}" hint-placeholder-val="{{ false }}"><div class="panel panel--flat col fade-in" style="padding: 14px 16px; gap: 6px; background: var(--surface-2)"><span class="t-label">النص المستخرج · ١٬٩٢٠ حرف</span><p lang="en" dir="ltr" style="font-family: 'IBM Plex Sans', sans-serif; font-size: 14.5px; line-height: 1.7; color: var(--ink-2)">Brent crude rose more than 2% after the group said it would keep supply curbs in place through the first quarter…</p></div></sc-if>
+          </div>
+        </sc-if>
+        <div class="row" style="padding: 12px 16px; border-top: 1px solid var(--line)">
+          <sc-if value="{{isDone}}" hint-placeholder-val="{{ false }}"><button class="btn btn--ghost btn--sm" type="button" onClick="{{edit}}">عدّل الأصل</button></sc-if>
+          <span class="grow"></span>
+          <button class="btn btn--ai" type="button" onClick="{{translate}}" disabled="{{isBusy}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg>{{btnLabel}}</button>
+        </div>
+      </section>
+
+      <section class="panel col" aria-label="الترجمة" style="overflow: hidden; background: var(--surface-2)">
+        <div class="row" style="justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--line); background: var(--surface)"><h2 class="t-label">الترجمة الصحفية</h2><span class="t-meta">{{to}}</span></div>
+        <sc-if value="{{isEmpty}}" hint-placeholder-val="{{ true }}">
+          <div class="grow" style="display: grid; place-items: center"><div class="empty" style="max-width: 340px"><span class="empty__art"><svg class="ic ic--xl" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg></span><h3 class="t-head">الخبر بلغته الجديدة</h3><p class="t-small">اضغط ترجم، وهتظهر الترجمة هنا جنب الأصل عشان تراجعهم سطر بسطر.</p></div></div>
+        </sc-if>
+        <sc-if value="{{isBusy}}" hint-placeholder-val="{{ false }}">
+          <div class="grow col fade-in" style="padding: 24px; gap: 14px">
+            <div class="row"><svg class="pulse-line" width="90" height="24" viewBox="0 0 90 24" aria-hidden="true"><path d="M0 12h26l6-9 8 18 7-13 5 4h38"></path></svg><span class="ai-mark t-ai">يترجم ويراجع الصياغة…</span></div>
+            <div class="sk" style="height: 14px; width: 100%"></div><div class="sk" style="height: 14px; width: 92%"></div><div class="sk" style="height: 14px; width: 97%"></div><div class="sk" style="height: 14px; width: 54%"></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{isDone}}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{stale}}" hint-placeholder-val="{{ false }}"><p role="status" class="notice notice--warn fade-in" style="margin: 14px 18px 0"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--warn)"><path d="M12 8v5M12 16.5v.5M10.3 4.2L2.8 17.5A2 2 0 0 0 4.5 20.5h15a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0z"></path></svg>عدّلت الأصل بعد الترجمة. الترجمة القديمة ظاهرة لحد ما تضغط «أعد الترجمة».</p></sc-if>
+          <article class="grow typeset col" lang="{{outLang}}" dir="{{outDir}}" style="overflow-y: auto; padding: 22px 26px; gap: 14px; font-size: 17px; line-height: 1.8; color: var(--ink); font-family: {{outFont}}; opacity: {{outOpacity}}">
+            <sc-for list="{{out}}" as="p" hint-placeholder-count="2"><p>{{p}}</p></sc-for>
+          </article>
+          <div class="row" style="padding: 12px 18px; border-top: 1px solid var(--line); background: var(--surface)">
+            <p class="ai-mark grow" style="color: var(--ink-3)"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>راجع الترجمة قبل النشر</p>
+            <a class="btn btn--ghost btn--sm" href="Main.dc.html">استخدمها في منشور</a>
+            <button class="btn btn--ink btn--sm" type="button" onClick="{{copy}}"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9zM5 15H4V4h11v1"></path></svg>{{copyLabel}}</button>
+          </div>
+        </sc-if>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["empty","busy","done","stale"],"default":"empty"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); var s = props.state || 'empty'; this.state = { phase: s === 'busy' ? 'busy' : (s === 'done' || s === 'stale' ? 'done' : 'empty'), stale: s === 'stale', arToEn: true, mode: 'text', copied: false }; this.t = []; }
+  componentWillUnmount() { this.t.forEach(function (x) { clearTimeout(x); }); }
+  renderVals() {
+    var self = this, st = this.state;
+    var ar = 'أبقى البنك المركزي على أسعار الفائدة دون تغيير للمرة الثالثة على التوالي، في قرار جاء متسقاً مع توقعات معظم المحللين.\n\nويأتي القرار في وقت تراجعت فيه معدلات التضخم، لكنها لا تزال أعلى من النطاق المستهدف، ما يدفع صانعي السياسة إلى انتظار مزيد من البيانات قبل أي تحرك.';
+    var en = 'The central bank held interest rates steady for a third consecutive time, in a decision that matched most analysts’ expectations.\n\nThe move comes as inflation has eased but remains above the target range, prompting policymakers to wait for more data before acting.';
+    var outEn = ['The central bank held interest rates steady for a third consecutive time, in a decision that matched most analysts’ expectations.', 'The move comes as inflation has eased but remains above the target range, prompting policymakers to wait for more data before acting.'];
+    var outAr = ['أبقى البنك المركزي أسعار الفائدة ثابتة للمرة الثالثة على التوالي، في قرار جاء متوافقاً مع توقعات معظم المحللين.', 'ويأتي ذلك بعد تراجع التضخم، الذي لا يزال مع ذلك أعلى من النطاق المستهدف، ما يدفع صانعي السياسات إلى انتظار مزيد من البيانات قبل التحرك.'];
+    var urlOut = ['ارتفع خام برنت أكثر من ٢٪ بعد أن قالت المجموعة إنها ستُبقي قيود الإمدادات حتى نهاية الربع الأول.', 'ويرى متعاملون أن القرار يقلّص المخاوف من فائض المعروض خلال الشتاء.'];
+    var toEn = st.mode === 'text' && st.arToEn;
+    function clear() { self.t.forEach(function (x) { clearTimeout(x); }); self.t = []; }
+    return {
+      theme: this.props.theme ?? 'light',
+      from: st.mode === 'url' ? 'الإنجليزية' : (st.arToEn ? 'العربية' : 'الإنجليزية'), to: st.mode === 'url' ? 'العربية' : (st.arToEn ? 'الإنجليزية' : 'العربية'),
+      modeText: String(st.mode === 'text'), modeUrl: String(st.mode === 'url'), isText: st.mode === 'text', isUrl: st.mode === 'url',
+      srcText: st.arToEn ? ar : en, srcDir: st.arToEn ? 'rtl' : 'ltr', chars: st.mode === 'url' ? 'رابط' : (st.arToEn ? '٢٢٨ حرف' : '٢٢١ حرف'),
+      isEmpty: st.phase === 'empty', isBusy: st.phase === 'busy', isDone: st.phase === 'done', stale: st.stale,
+      out: st.mode === 'url' ? urlOut : (toEn ? outEn : outAr), outLang: toEn ? 'en' : 'ar', outDir: toEn ? 'ltr' : 'rtl', outFont: toEn ? "'IBM Plex Sans', sans-serif" : 'var(--f-ui)', outOpacity: st.stale ? '.55' : '1',
+      btnLabel: st.phase === 'busy' ? 'جاري الترجمة…' : st.stale ? 'أعد الترجمة' : (st.phase === 'done' ? 'ترجم مرة أخرى' : (st.mode === 'url' ? 'استخرج وترجم' : 'ترجم إلى ' + (st.arToEn ? 'الإنجليزية' : 'العربية'))),
+      copyLabel: st.copied ? 'تم النسخ' : 'نسخ الترجمة',
+      translate: function () { clear(); self.setState({ phase: 'busy', stale: false }); self.t.push(setTimeout(function () { self.setState({ phase: 'done' }); }, 1600)); },
+      edit: function () { self.setState({ stale: true }); },
+      swap: function () { clear(); self.setState({ arToEn: !self.state.arToEn, phase: 'empty', stale: false, mode: 'text' }); },
+      setText: function () { clear(); self.setState({ mode: 'text', phase: 'empty', stale: false }); },
+      setUrl: function () { clear(); self.setState({ mode: 'url', phase: 'empty', stale: false }); },
+      copy: function () { self.setState({ copied: true }); self.t.push(setTimeout(function () { self.setState({ copied: false }); }, 1500)); }
+    };
+  }
+}
+</script>
+</body>
+</html>

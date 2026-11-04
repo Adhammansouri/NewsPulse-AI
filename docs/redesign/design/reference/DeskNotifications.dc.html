@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — الإشعارات</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np" data-theme="{{theme}}" style="display: flex; width: 100%; min-height: 900px">
+  <nav class="rail" aria-label="التنقل الرئيسي">
+    <img class="rail__logo" src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="Newsplus">
+    <a class="rail__item" href="DeskHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>الرئيسية</a>
+    <a class="rail__item" href="Main.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H5a1 1 0 0 1-1-1zM17 9h3v9a1 1 0 0 1-2 0M7 9h7M7 13h7M7 16h4"></path></svg>الأخبار</a>
+    <a class="rail__item" href="NewBoard.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v10h-4zM16 4h4v13h-4z"></path></svg>سير العمل</a>
+    <a class="rail__item" href="DeskGenerate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"></path></svg>توليد</a>
+    <a class="rail__item" href="DeskTranslate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg>ترجمة</a>
+    <a class="rail__item" href="DeskUsage.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"></path></svg>الاستهلاك</a>
+    <div style="flex: 1"></div>
+    <a class="rail__btn" href="DeskNotifications.dc.html" aria-label="الإشعارات" aria-current="page" style="background: rgb(45 212 191 / .14); color: #5eead4"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"></path></svg></a>
+    <button class="avatar" type="button" aria-label="حساب سارة" style="margin-top: 8px">س</button>
+  </nav>
+
+  <main class="grow" style="padding: 36px 48px">
+    <div style="max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1.25fr 1fr; gap: 24px; align-items: start">
+      <div class="col" style="gap: 20px">
+        <header class="col"><h1 class="t-hero" style="font-size: 30px">الإشعارات</h1><p class="t-small">تنبيهات العاجل على هذا الجهاز، حتى لو التطبيق مقفول.</p></header>
+
+        <section class="panel col" style="padding: 22px; gap: 18px">
+          <div class="row" style="gap: 14px">
+            <span class="ic-wrap ic-wrap--teal" style="width: 48px; height: 48px; border-radius: 14px"><svg class="ic ic--lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"></path></svg></span>
+            <span class="col grow"><span class="t-head">{{heroTitle}}</span><span class="t-meta">{{heroSub}}</span></span>
+            <button class="switch" type="button" role="switch" aria-checked="{{onStr}}" aria-label="إشعارات العاجل"></button>
+          </div>
+          <hr class="hr">
+          <dl style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+            <sc-for list="{{cells}}" as="c" hint-placeholder-count="4">
+              <div class="row panel panel--flat" style="gap: 10px; padding: 12px 14px; background: var(--surface-2)">
+                <span style="width: 9px; height: 9px; border-radius: 50%; background: {{c.dot}}; flex: none"></span>
+                <span class="col"><dt class="t-meta">{{c.label}}</dt><dd style="margin: 0; font-weight: 600; font-size: 14px">{{c.value}}</dd></span>
+              </div>
+            </sc-for>
+          </dl>
+          <sc-if value="{{isOn}}" hint-placeholder-val="{{ true }}">
+          <div class="row" style="flex-wrap: wrap">
+            <button class="btn btn--quiet" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"></path></svg>أرسل إشعار تجربة</button>
+            <span class="hint hint--ok"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>وصل إشعار التجربة قبل دقيقة</span>
+            <span class="grow"></span>
+            <button class="btn btn--ghost btn--sm" type="button" style="color: var(--breaking)">إيقاف على هذا الجهاز</button>
+          </div>
+          </sc-if>
+          <sc-if value="{{isOff}}" hint-placeholder-val="{{ false }}">
+          <div class="ai-panel col" style="padding: 18px; gap: 12px; box-shadow: none">
+            <b style="font-weight: 600">هتوصلك الأخبار العاجلة أول بأول</b>
+            <ul class="col" style="gap: 8px"><li class="row t-small"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--teal)"><path d="M5 12l5 5 9-10"></path></svg>العاجل بس، مش كل خبر</li><li class="row t-small"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--teal)"><path d="M5 12l5 5 9-10"></path></svg>تضغط على الإشعار تفتح الخبر جاهز للكتابة</li><li class="row t-small"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--teal)"><path d="M5 12l5 5 9-10"></path></svg>تقدر توقفها في أي وقت</li></ul>
+            <div class="row"><button class="btn btn--ink" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"></path></svg>فعّل الإشعارات</button><span class="hint">المتصفح هيطلب إذنك مرة واحدة</span></div>
+          </div>
+          </sc-if>
+        </section>
+
+        <section class="col" style="gap: 10px">
+          <h2 class="t-head">شكل الإشعار</h2>
+          <div class="panel row" style="gap: 12px; padding: 14px 16px; max-width: 460px; border-radius: 18px; box-shadow: var(--shadow-2)">
+            <img src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="" style="width: 40px; height: 40px; border-radius: 10px">
+            <span class="col grow"><span class="row" style="justify-content: space-between"><span style="font-weight: 700; font-size: 13.5px">Newsplus · عاجل</span><span class="t-meta">الآن</span></span><span style="font-size: 14px; line-height: 1.6">البنك المركزي يثبت أسعار الفائدة للمرة الثالثة على التوالي</span></span>
+          </div>
+        </section>
+      </div>
+
+      <aside class="col" style="gap: 12px; padding-top: 86px">
+        <h2 class="t-label">لو ظهرت لك رسالة من دول</h2>
+        <sc-for list="{{states}}" as="s" hint-placeholder-count="4">
+          <div class="notice {{s.cls}}" style="flex-direction: column; gap: 6px">
+            <span class="row" style="font-weight: 600"><span class="ic-wrap {{s.ic}}" style="width: 28px; height: 28px; border-radius: 8px; background: var(--surface)"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{s.path}}"></path></svg></span>{{s.title}}</span>
+            <span class="t-small">{{s.text}}</span>
+          </div>
+        </sc-for>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["on","off"],"default":"on"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var ok = 'var(--ok-dot)';
+    return {
+      theme: this.props.theme ?? 'light',
+      isOn: this.props.state !== 'off', isOff: this.props.state === 'off', onStr: String(this.props.state !== 'off'),
+      heroTitle: this.props.state === 'off' ? 'الإشعارات مش مفعّلة' : 'إشعارات العاجل مفعّلة', heroSub: this.props.state === 'off' ? 'Chrome على macOS · ما اتطلبش إذن لسه' : 'Chrome على macOS · فُعّلت اليوم ١٠:٢٠ ص',
+      cells: this.props.state === 'off' ? [{ label: 'المتصفح', value: 'يدعم الإشعارات', dot: ok }, { label: 'إذن النظام', value: 'ما اتطلبش لسه', dot: 'var(--warn-dot)' }, { label: 'اشتراك الجهاز', value: 'غير مشترك', dot: 'var(--line-strong)' }, { label: 'خادم الإرسال', value: 'جاهز', dot: ok }] : [{ label: 'المتصفح', value: 'يدعم الإشعارات', dot: ok }, { label: 'إذن النظام', value: 'مسموح', dot: ok }, { label: 'اشتراك الجهاز', value: 'مشترك', dot: ok }, { label: 'خادم الإرسال', value: 'جاهز', dot: ok }],
+      states: [
+        { cls: 'notice--info', ic: '', title: 'على الآيفون: ثبّت التطبيق أولاً', text: 'من Safari اضغط مشاركة ثم «إضافة إلى الشاشة الرئيسية»، وافتح Newsplus من الأيقونة.', path: 'M12 4v12M7 9l5-5 5 5M5 20h14' },
+        { cls: 'notice--warn', ic: 'ic-wrap--warn', title: 'الإذن محظور في المتصفح', text: 'افتح إعدادات الموقع، اسمح بالإشعارات، ثم أعد تحميل الصفحة.', path: 'M12 8v5M12 16.5v.5M10.3 4.2L2.8 17.5A2 2 0 0 0 4.5 20.5h15a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0z' },
+        { cls: 'notice--warn', ic: 'ic-wrap--warn', title: 'المتصفح لا يدعم الإشعارات', text: 'استخدم Chrome أو Edge أو Safari حديث، أو ثبّت التطبيق.', path: 'M6 6l12 12M18 6L6 18' },
+        { cls: 'notice--error', ic: 'ic-wrap--breaking', title: 'الخادم غير جاهز للإرسال', text: 'مفتاح الإرسال غير مُعدّ على السيرفر. بلّغ مسؤول النظام.', path: 'M4 7h16v10H4zM8 21h8M12 17v4' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

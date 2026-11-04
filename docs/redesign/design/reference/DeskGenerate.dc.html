@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — توليد</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np" data-theme="{{theme}}" style="display: flex; width: 100%; height: 900px; overflow: hidden">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+  <nav class="rail" aria-label="التنقل الرئيسي">
+    <img class="rail__logo" src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="Newsplus">
+    <a class="rail__item" href="DeskHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>الرئيسية</a>
+    <a class="rail__item" href="Main.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H5a1 1 0 0 1-1-1zM17 9h3v9a1 1 0 0 1-2 0M7 9h7M7 13h7M7 16h4"></path></svg>الأخبار</a>
+    <a class="rail__item" href="NewBoard.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v10h-4zM16 4h4v13h-4z"></path></svg>سير العمل</a>
+    <a class="rail__item" href="DeskGenerate.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"></path></svg>توليد</a>
+    <a class="rail__item" href="DeskTranslate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg>ترجمة</a>
+    <a class="rail__item" href="DeskUsage.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"></path></svg>الاستهلاك</a>
+    <div style="flex: 1"></div>
+    <button class="avatar" type="button" aria-label="حساب سارة">س</button>
+  </nav>
+
+  <form aria-label="التعيين" style="position: relative; width: 470px; flex: none; display: flex; flex-direction: column; background: var(--surface); border-inline-start: 1px solid var(--line)">
+    <sc-if value="{{isDrafts}}" hint-placeholder-val="{{ false }}">
+      <div class="popover col" role="dialog" aria-label="مسوداتي" style="top: 78px; inset-inline: 20px; padding: 10px; gap: 2px">
+        <div class="row" style="justify-content: space-between; padding: 6px 8px 10px"><b style="font-weight: 600">مسوداتي</b><span class="t-meta">محفوظة على الجهاز ده · آخر ٢٠</span></div>
+        <sc-for list="{{drafts}}" as="d" hint-placeholder-count="5"><div class="row" style="gap: 12px; padding: 10px 8px; border-radius: 12px; background: {{d.bg}}"><span class="badge {{d.badge}}">{{d.kind}}</span><span class="col grow"><span class="ellipsis" style="font-weight: 600; font-size: 14px">{{d.title}}</span><span class="t-meta">{{d.meta}}</span></span><button class="icon-btn" type="button" aria-label="حذف المسودة" style="width: 32px; height: 32px"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></button></div></sc-for>
+        <button class="btn btn--ghost btn--sm" type="button" style="color: var(--breaking); align-self: flex-start; margin-top: 6px">امسح كل المسودات</button>
+      </div>
+    </sc-if>
+    <div class="col" style="flex: 1; overflow-y: auto; padding: 22px 26px; gap: 22px">
+      <header class="row" style="justify-content: space-between"><div class="col"><h1 class="t-title" style="font-size: 22px">توليد</h1><p class="t-meta">مقال أو تقرير أو ملخص من رابط أو موضوع</p></div><button class="btn btn--ghost btn--sm" type="button"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2"></path></svg>مسوداتي · ٥</button></header>
+
+      <div class="col" style="gap: 8px">
+        <label class="t-label" for="g-src">المصدر</label>
+        <div class="field {{srcCls}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--teal)"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path></svg><input id="g-src" dir="ltr" value="{{srcVal}}" style="text-align: right"></div>
+        <sc-if value="{{isError}}" hint-placeholder-val="{{ false }}">
+          <p class="hint hint--error"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5M12 16.5v.5M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z"></path></svg>الموقع رفض الوصول للصفحة (محتوى للمشتركين)</p>
+          <div class="ai-panel col arrive" style="padding: 16px; gap: 10px; box-shadow: none"><span class="ai-mark t-ai">المحرّر يقدر يكمّل بطريقة تانية</span><p class="t-small">يدوّر على نفس الخبر في مصادر تانية، أو تلصق نص المقال بنفسك.</p><div class="row"><button class="btn btn--ai btn--sm" type="button">ابحث عن الخبر</button><button class="btn btn--quiet btn--sm" type="button">الصق النص</button></div></div>
+        </sc-if>
+        <sc-if value="{{notError}}" hint-placeholder-val="{{ true }}">
+        <p class="hint hint--ok"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>رابط من skynewsarabia.com · سيقرأ المحرّر المقال كاملاً</p>
+        </sc-if>
+        <label class="field field--area field--sunken"><span class="sr">ملاحظات للمحرر</span><textarea rows="2" placeholder="ملاحظات اختيارية: الجمهور، تفاصيل تريد التركيز عليها…"></textarea></label>
+      </div>
+
+      <fieldset class="col" style="border: 0; padding: 0; margin: 0; gap: 8px">
+        <legend class="t-label" style="margin-bottom: 8px">ماذا تكتب؟</legend>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+          <sc-for list="{{styles}}" as="s" hint-placeholder-count="3">
+            <button class="tile" type="button" aria-pressed="{{s.pressed}}" onClick="{{s.pick}}" style="padding: 12px; gap: 6px">
+              <span class="tile__shape" style="height: 60px"><svg width="38" height="38" viewBox="0 0 64 64" aria-hidden="true"><rect x="14" y="{{s.y}}" width="36" height="{{s.h}}" rx="5" fill="none" stroke="currentColor" stroke-width="3"></rect><rect x="21" y="{{s.ty}}" width="22" height="4" rx="2" fill="currentColor"></rect><rect x="21" y="{{s.ly}}" width="16" height="3" rx="1.5" fill="currentColor" opacity=".5"></rect></svg></span>
+              <span class="tile__name">{{s.name}}</span><span class="tile__hint num">{{s.hint}}</span>
+              <sc-if value="{{s.on}}" hint-placeholder-val="{{ false }}"><span class="tile__check"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span></sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </fieldset>
+
+      <div class="col" style="gap: 12px">
+        <p class="t-label">الضبط</p>
+        <div class="row" style="justify-content: space-between"><span class="t-small">اللغة</span><div class="seg"><button type="button" aria-pressed="true">عربي</button><button type="button" aria-pressed="false">English</button></div></div>
+        <div class="row" style="justify-content: space-between"><span class="t-small">الطول</span><div class="seg"><button type="button" aria-pressed="false">أقصر</button><button type="button" aria-pressed="true">قياسي</button><button type="button" aria-pressed="false">أطول</button></div></div>
+        <div class="row" style="justify-content: space-between"><span class="t-small">النبرة</span><div class="seg"><button type="button" aria-pressed="true">مكتبية</button><button type="button" aria-pressed="false">رسمية</button><button type="button" aria-pressed="false">تفسيرية</button></div></div>
+        <div class="col" style="gap: 8px"><span class="t-small">زاوية التغطية</span><div class="row" style="flex-wrap: wrap; gap: 6px"><button class="chip chip--sm" type="button" aria-pressed="true">اقتصادي</button><button class="chip chip--sm" type="button" aria-pressed="false">سياسي</button><button class="chip chip--sm" type="button" aria-pressed="false">إنساني</button><button class="chip chip--sm" type="button" aria-pressed="false">محلي</button><button class="chip chip--sm" type="button" aria-pressed="false">تقني</button></div></div>
+      </div>
+    </div>
+    <div class="col" style="gap: 6px; padding: 14px 26px 18px; border-top: 1px solid var(--line)">
+      <button class="btn btn--ai btn--block btn--lg" type="button" onClick="{{generate}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>{{action}}<span class="kbd">Ctrl ↵</span></button>
+      <p class="t-meta" style="text-align: center">التعيين حتى ١٢٬٠٠٠ حرف · الزاوية حتى ٢٤٠ حرف</p>
+    </div>
+  </form>
+
+  <main class="grow col" style="background: var(--bg)">
+    <sc-if value="{{isEmpty}}" hint-placeholder-val="{{ true }}">
+      <div class="grow" style="display: grid; place-items: center; padding: 40px">
+        <div class="empty" style="max-width: 460px">
+          <span class="empty__art" style="background: var(--ai-soft)"><svg class="ic ic--xl" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--cyan)"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"></path></svg></span>
+          <h2 class="t-title">مسودتك هتظهر هنا</h2>
+          <p class="t-small">الصق رابط الخبر، اختار نوع المادة، والمحرّر يقرأ المصدر ويكتب مسودة جاهزة للمراجعة.</p>
+          <div class="col" style="gap: 8px; margin-top: 10px; width: 100%">
+            <div class="row panel panel--flat" style="padding: 10px 14px; gap: 10px; text-align: start"><span class="badge badge--teal">رابط</span><span class="t-small">يقرأ الصفحة كاملة، ولو تعذّر يبحث عن الخبر</span></div>
+            <div class="row panel panel--flat" style="padding: 10px 14px; gap: 10px; text-align: start"><span class="badge badge--teal">موضوع</span><span class="t-small">اكتب الفكرة والتفاصيل اللي تهمك في الملاحظات</span></div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isWriting}}" hint-placeholder-val="{{ false }}">
+      <div class="grow fade-in" style="display: flex; gap: 30px; padding: 40px 44px; overflow: hidden">
+        <div class="ai-panel ai-glow col" style="width: 300px; flex: none; align-self: flex-start; padding: 22px; gap: 16px">
+          <span class="ai-mark t-ai">المحرّر يكتب المقال</span>
+          <svg class="pulse-line" width="256" height="40" viewBox="0 0 256 40" aria-hidden="true"><path class="base" d="M0 20h70l12-15 16 30 14-24 10 9h134"></path><path d="M0 20h70l12-15 16 30 14-24 10 9h134"></path></svg>
+          <ol class="steps"><sc-for list="{{steps}}" as="s" hint-placeholder-count="3"><li class="step {{s.cls}}"><span class="step__dot"><sc-if value="{{s.done}}" hint-placeholder-val="{{ false }}"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></sc-if></span>{{s.text}}</li></sc-for></ol>
+        </div>
+        <div class="doc grow col" style="max-width: 640px; padding: 34px 40px; gap: 14px; align-self: flex-start"><div class="sk" style="height: 32px; width: 84%"></div><div class="sk" style="height: 18px; width: 50%"></div><div class="sk" style="height: 14px; width: 100%; margin-top: 14px"></div><div class="sk" style="height: 14px; width: 97%"></div><div class="sk" style="height: 14px; width: 93%"></div><div class="sk" style="height: 14px; width: 60%"></div><div class="sk" style="height: 14px; width: 100%; margin-top: 10px"></div><div class="sk" style="height: 14px; width: 88%"></div></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isDone}}" hint-placeholder-val="{{ false }}">
+      <div class="row" style="padding: 12px 28px; background: var(--surface); border-bottom: 1px solid var(--line); flex-wrap: wrap">
+        <span class="badge badge--ai">{{styleName}}</span>
+        <span class="badge badge--teal"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path></svg>من الصفحة</span>
+        <span class="t-meta num">٥١٠ كلمة · ٣ دقائق قراءة</span>
+        <span class="grow"></span>
+        <a class="btn btn--ghost btn--sm" href="DeskTranslate.dc.html"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg>ترجم</a>
+        <a class="btn btn--ghost btn--sm" href="Main.dc.html"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--cyan)"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>حوّله لمنشور سوشيال</a>
+        <button class="icon-btn" type="button" aria-label="تنزيل"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"></path></svg></button>
+        <button class="btn btn--ink btn--sm" type="button"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9zM5 15H4V4h11v1"></path></svg>نسخ الكل</button>
+      </div>
+      <div style="flex: 1; overflow-y: auto; padding: 34px 44px">
+        <article class="doc typeset" style="max-width: 720px; margin: 0 auto; padding: 0 0 30px; display: flex; flex-direction: column; gap: 4px">
+          <div class="ai-strip"></div>
+          <div class="col" style="padding: 26px 44px 0; gap: 4px">
+            <p class="ai-mark" style="color: var(--ink-3); margin-bottom: 8px"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>كتبه المحرّر من مقال سكاي نيوز عربية · زاوية اقتصادية</p>
+            <div class="block"><div class="block__label">العنوان<button class="block__copy" type="button">نسخ</button></div><h2 class="t-hero" style="font-size: 30px">التثبيت الثالث: لماذا يتمسك المركزي بالحذر؟</h2></div>
+            <div class="block"><div class="block__label">المقدمة<button class="block__copy" type="button">نسخ</button></div><p class="t-head" style="color: var(--ink-2); font-weight: 500; font-size: 18px; line-height: 1.7">قرار متوقع، لكن رسائله للأسواق أهم من الرقم نفسه.</p></div>
+            <div class="block"><div class="block__label">النص</div><div class="t-body col" style="color: var(--ink); gap: 14px; font-size: 17px"><p>أبقى البنك المركزي على أسعار الفائدة دون تغيير للمرة الثالثة على التوالي، في قرار جاء متسقاً مع توقعات معظم المحللين.</p><p>ويأتي القرار في وقت تراجعت فيه معدلات التضخم، لكنها لا تزال أعلى من النطاق المستهدف، ما يدفع صانعي السياسة إلى انتظار مزيد من البيانات قبل أي تحرك.</p><p>ويرى محللون أن البيان حمل إشارات إلى أن أي خفض محتمل لن يكون قبل منتصف العام المقبل.</p></div></div>
+          </div>
+        </article>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["empty","writing","done","error","drafts"],"default":"empty"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); var s = props.state || 'empty'; this.state = { style: 'article', phase: s === 'writing' ? 'writing' : (s === 'done' ? 'done' : 'empty'), step: 1 }; this.t = []; }
+  componentWillUnmount() { this.t.forEach(function (x) { clearTimeout(x); }); }
+  renderVals() {
+    var self = this, st = this.state;
+    var D = { brief: ['ملخص', '١٢٠–١٧٠ كلمة', 'اكتب الملخص', 18, 28, 26, 36], article: ['مقال', '٤٥٠–٧٠٠ كلمة', 'اكتب المقال', 8, 48, 16, 28], report: ['تقرير', '٦٥٠–٩٠٠ كلمة', 'اكتب التقرير', 6, 52, 14, 26] };
+    var styles = Object.keys(D).map(function (k) { return { name: D[k][0], hint: D[k][1], y: String(D[k][3]), h: String(D[k][4]), ty: String(D[k][5]), ly: String(D[k][6]), pressed: String(st.style === k), on: st.style === k, pick: function () { self.setState({ style: k }); } }; });
+    var stepsText = ['فتح الرابط وقراءة المقال', 'كتابة ' + D[st.style][0] + ' بزاوية اقتصادية', 'مراجعة الأسماء والأرقام'];
+    return {
+      theme: this.props.theme ?? 'light', styles: styles, action: D[st.style][2], styleName: D[st.style][0],
+      isEmpty: st.phase === 'empty', isWriting: st.phase === 'writing', isDone: st.phase === 'done',
+      isDrafts: this.props.state === 'drafts',
+      drafts: [
+        { kind: 'مقال', badge: 'badge--ai', title: 'التثبيت الثالث: لماذا يتمسك المركزي بالحذر؟', meta: 'من الصفحة · ٥١٠ كلمة · الآن', bg: 'var(--teal-soft)' },
+        { kind: 'تقرير', badge: 'badge--topic', title: 'أسعار النفط بعد قرار أوبك+', meta: 'بالبحث · ٧٨٠ كلمة · أمس', bg: 'transparent' },
+        { kind: 'ملخص', badge: 'badge--topic', title: 'اجتماع وزراء الخارجية العرب', meta: 'من التعيين · ١٤٠ كلمة · أمس', bg: 'transparent' },
+        { kind: 'مقال', badge: 'badge--topic', title: 'الذكاء الاصطناعي وتشخيص أمراض القلب', meta: 'من الصفحة · ٦٢٠ كلمة · ١ نوفمبر', bg: 'transparent' }
+      ],
+      isError: this.props.state === 'error', notError: this.props.state !== 'error', srcCls: this.props.state === 'error' ? 'is-error' : 'is-valid',
+      srcVal: this.props.state === 'error' ? 'https://www.example-news.com/members/central-bank' : 'https://www.skynewsarabia.com/business/central-bank-rates',
+      steps: stepsText.map(function (t, i) { return { text: t, done: i < st.step, cls: i < st.step ? 'is-done' : (i === st.step ? 'is-active' : '') }; }),
+      generate: function () {
+        self.t.forEach(function (x) { clearTimeout(x); });
+        self.setState({ phase: 'writing', step: 0 });
+        self.t.push(setTimeout(function () { self.setState({ step: 1 }); }, 700));
+        self.t.push(setTimeout(function () { self.setState({ step: 2 }); }, 1500));
+        self.t.push(setTimeout(function () { self.setState({ phase: 'done' }); }, 2300));
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

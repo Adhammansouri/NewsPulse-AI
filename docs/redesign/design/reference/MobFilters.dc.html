@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus موبايل — التصفية</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+<link rel="stylesheet" href="/_blob/210170dd5a2fa534503e7d6a475c3fc9">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np m" data-theme="{{theme}}">
+  <div aria-hidden="true" class="col" style="background: var(--surface); padding: 18px 20px; gap: 12px">
+    <span class="m-title">الأخبار</span><div class="field field--sunken">ابحث في العناوين…</div>
+  </div>
+  <div aria-hidden="true" class="m-row is-breaking"><span class="tick"></span><span class="m-row__title">البنك المركزي يثبت أسعار الفائدة للمرة الثالثة على التوالي</span></div>
+  <div aria-hidden="true" class="m-row is-now"><span class="tick"></span><span class="m-row__title">اجتماع طارئ لوزراء الخارجية العرب</span></div>
+  <a class="scrim" href="MobWire.dc.html" aria-label="إغلاق التصفية"></a>
+
+  <section class="sheet col" role="dialog" aria-modal="true" aria-labelledby="mf-title" style="max-height: 780px">
+    <div class="grabber" aria-hidden="true"></div>
+    <header class="row" style="justify-content: space-between; padding: 6px 20px 14px"><h2 id="mf-title" class="t-title">تصفية العناوين</h2><button class="btn btn--ghost btn--sm" type="button">مسح الكل</button></header>
+    <div class="m-scroll col" style="padding: 0 20px 18px; gap: 22px">
+      <fieldset class="col" style="border: 0; padding: 0; margin: 0; gap: 8px"><legend class="t-label" style="margin-bottom: 8px">الوقت</legend><div class="seg seg--block"><button type="button" aria-pressed="false">الكل</button><button type="button" aria-pressed="false">٢٠ د</button><button type="button" aria-pressed="true">ساعة</button><button type="button" aria-pressed="false">٣ س</button><button type="button" aria-pressed="false">اليوم</button></div></fieldset>
+      <fieldset class="col" style="border: 0; padding: 0; margin: 0; gap: 8px"><legend class="t-label" style="margin-bottom: 8px">اللغة</legend><div class="seg seg--block"><button type="button" aria-pressed="true">الكل</button><button type="button" aria-pressed="false">عربي</button><button type="button" aria-pressed="false">English</button></div></fieldset>
+      <fieldset class="col" style="border: 0; padding: 0; margin: 0; gap: 10px">
+        <legend class="row" style="margin-bottom: 8px; width: 100%; justify-content: space-between"><span class="t-label">المصادر</span><span class="t-meta">٢ من ٩</span></legend>
+        <label class="field field--sunken"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"></path></svg><span class="sr">ابحث باسم المصدر</span><input type="search" placeholder="ابحث باسم المصدر…"></label>
+        <div class="m-list">
+          <sc-for list="{{sources}}" as="s" hint-placeholder-count="6">
+            <button class="m-item" type="button" aria-pressed="{{s.on}}"><span class="mark" style="width: 30px; height: 30px; border-radius: 9px; background: {{s.bg}}">{{s.ch}}</span><span class="m-item__label">{{s.name}}<small>{{s.lang}}</small></span><span class="check {{s.cls}}"><sc-if value="{{s.checked}}" hint-placeholder-val="{{ false }}"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></sc-if></span></button>
+          </sc-for>
+        </div>
+      </fieldset>
+    </div>
+    <div class="m-cta"><a class="btn btn--ink btn--block btn--lg" href="MobWire.dc.html">عرض ٤ عناوين</a></div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var src = [['العربية', 'ع', '#0f6e5d', 1, 'عربي'], ['سكاي نيوز عربية', 'س', '#1d4ed8', 1, 'عربي'], ['الجزيرة نت', 'ج', '#a16207', 0, 'عربي'], ['BBC عربي', 'B', '#b91c1c', 0, 'عربي'], ['الشرق للأخبار', 'ش', '#c2410c', 0, 'عربي'], ['Reuters', 'R', '#c2410c', 0, 'English']];
+    return {
+      theme: this.props.theme ?? 'light',
+      sources: src.map(function (s) { return { name: s[0], ch: s[1], bg: s[2], on: String(!!s[3]), checked: !!s[3], cls: s[3] ? 'is-on' : '', lang: s[4] }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

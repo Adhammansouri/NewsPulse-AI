@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — غرفة الأخبار</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np" data-theme="{{theme}}" style="display: flex; width: 100%; height: 900px; overflow: hidden">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+
+  <nav class="rail" aria-label="التنقل الرئيسي">
+    <img class="rail__logo" src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="Newsplus">
+    <a class="rail__item" href="DeskHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>الرئيسية</a>
+    <a class="rail__item" href="Main.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H5a1 1 0 0 1-1-1zM17 9h3v9a1 1 0 0 1-2 0M7 9h7M7 13h7M7 16h4"></path></svg>الأخبار</a>
+    <a class="rail__item" href="NewBoard.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v10h-4zM16 4h4v13h-4z"></path></svg>سير العمل</a>
+    <a class="rail__item" href="DeskGenerate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"></path></svg>توليد</a>
+    <a class="rail__item" href="DeskTranslate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg>ترجمة</a>
+    <a class="rail__item" href="DeskUsage.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"></path></svg>الاستهلاك</a>
+    <div style="flex: 1"></div>
+    <a class="rail__btn" href="DeskNotifications.dc.html" aria-label="الإشعارات، تنبيه جديد"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"></path></svg><span class="dot-badge" style="box-shadow: 0 0 0 2px var(--navy)"></span></a>
+    <button class="rail__btn" type="button" aria-label="الوضع الداكن"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg></button>
+    <button class="avatar" type="button" aria-label="حساب سارة" style="margin-top: 8px">س</button>
+  </nav>
+
+  <section aria-label="العناوين" style="position: relative; width: 420px; flex: none; display: flex; flex-direction: column; background: var(--surface); border-inline-start: 1px solid var(--line)">
+    <header style="display: flex; flex-direction: column; gap: 12px; padding: 18px 20px 12px">
+      <div class="row" style="justify-content: space-between">
+        <div class="col" style="gap: 2px"><h1 class="t-title" style="font-size: 22px">الأخبار</h1><p class="live">مباشر · {{count}} عناوين · حُدّث قبل دقيقة</p></div>
+        <div class="row" style="gap: 4px">
+          <button class="icon-btn" type="button" aria-label="تحديث العناوين"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"></path></svg></button>
+          <button class="btn btn--quiet btn--sm" type="button" onClick="{{briefing}}"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--cyan)"><path d="M13 3L5 14h6l-1 7 8-11h-6z"></path></svg>موجز الساعة</button>
+        </div>
+      </div>
+      <div class="row">
+        <label class="field field--sunken grow"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"></path></svg><span class="sr">بحث في العناوين</span><input type="search" placeholder="ابحث في العناوين…"><span class="kbd" style="background: var(--surface); color: var(--ink-3)">/</span></label>
+        <button class="icon-btn icon-btn--line" type="button" onClick="{{toggleFilter}}" aria-expanded="{{filterOpenStr}}" aria-label="تصفية، فلتر واحد مفعّل" style="width: 44px; height: 44px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M14 5v4M8 15v4"></path></svg><span class="badge badge--count" style="position: absolute; top: -6px; inset-inline-end: -6px">١</span></button>
+      </div>
+      <div class="seg seg--block" role="group" aria-label="الوقت"><button type="button" aria-pressed="true">الكل</button><button type="button" aria-pressed="false">٢٠ د</button><button type="button" aria-pressed="false">ساعة</button><button type="button" aria-pressed="false">٣ س</button><button type="button" aria-pressed="false">اليوم</button></div>
+      <div class="scroll-x" role="group" aria-label="الموضوع">
+        <sc-for list="{{topics}}" as="t" hint-placeholder-count="6"><button class="chip chip--sm" type="button" aria-pressed="{{t.pressed}}" onClick="{{t.pick}}">{{t.label}}<span class="n num">{{t.n}}</span></button></sc-for>
+      </div>
+    </header>
+    <div style="flex: 1; overflow-y: auto; border-top: 1px solid var(--line)">
+      <sc-if value="{{feed.loading}}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{skRows}}" as="w" hint-placeholder-count="6"><div class="col" style="gap: 10px; padding: 16px 18px; padding-inline-start: 30px; border-bottom: 1px solid var(--line)"><div class="row"><div class="sk" style="width: 22px; height: 22px; border-radius: 7px"></div><div class="sk" style="height: 10px; width: 28%"></div><span class="grow"></span><div class="sk" style="height: 10px; width: 14%"></div></div><div class="sk" style="height: 14px; width: 95%"></div><div class="sk" style="height: 14px; width: {{w}}"></div></div></sc-for>
+      </sc-if>
+      <sc-if value="{{feed.error}}" hint-placeholder-val="{{ false }}">
+        <div class="notice notice--error" role="alert" style="margin: 12px 16px; align-items: center"><span class="ic-wrap ic-wrap--breaking" style="background: var(--surface)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"></path></svg></span><span class="col grow"><b style="font-weight: 600">تعذّر جلب العناوين</b><span class="t-small">بتشوف آخر نسخة من ٢:٤٠ م</span></span><button class="btn btn--quiet btn--sm" type="button">حاول تاني</button></div>
+      </sc-if>
+      <sc-if value="{{feed.empty}}" hint-placeholder-val="{{ false }}">
+        <div class="empty" style="padding-top: 64px"><span class="empty__art"><svg class="ic ic--xl" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H5a1 1 0 0 1-1-1zM17 9h3v9a1 1 0 0 1-2 0M7 9h7M7 13h7"></path></svg></span><h2 class="t-title">مفيش عناوين هنا</h2><p class="t-small" style="max-width: 300px">مفيش أخبار اقتصاد في آخر ٢٠ دقيقة من المصادر المختارة. آخر خبر كان قبل ٢٦ دقيقة.</p><div class="row" style="margin-top: 6px"><button class="btn btn--ink btn--sm" type="button">وسّع الوقت لساعة</button><button class="btn btn--ghost btn--sm" type="button">امسح التصفية</button></div></div>
+      </sc-if>
+      <sc-if value="{{showNewPill}}" hint-placeholder-val="{{ true }}">
+        <button class="wire-new" type="button" onClick="{{reveal}}"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"></path></svg>عنوانان جديدان</button>
+      </sc-if>
+      <sc-for list="{{rows}}" as="row" hint-placeholder-count="6">
+        <button type="button" class="wire-row {{row.cls}}" aria-pressed="{{row.pressed}}" onClick="{{row.pick}}">
+          <span class="tick" aria-hidden="true"></span>
+          <span class="wire-row__meta">
+            <span class="marks"><sc-for list="{{row.marks}}" as="m" hint-placeholder-count="2"><span class="mark" style="background: {{m.bg}}">{{m.ch}}</span></sc-for></span>
+            <span style="font-weight: 600; color: var(--ink-2)">{{row.source}}</span><span>{{row.more}}</span>
+            <span class="grow"></span><span class="num">{{row.time}}</span>
+          </span>
+          <span class="wire-row__title" dir="{{row.dir}}">{{row.title}}</span>
+          <span class="wire-row__foot">
+            <sc-if value="{{row.breaking}}" hint-placeholder-val="{{ false }}"><span class="badge badge--breaking">عاجل</span></sc-if>
+            <span class="badge badge--topic">{{row.topic}}</span>
+            <sc-if value="{{row.draft}}" hint-placeholder-val="{{ false }}"><span class="badge badge--ai">مسودة جاهزة</span></sc-if>
+          </span>
+        </button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{filterOpen}}" hint-placeholder-val="{{ false }}">
+      <div class="popover" role="dialog" aria-label="تصفية" style="top: 132px; inset-inline: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+        <div class="row" style="justify-content: space-between"><h2 class="t-head">تصفية</h2><button class="btn btn--ghost btn--sm" type="button">مسح الكل</button></div>
+        <div class="col" style="gap: 6px"><span class="t-label">اللغة</span><div class="seg seg--block"><button type="button" aria-pressed="true">الكل</button><button type="button" aria-pressed="false">عربي</button><button type="button" aria-pressed="false">English</button></div></div>
+        <div class="col" style="gap: 8px"><span class="t-label">المصادر</span>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px">
+            <sc-for list="{{sourceList}}" as="s" hint-placeholder-count="6"><button class="tile tile--row" type="button" aria-pressed="{{s.on}}" style="padding: 8px; gap: 8px; box-shadow: none"><span class="mark" style="background: {{s.bg}}; width: 26px; height: 26px">{{s.ch}}</span><span class="grow" style="font-size: 13px; font-weight: 600">{{s.name}}</span></button></sc-for>
+          </div>
+        </div>
+        <button class="btn btn--ink btn--block" type="button" onClick="{{toggleFilter}}">عرض النتائج</button>
+      </div>
+    </sc-if>
+  </section>
+
+  <main style="position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--bg)">
+    <sc-if value="{{feed.loading}}" hint-placeholder-val="{{ false }}">
+      <div class="col" style="flex: 1; padding: 26px 34px; gap: 18px"><div class="panel col" style="padding: 24px 28px; gap: 14px"><div class="sk" style="height: 12px; width: 30%"></div><div class="sk" style="height: 28px; width: 85%"></div><div class="sk" style="height: 28px; width: 55%"></div><div class="sk" style="height: 14px; width: 100%; margin-top: 6px"></div><div class="sk" style="height: 14px; width: 80%"></div></div><div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px"><div class="sk" style="height: 168px; border-radius: 16px"></div><div class="sk" style="height: 168px; border-radius: 16px"></div><div class="sk" style="height: 168px; border-radius: 16px"></div></div></div>
+    </sc-if>
+    <sc-if value="{{feed.empty}}" hint-placeholder-val="{{ false }}">
+      <div style="flex: 1; display: grid; place-items: center"><div class="empty" style="max-width: 420px"><span class="empty__art" style="background: var(--ai-soft)"><svg class="ic ic--xl" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--cyan)"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span><h2 class="t-title">اختار خبر وابدأ</h2><p class="t-small">لما تختار خبر من العناوين، هيظهر هنا ومعاه الصيغ اللي المحرّر يقدر يكتبها.</p></div></div>
+    </sc-if>
+
+    <sc-if value="{{isIdle}}" hint-placeholder-val="{{ true }}">
+      <div class="enter" style="flex: 1; overflow-y: auto; padding: 26px 34px 20px">
+        <article class="panel" style="padding: 24px 28px; display: flex; flex-direction: column; gap: 14px">
+          <div class="row t-meta" style="gap: 10px; flex-wrap: wrap">
+            <span class="marks"><sc-for list="{{story.marks}}" as="m" hint-placeholder-count="2"><span class="mark" style="background: {{m.bg}}">{{m.ch}}</span></sc-for></span>
+            <span style="font-weight: 600; color: var(--ink-2)">{{story.sourceLine}}</span><span class="num">{{story.time}}</span><a class="chip chip--sm chip--ai" href="NewTimeline.dc.html">تطور القصة · ٤ تحديثات</a>
+            <sc-if value="{{story.breaking}}" hint-placeholder-val="{{ false }}"><span class="badge badge--breaking">عاجل</span></sc-if>
+            <span class="badge badge--topic">{{story.topic}}</span>
+          </div>
+          <h2 class="t-display" dir="{{story.dir}}">{{story.title}}</h2>
+          <p class="t-body" dir="{{story.dir}}" style="max-width: 68ch">{{story.excerpt}}</p>
+          <div class="row" style="flex-wrap: wrap">
+            <sc-for list="{{story.links}}" as="l" hint-placeholder-count="2"><a class="chip chip--soft chip--sm" href="https://example.com">{{l.name}}<svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></a></sc-for>
+          </div>
+        </article>
+
+        <div class="row" style="justify-content: space-between; margin: 24px 2px 12px">
+          <h3 class="t-head">ماذا ننشر؟ <span class="t-meta" style="font-weight: 400">· للسوشيال</span></h3>
+          <span class="chip chip--ai chip--sm"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--cyan)"><path d="M12 3a6 6 0 0 1 6 6c0 2.2-1.2 3.6-2.5 4.7-.7.6-1 1.3-1 2.1V17h-5v-1.2c0-.8-.3-1.5-1-2.1C7.2 12.6 6 11.2 6 9a6 6 0 0 1 6-6zM10 21h4"></path></svg>ذاكرة الفريق: ٤ قواعد تُطبَّق تلقائياً</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+          <button class="tile" type="button" aria-pressed="{{tiles.social.pressed}}" onClick="{{tiles.social.pick}}">
+            <span class="tile__shape" style="height: 96px"><svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><rect x="14" y="8" width="36" height="48" rx="6" fill="none" stroke="currentColor" stroke-width="2"></rect><rect x="19" y="13" width="26" height="20" rx="3" fill="currentColor" opacity=".25"></rect><rect x="19" y="38" width="22" height="3" rx="1.5" fill="currentColor"></rect><rect x="19" y="45" width="15" height="3" rx="1.5" fill="currentColor" opacity=".5"></rect></svg></span>
+            <span class="tile__name">منشور سوشيال</span><span class="tile__hint">٤٠–٧٠ كلمة · وسوم · خطافان بديلان</span>
+            <sc-if value="{{tiles.social.on}}" hint-placeholder-val="{{ false }}"><span class="tile__check"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span></sc-if>
+          </button>
+          <button class="tile" type="button" aria-pressed="{{tiles.video.pressed}}" onClick="{{tiles.video.pick}}">
+            <span class="tile__shape" style="height: 96px"><svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><rect x="20" y="4" width="24" height="56" rx="6" fill="none" stroke="currentColor" stroke-width="2"></rect><path d="M29 25l9 6-9 6z" fill="currentColor"></path><rect x="24" y="48" width="16" height="3" rx="1.5" fill="currentColor" opacity=".5"></rect></svg></span>
+            <span class="tile__name">سكريبت فيديو</span><span class="tile__hint">هوك ٣ ثوانٍ · نص · لقطات</span>
+            <sc-if value="{{tiles.video.on}}" hint-placeholder-val="{{ false }}"><span class="tile__check"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span></sc-if>
+          </button>
+          <button class="tile" type="button" aria-pressed="{{tiles.carousel.pressed}}" onClick="{{tiles.carousel.pick}}">
+            <span class="tile__shape" style="height: 96px"><svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><rect x="26" y="14" width="28" height="36" rx="5" fill="currentColor" opacity=".18"></rect><rect x="18" y="12" width="28" height="40" rx="5" fill="currentColor" opacity=".32"></rect><rect x="10" y="10" width="28" height="44" rx="5" style="fill: var(--surface)" stroke="currentColor" stroke-width="2"></rect><rect x="15" y="38" width="18" height="3" rx="1.5" fill="currentColor"></rect></svg></span>
+            <span class="tile__name">كاروسيل بصور AI</span><span class="tile__hint">٣–٦ شرائح · الصور تُرسم تلقائياً</span>
+            <sc-if value="{{tiles.carousel.on}}" hint-placeholder-val="{{ false }}"><span class="tile__check"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span></sc-if>
+          </button>
+        </div>
+        <h3 class="t-head" style="margin: 22px 2px 12px">للموقع والنشرات</h3>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+          <button class="tile tile--row" type="button" aria-pressed="{{tiles.desk.pressed}}" onClick="{{tiles.desk.pick}}"><span class="tile__shape"><svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><rect x="14" y="8" width="36" height="48" rx="4" fill="none" stroke="currentColor" stroke-width="3.5"></rect><rect x="21" y="17" width="22" height="5" rx="2" fill="currentColor"></rect><rect x="21" y="30" width="22" height="3" rx="1.5" fill="currentColor" opacity=".55"></rect><rect x="21" y="38" width="15" height="3" rx="1.5" fill="currentColor" opacity=".55"></rect></svg></span><span class="col"><span class="tile__name">خبر مكتبي</span><span class="tile__hint">٩٠–١٤٠ كلمة</span></span></button>
+          <button class="tile tile--row" type="button" aria-pressed="{{tiles.bulletin.pressed}}" onClick="{{tiles.bulletin.pick}}"><span class="tile__shape"><svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><rect x="6" y="22" width="52" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="3.5"></rect><rect x="13" y="29" width="30" height="6" rx="3" fill="currentColor"></rect></svg></span><span class="col"><span class="tile__name">نشرة</span><span class="tile__hint">فقرة للشريط</span></span></button>
+          <button class="tile tile--row" type="button" aria-pressed="{{tiles.facts.pressed}}" onClick="{{tiles.facts.pick}}"><span class="tile__shape"><svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><circle cx="15" cy="18" r="4.5" fill="currentColor"></circle><circle cx="15" cy="32" r="4.5" fill="currentColor"></circle><circle cx="15" cy="46" r="4.5" fill="currentColor"></circle><rect x="26" y="16" width="28" height="4" rx="2" fill="currentColor" opacity=".55"></rect><rect x="26" y="30" width="24" height="4" rx="2" fill="currentColor" opacity=".55"></rect><rect x="26" y="44" width="20" height="4" rx="2" fill="currentColor" opacity=".55"></rect></svg></span><span class="col"><span class="tile__name">حقائق</span><span class="tile__hint">للإسناد</span></span></button>
+          <button class="tile tile--row" type="button" aria-pressed="{{tiles.context.pressed}}" onClick="{{tiles.context.pick}}"><span class="tile__shape"><svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="21" fill="none" stroke="currentColor" stroke-width="3.5"></circle><path d="M40 24l-5 11-11 5 5-11z" fill="currentColor"></path></svg></span><span class="col"><span class="tile__name">سياق</span><span class="tile__hint">لماذا يهم الآن</span></span></button>
+        </div>
+      </div>
+      <footer class="row" style="gap: 12px; padding: 14px 34px; background: var(--surface); border-top: 1px solid var(--line)">
+        <span class="ic-wrap ic-wrap--ai"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"></path></svg></span>
+        <div class="col grow"><span style="font-weight: 700">{{fmt.name}}</span><span class="t-meta">{{fmt.hint}} · من {{story.sourcesPhrase}} · بأسلوب فريقك</span></div>
+        <button class="btn btn--ghost" type="button" onClick="{{openArchive}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2"></path></svg>الأرشيف</button>
+        <button class="btn btn--ai btn--lg" type="button" onClick="{{generate}}" style="min-width: 230px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>{{fmt.action}}<span class="kbd">Ctrl ↵</span></button>
+      </footer>
+    </sc-if>
+
+    <sc-if value="{{isGen}}" hint-placeholder-val="{{ false }}">
+      <div class="fade-in" style="flex: 1; overflow: hidden; padding: 30px 36px; display: flex; gap: 32px">
+        <div class="ai-panel ai-glow" style="width: 330px; flex: none; align-self: flex-start; padding: 22px; display: flex; flex-direction: column; gap: 18px">
+          <div class="col" style="gap: 4px"><span class="ai-mark t-ai">المحرّر يكتب الآن</span><h2 class="t-title">{{fmt.name}}</h2></div>
+          <svg class="pulse-line" width="286" height="44" viewBox="0 0 286 44" aria-hidden="true"><path class="base" d="M0 22h80l12-16 16 32 14-26 10 10h154"></path><path d="M0 22h80l12-16 16 32 14-26 10 10h154"></path></svg>
+          <ol class="steps">
+            <sc-for list="{{steps}}" as="s" hint-placeholder-count="3"><li class="step {{s.cls}}"><span class="step__dot"><sc-if value="{{s.done}}" hint-placeholder-val="{{ false }}"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></sc-if></span>{{s.text}}</li></sc-for>
+          </ol>
+          <button class="btn btn--ghost btn--sm" type="button" onClick="{{back}}" style="align-self: flex-start">إلغاء</button>
+        </div>
+        <div class="grow col" style="gap: 14px; padding-top: 4px">
+          <p class="t-meta">{{story.title}}</p>
+          <sc-if value="{{shape.post}}" hint-placeholder-val="{{ false }}"><div class="doc" style="max-width: 520px; padding: 24px; display: flex; flex-direction: column; gap: 14px"><div class="sk" style="height: 26px; width: 88%"></div><div class="sk" style="height: 26px; width: 58%"></div><div class="sk" style="height: 14px; width: 100%; margin-top: 10px"></div><div class="sk" style="height: 14px; width: 94%"></div><div class="sk" style="height: 14px; width: 66%"></div><div class="row"><div class="sk" style="height: 28px; width: 110px"></div><div class="sk" style="height: 28px; width: 90px"></div></div></div></sc-if>
+          <sc-if value="{{shape.video}}" hint-placeholder-val="{{ false }}"><div class="row" style="align-items: flex-start; gap: 24px"><div class="sk" style="width: 200px; height: 356px; border-radius: 22px"></div><div class="col grow" style="gap: 14px; max-width: 420px"><div class="sk" style="height: 22px; width: 72%"></div><div class="sk" style="height: 40px; width: 100%; border-radius: 12px"></div><div class="sk" style="height: 14px; width: 100%"></div><div class="sk" style="height: 14px; width: 90%"></div><div class="sk" style="height: 14px; width: 60%"></div></div></div></sc-if>
+          <sc-if value="{{shape.carousel}}" hint-placeholder-val="{{ false }}"><div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-width: 640px"><div class="sk" style="aspect-ratio: 1; border-radius: 16px"></div><div class="sk" style="aspect-ratio: 1; border-radius: 16px"></div><div class="sk" style="aspect-ratio: 1; border-radius: 16px"></div></div></sc-if>
+          <sc-if value="{{shape.docLike}}" hint-placeholder-val="{{ false }}"><div class="doc" style="max-width: 620px; padding: 28px; display: flex; flex-direction: column; gap: 14px"><div class="sk" style="height: 30px; width: 80%"></div><div class="sk" style="height: 16px; width: 52%"></div><div class="sk" style="height: 14px; width: 100%; margin-top: 10px"></div><div class="sk" style="height: 14px; width: 97%"></div><div class="sk" style="height: 14px; width: 92%"></div><div class="sk" style="height: 14px; width: 58%"></div></div></sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isDraft}}" hint-placeholder-val="{{ false }}">
+      <div style="flex: 1; min-height: 0; display: flex">
+        <div class="grow col">
+          <div class="row" style="padding: 12px 22px; background: var(--surface); border-bottom: 1px solid var(--line)">
+            <button class="btn btn--ghost btn--sm" type="button" onClick="{{back}}"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>الخبر</button>
+            <span class="badge badge--ai">{{fmt.name}}</span>
+            <div class="row" style="gap: 4px" role="list" aria-label="النسخ"><sc-for list="{{versions}}" as="v" hint-placeholder-count="1"><span class="vchip" role="listitem" aria-current="{{v.cur}}">{{v.label}}</span></sc-for></div>
+            <span class="grow"></span>
+            <button class="icon-btn" type="button" onClick="{{back}}" aria-label="تحويل الصيغة" title="تحويل الصيغة"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h13l-4-4M17 17H4l4 4"></path></svg></button>
+            <a class="btn btn--quiet btn--sm" href="NewPublish.dc.html"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>فحص ونشر</a>
+            <button class="icon-btn" type="button" aria-label="تنزيل"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"></path></svg></button>
+            <button class="btn btn--ink btn--sm" type="button" onClick="{{copyAll}}"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9zM5 15H4V4h11v1"></path></svg>{{copyAllLabel}}</button>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 22px 34px 34px">
+            <p class="ai-mark" style="margin-bottom: 14px; color: var(--ink-3)"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>كتبه المحرّر من {{story.sourcesPhrase}} · راجعه قبل النشر</p>
+
+            <sc-if value="{{shape.post}}" hint-placeholder-val="{{ true }}">
+              <div class="typeset" style="max-width: 640px; display: flex; flex-direction: column; gap: 4px">
+                <div class="block {{hookCls}}"><div class="block__label">{{hookLabel}}<button class="block__copy {{cp.hook}}" type="button" onClick="{{copyHook}}">{{cpl.hook}}</button></div><p class="t-display" style="font-size: 22px" dir="{{draft.dir}}">{{draft.hook}}</p></div>
+                <div class="block"><div class="block__label">النص<button class="block__copy {{cp.body}}" type="button" onClick="{{copyBody}}">{{cpl.body}}</button></div><p class="t-body" style="color: var(--ink)" dir="{{draft.dir}}">{{draft.body}}</p></div>
+                <div class="block"><div class="block__label">الوسوم<button class="block__copy {{cp.tags}}" type="button" onClick="{{copyTags}}">{{cpl.tags}}</button></div><div class="row" style="flex-wrap: wrap; gap: 6px"><sc-for list="{{draft.tags}}" as="tag" hint-placeholder-count="4"><span class="tag">{{tag}}</span></sc-for></div></div>
+                <div class="block"><div class="block__label">خطافات بديلة · اضغط لاستبدال</div><div class="col" style="gap: 8px"><sc-for list="{{draft.alts}}" as="alt" hint-placeholder-count="2"><button class="tile tile--row" type="button" style="box-shadow: none; padding: 10px 14px"><span class="grow" style="font-size: 14.5px; font-weight: 500">{{alt}}</span><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--ink-3)"><path d="M7 7h13l-4-4M17 17H4l4 4"></path></svg></button></sc-for></div></div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{shape.video}}" hint-placeholder-val="{{ false }}">
+              <div class="typeset row" style="align-items: flex-start; gap: 28px">
+                <div style="width: 214px; height: 380px; flex: none; border-radius: 26px; background: radial-gradient(circle at 70% 20%, #1d6f8f, #0c2340 70%); color: #fff; padding: 18px 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow-3)">
+                  <div class="row" style="justify-content: space-between"><img src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="" style="width: 28px; height: 28px; border-radius: 8px"><span style="font-size: 11px; opacity: .8" class="num">٠:٤٥</span></div>
+                  <div class="col" style="gap: 8px"><span style="align-self: flex-start; font-size: 11px; font-weight: 600; background: #ef6c57; padding: 2px 8px; border-radius: 6px">الكوفر</span><p style="font-family: var(--f-display); font-size: 23px; line-height: 1.4; font-weight: 700">{{draft.cover}}</p></div>
+                </div>
+                <div class="col grow" style="gap: 4px; max-width: 480px">
+                  <div class="block"><div class="block__label">عنوان النشر<button class="block__copy" type="button">نسخ</button></div><p class="t-title">{{draft.vtitle}}</p></div>
+                  <div class="block {{hookCls}}"><div class="block__label">الهوك · ٠–٣ ثوانٍ</div><p class="t-head" style="font-size: 17px">{{draft.vhook}}</p></div>
+                  <div class="block"><div class="block__label">النص<button class="block__copy" type="button">نسخ</button></div><p class="t-body" style="color: var(--ink)">{{draft.script}}</p></div>
+                  <div class="block"><div class="block__label">لقطات / CG</div><ol class="col" style="gap: 6px"><sc-for list="{{draft.shots}}" as="s" hint-placeholder-count="3"><li class="row" style="font-size: 14px; align-items: flex-start"><span class="vchip num">{{s.n}}</span><span style="padding-top: 3px">{{s.text}}</span></li></sc-for></ol></div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{shape.carousel}}" hint-placeholder-val="{{ false }}">
+              <div class="typeset col" style="gap: 18px">
+                <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+                  <sc-for list="{{slides}}" as="sl" hint-placeholder-count="4">
+                    <figure class="slide {{sl.cls}}">
+                      <span class="slide__art" style="background: {{sl.art}}"></span>
+                      <span class="slide__art" style="background: linear-gradient(180deg, transparent 35%, rgb(5 13 23 / .82))"></span>
+                      <span class="row" style="position: absolute; top: 10px; inset-inline: 10px; justify-content: space-between; font-size: 11px"><span class="num" style="opacity: .8">{{sl.n}} / ٤</span><span class="badge" style="background: rgb(255 255 255 / .16); color: #fff; height: 20px; font-size: 11px">{{sl.status}}</span></span>
+                      <p style="font-family: var(--f-display); font-size: 15px; line-height: 1.45; font-weight: 700">{{sl.text}}</p>
+                    </figure>
+                  </sc-for>
+                </div>
+                <div class="row t-meta"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--cyan)"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>{{paintLine}}</div>
+                <div class="block" style="max-width: 640px"><div class="block__label">الكابشن<button class="block__copy" type="button">نسخ</button></div><p class="t-body" style="color: var(--ink)">{{draft.body}}</p></div>
+                <div class="row" style="flex-wrap: wrap; gap: 6px"><sc-for list="{{draft.tags}}" as="tag" hint-placeholder-count="3"><span class="tag">{{tag}}</span></sc-for></div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{shape.docLike}}" hint-placeholder-val="{{ false }}">
+              <article class="doc typeset" style="max-width: 680px; padding: 30px 36px; display: flex; flex-direction: column; gap: 4px">
+                <div class="block {{hookCls}}"><div class="block__label">{{docLabel}}<button class="block__copy" type="button">نسخ</button></div><h2 class="t-display" dir="{{draft.dir}}">{{draft.hook}}</h2></div>
+                <sc-if value="{{doc.dek}}" hint-placeholder-val="{{ true }}"><div class="block"><div class="block__label">المقدمة</div><p class="t-head" style="color: var(--ink-2); font-weight: 500" dir="{{draft.dir}}">{{draft.dek}}</p></div></sc-if>
+                <sc-if value="{{doc.body}}" hint-placeholder-val="{{ true }}"><div class="block"><div class="block__label">النص</div><p class="t-body" style="color: var(--ink)" dir="{{draft.dir}}">{{draft.body}}</p></div></sc-if>
+                <sc-if value="{{doc.points}}" hint-placeholder-val="{{ true }}"><div class="block"><div class="block__label">{{doc.pointsLabel}}</div><ul class="col" style="gap: 8px"><sc-for list="{{draft.points}}" as="pt" hint-placeholder-count="3"><li class="row" style="align-items: flex-start; font-size: 15px; gap: 10px"><span style="width: 7px; height: 7px; border-radius: 50%; background: var(--ai); margin-top: 10px; flex: none"></span>{{pt}}</li></sc-for></ul></div></sc-if>
+              </article>
+            </sc-if>
+
+            <sc-if value="{{shape.briefing}}" hint-placeholder-val="{{ false }}">
+              <article class="doc typeset" style="max-width: 700px; padding: 28px 32px; display: flex; flex-direction: column; gap: 6px">
+                <div class="block"><div class="block__label">موجز الساعة · أهم ٥ عناوين<button class="block__copy" type="button">نسخ</button></div><h2 class="t-display">موجز ٣:٠٠ م: الفائدة، اجتماع طارئ، والنفط</h2></div>
+                <ol class="col" style="gap: 2px">
+                  <sc-for list="{{brief}}" as="b" hint-placeholder-count="5"><li class="block row" style="align-items: flex-start; gap: 14px"><span class="t-num" style="font-size: 20px; color: var(--cyan); width: 22px">{{b.n}}</span><span class="col grow"><span style="font-weight: 600; font-size: 15.5px; line-height: 1.6">{{b.t}}</span><span class="t-meta">{{b.src}}</span></span></li></sc-for>
+                </ol>
+              </article>
+            </sc-if>
+          </div>
+        </div>
+
+        <aside aria-label="المحرّر" style="width: 344px; flex: none; display: flex; flex-direction: column; background: var(--surface); border-inline-end: 1px solid var(--line)">
+          <div class="row" style="justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--line)">
+            <div class="row"><span class="ic-wrap ic-wrap--ai" style="width: 32px; height: 32px; border-radius: 10px"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span><h3 class="t-head">المحرّر</h3></div>
+            <span class="t-meta">كل تعديل نسخة جديدة</span>
+          </div>
+          <div class="col" style="flex: 1; overflow-y: auto; padding: 16px 18px; gap: 10px">
+            <sc-for list="{{msgs}}" as="m" hint-placeholder-count="1"><p class="msg {{m.cls}} fade-in">{{m.text}}</p></sc-for>
+            <sc-if value="{{revising}}" hint-placeholder-val="{{ false }}"><div class="msg msg--ai row" style="gap: 10px"><svg class="pulse-line" width="64" height="20" viewBox="0 0 64 20" aria-hidden="true"><path d="M0 10h18l4-7 6 14 5-11 4 4h27"></path></svg>يعدّل النص…</div></sc-if>
+          </div>
+          <form class="dock">
+            <div class="row" style="flex-wrap: wrap; gap: 6px"><sc-for list="{{quick}}" as="q" hint-placeholder-count="3"><button class="chip chip--sm chip--ai" type="button" onClick="{{q.run}}">{{q.text}}</button></sc-for></div>
+            <label class="dock__input"><span class="sr">اطلب تعديلاً</span><textarea rows="1" placeholder="اطلب تعديلاً… مثلاً: اجعل الخطاف سؤالاً"></textarea><button class="send" type="button" aria-label="إرسال"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"></path></svg></button></label>
+          </form>
+        </aside>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="position: absolute; bottom: 24px; inset-inline: 0; display: flex; justify-content: center; pointer-events: none"><span class="toast"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color: #5eead4"><path d="M5 12l5 5 9-10"></path></svg>{{toast}}</span></div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["idle","loading","empty","error","filters","generating","social","briefing","desk","bulletin","facts","context"],"default":"idle"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    var s = props.state || 'idle';
+    var NOUN = { social: 'المنشور', briefing: 'الموجز', desk: 'الخبر المكتبي', bulletin: 'النشرة', facts: 'ملف الحقائق', context: 'السياق' };
+    var first = [{ cls: 'msg--ai', text: 'جهّزت ' + (NOUN[s] || 'المنشور') + ' وطبّقت ٤ قواعد من ذاكرة الفريق. اطلب أي تعديل وسأحفظه كنسخة جديدة.' }];
+    var isD = ['social', 'briefing', 'desk', 'bulletin', 'facts', 'context'].indexOf(s) >= 0;
+    this.state = { sel: 'n1', fmt: isD ? s : 'social', phase: s === 'generating' ? 'gen' : (isD ? 'draft' : 'idle'), step: 1, topic: 'all', revealed: false, filterOpen: s === 'filters', rev: 0, revising: false, msgs: isD ? first : [], copied: '', toast: '', painted: 0 };
+    this.timers = [];
+  }
+  componentWillUnmount() { this.clear(); }
+  clear() { this.timers.forEach(function (t) { clearTimeout(t); }); this.timers = []; }
+  later(fn, ms) { this.timers.push(setTimeout(fn, ms)); }
+  flash(text, key) {
+    var self = this;
+    this.setState({ toast: text, copied: key || '' });
+    this.later(function () { self.setState({ toast: '', copied: '' }); }, 1900);
+  }
+  run(fmt) {
+    var self = this;
+    this.clear();
+    this.setState({ fmt: fmt, phase: 'gen', step: 0, rev: 0, msgs: [], painted: 0, revising: false, filterOpen: false });
+    this.later(function () { self.setState({ step: 1 }); }, 650);
+    this.later(function () { self.setState({ step: 2 }); }, 1350);
+    this.later(function () {
+      var F = { social: 'المنشور', video: 'السكريبت', carousel: 'نصوص الشرائح', desk: 'الخبر', bulletin: 'النشرة', facts: 'ملف الحقائق', context: 'السياق', briefing: 'الموجز' };
+      self.setState({ phase: 'draft', msgs: [{ cls: 'msg--ai', text: 'جهّزت ' + F[fmt] + ' وطبّقت ٤ قواعد من ذاكرة الفريق. اطلب أي تعديل وسأحفظه كنسخة جديدة.' }] });
+      if (fmt === 'carousel') { [1, 2, 3, 4].forEach(function (n) { self.later(function () { self.setState({ painted: n }); }, 900 * n); }); }
+    }, 2100);
+  }
+  revise(text) {
+    var self = this;
+    if (this.state.revising) return;
+    this.setState({ revising: true, msgs: this.state.msgs.concat([{ cls: 'msg--me', text: text }]) });
+    this.later(function () {
+      var rev = self.state.rev + 1;
+      self.setState({ revising: false, rev: rev, msgs: self.state.msgs.concat([{ cls: 'msg--ai', text: 'تم. عدّلت الجزء المظلل وحافظت على الأسماء والإسناد. النسخة ' + (rev + 1) + ' محفوظة.' }]) });
+    }, 1500);
+  }
+  renderVals() {
+    var self = this, st = this.state;
+    var toAr = function (n) { return String(n).replace(/\d/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'[d]; }); };
+    var S = {
+      arabiya: { ch: 'ع', bg: '#0f6e5d', name: 'العربية' }, sky: { ch: 'س', bg: '#1d4ed8', name: 'سكاي نيوز عربية' }, asharq: { ch: 'ش', bg: '#c2410c', name: 'الشرق' },
+      jazeera: { ch: 'ج', bg: '#a16207', name: 'الجزيرة نت' }, bbcar: { ch: 'B', bg: '#b91c1c', name: 'BBC عربي' }, reuters: { ch: 'R', bg: '#c2410c', name: 'Reuters' },
+      ap: { ch: 'AP', bg: '#334155', name: 'AP' }, ain: { ch: 'ع', bg: '#6d28d9', name: 'العين الإخبارية' }, bbcen: { ch: 'B', bg: '#7f1d1d', name: 'BBC News' }
+    };
+    var TOPIC = { economy: 'اقتصاد', politics: 'سياسة', sports: 'رياضة', health: 'صحة', science: 'علوم', culture: 'ثقافة', tech: 'تكنولوجيا' };
+    var TAGS = { economy: ['#اقتصاد', '#الأسواق'], politics: ['#سياسة', '#عاجل'], sports: ['#رياضة', '#كرة_القدم'], health: ['#صحة', '#الذكاء_الاصطناعي'], science: ['#علوم', '#الفضاء'], culture: ['#ثقافة', '#سينما'], tech: ['#تكنولوجيا', '#الذكاء_الاصطناعي'] };
+    var arrivals = [
+      { id: 'a2', t: 'مجلس الأمن يعقد جلسة مغلقة مساء اليوم بطلب من ثلاث دول', x: 'قال دبلوماسيون إن الجلسة ستناقش التطورات الأخيرة، دون أن يُتوقع صدور بيان.', time: 'الآن', fr: 'now', br: true, topic: 'politics', src: ['jazeera', 'arabiya'] },
+      { id: 'a1', t: 'منصات التواصل تبدأ وسم المحتوى المولّد بالذكاء الاصطناعي تلقائياً', x: 'أعلنت عدة منصات أنها ستضيف علامة ظاهرة على الصور ومقاطع الفيديو المولّدة آلياً.', time: 'قبل دقيقة', fr: 'now', br: false, topic: 'tech', src: ['sky'] }
+    ];
+    var base = [
+      { id: 'n1', t: 'البنك المركزي يثبت أسعار الفائدة للمرة الثالثة على التوالي وسط ترقب لبيانات التضخم', x: 'قررت لجنة السياسة النقدية الإبقاء على أسعار الفائدة دون تغيير، مشيرة إلى أن معدلات التضخم ما زالت أعلى من المستهدف رغم تراجعها خلال الربع الأخير.', time: 'قبل ٣ دقائق', fr: 'now', br: true, topic: 'economy', src: ['arabiya', 'sky', 'asharq'] },
+      { id: 'n2', t: 'اجتماع طارئ لوزراء الخارجية العرب لبحث تطورات الأوضاع الإقليمية', x: 'يعقد وزراء الخارجية العرب اجتماعاً طارئاً مساء اليوم لبحث آخر التطورات، بحسب ما أعلنت الأمانة العامة.', time: 'قبل ١١ دقيقة', fr: 'now', br: false, topic: 'politics', src: ['jazeera', 'bbcar'], draft: true },
+      { id: 'n3', t: 'Global oil prices climb after OPEC+ signals extended output cuts', x: 'Brent crude rose more than 2% after the group said it would keep supply curbs in place through the first quarter.', time: 'قبل ٢٦ دقيقة', fr: 'hour', br: false, topic: 'economy', src: ['reuters', 'ap'], en: true },
+      { id: 'n4', t: 'منتخب مصر يعلن قائمة المعسكر المقبل استعداداً لتصفيات كأس العالم', x: 'أعلن الجهاز الفني قائمة تضم 26 لاعباً مع عودة عدد من المحترفين بعد التعافي من الإصابة.', time: 'قبل ٤٨ دقيقة', fr: 'hour', br: false, topic: 'sports', src: ['ain'] },
+      { id: 'n5', t: 'دراسة: الذكاء الاصطناعي يختصر زمن تشخيص بعض أمراض القلب إلى النصف', x: 'أظهرت دراسة نُشرت في دورية علمية أن نموذجاً للتعلم الآلي حقق دقة مقاربة للأطباء المتخصصين.', time: 'قبل ساعة', fr: 'old', br: false, topic: 'health', src: ['bbcar'] },
+      { id: 'n6', t: 'UN agency warns of funding gap as winter approaches in displacement camps', x: 'The agency said it had received less than half of the funding needed for its winter response plan.', time: 'قبل ساعتين', fr: 'old', br: false, topic: 'politics', src: ['bbcen'], en: true },
+      { id: 'n7', t: 'إطلاق أول قمر صناعي عربي لرصد جودة الهواء من محطة فضائية', x: 'انطلق القمر الصناعي في مهمة تمتد خمس سنوات لقياس الملوثات فوق المدن الكبرى.', time: 'قبل ٣ ساعات', fr: 'old', br: false, topic: 'science', src: ['sky', 'ain'] },
+      { id: 'n8', t: 'مهرجان القاهرة السينمائي يكشف عن أفلام المسابقة الرسمية لدورته الجديدة', x: 'تضم المسابقة 16 فيلماً من 14 دولة، بينها ثلاثة أفلام عربية في عرضها العالمي الأول.', time: 'قبل ٥ ساعات', fr: 'old', br: false, topic: 'culture', src: ['asharq'] }
+    ];
+    var all = st.revealed ? arrivals.concat(base) : base;
+    function mk(k) { return { ch: S[k].ch, bg: S[k].bg }; }
+    var rows = all.filter(function (it) { return st.topic === 'all' || it.topic === st.topic; }).map(function (it) {
+      var cls = (it.br && it.fr === 'now') ? 'is-breaking' : (it.fr === 'now' ? 'is-now' : (it.fr === 'hour' ? 'is-hour' : ''));
+      if (st.revealed && (it.id === 'a1' || it.id === 'a2')) cls += ' arrive';
+      return { cls: cls, pressed: String(st.sel === it.id), title: it.t, dir: it.en ? 'ltr' : 'rtl', time: it.time, breaking: it.br, draft: !!it.draft, topic: TOPIC[it.topic], marks: it.src.map(mk), source: S[it.src[0]].name, more: it.src.length > 1 ? '+' + toAr(it.src.length - 1) : '',
+        pick: function () { self.clear(); self.setState({ sel: it.id, phase: 'idle', filterOpen: false }); } };
+    });
+    var counts = { all: all.length };
+    all.forEach(function (it) { counts[it.topic] = (counts[it.topic] || 0) + 1; });
+    var topics = ['all', 'economy', 'politics', 'tech', 'sports', 'health', 'science', 'culture'].filter(function (k) { return counts[k]; }).map(function (k) {
+      return { label: k === 'all' ? 'الكل' : TOPIC[k], n: String(counts[k]).replace(/\d/g, function (x) { return '٠١٢٣٤٥٦٧٨٩'[x]; }), pressed: String(st.topic === k), pick: function () { self.setState({ topic: k }); } };
+    });
+    var it = all.filter(function (x) { return x.id === st.sel; })[0] || base[0];
+    var story = { title: it.t, excerpt: it.x, dir: it.en ? 'ltr' : 'rtl', time: it.time, breaking: it.br, topic: TOPIC[it.topic], marks: it.src.map(mk),
+      sourceLine: S[it.src[0]].name + (it.src.length === 2 ? ' ومصدر آخر' : (it.src.length > 2 ? ' و' + toAr(it.src.length - 1) + ' مصادر أخرى' : '')), links: it.src.map(function (k) { return { name: S[k].name }; }), sourceCount: toAr(it.src.length), sourcesPhrase: it.src.length === 1 ? 'مصدر واحد' : (it.src.length === 2 ? 'مصدرين' : toAr(it.src.length) + ' مصادر') };
+    var F = {
+      social: { name: 'منشور سوشيال', hint: '٤٠–٧٠ كلمة + وسوم', action: 'اكتب المنشور' }, video: { name: 'سكريبت فيديو', hint: 'هوك + نص + لقطات', action: 'اكتب السكريبت' },
+      carousel: { name: 'كاروسيل بصور AI', hint: '٤ شرائح + كابشن', action: 'اكتب وارسم الشرائح' }, desk: { name: 'خبر مكتبي', hint: '٩٠–١٤٠ كلمة', action: 'اكتب الخبر' },
+      bulletin: { name: 'نشرة', hint: 'فقرة واحدة للشريط', action: 'اكتب النشرة' }, facts: { name: 'ملف حقائق', hint: 'أرقام وأسماء للإسناد', action: 'اكتب الحقائق' },
+      context: { name: 'سياق الخبر', hint: 'لماذا يهم الآن', action: 'اكتب السياق' }, briefing: { name: 'موجز الساعة', hint: 'أهم ٥ عناوين في الغرفة', action: 'اكتب الموجز' }
+    };
+    var tiles = {};
+    ['social', 'video', 'carousel', 'desk', 'bulletin', 'facts', 'context'].forEach(function (k) { tiles[k] = { pressed: String(st.fmt === k), on: st.fmt === k, pick: function () { self.setState({ fmt: k }); } }; });
+    var n1 = it.id === 'n1';
+    var draft = n1 ? {
+      dir: 'rtl', hook: st.rev > 0 ? 'هل انتهى زمن خفض الفائدة؟ المركزي يثبّتها للمرة الثالثة' : 'المركزي يثبّت الفائدة للمرة الثالثة.. والتضخم ما زال فوق المستهدف',
+      dek: 'اللجنة أبقت الأسعار دون تغيير وربطت أي تحرك مقبل ببيانات التضخم.',
+      body: 'قررت لجنة السياسة النقدية الإبقاء على أسعار الفائدة دون تغيير للمرة الثالثة على التوالي. وقالت اللجنة إن التضخم تراجع خلال الربع الأخير لكنه ما زال أعلى من المستهدف، وإن أي تحرك مقبل مرتبط بالبيانات.',
+      tags: ['#البنك_المركزي', '#أسعار_الفائدة', '#التضخم', '#اقتصاد'], alts: ['ثالث تثبيت على التوالي: المركزي ينتظر بيانات التضخم', 'الفائدة كما هي.. فماذا ينتظر المركزي؟'],
+      cover: 'لماذا قال المركزي «لا» للمرة الثالثة؟', vtitle: 'لماذا لم يخفض المركزي الفائدة؟', vhook: st.rev > 0 ? 'المركزي قال «لا» للمرة الثالثة.. فما الذي ينتظره بالضبط؟' : 'المركزي قال «لا» للمرة الثالثة.. والسبب رقم واحد',
+      script: 'اللجنة أبقت الفائدة كما هي، لأن التضخم رغم تراجعه ما زال فوق المستهدف. الرسالة للأسواق: لا خفض قبل أن تؤكد البيانات الاتجاه.',
+      shots: [{ n: '١', text: 'لقطة لمقر البنك المركزي' }, { n: '٢', text: 'CG: ثالث تثبيت على التوالي' }, { n: '٣', text: 'رسم: التضخم مقابل المستهدف' }],
+      slidesText: ['المركزي يثبّت الفائدة للمرة الثالثة', 'التضخم تراجع.. لكنه فوق المستهدف', 'اللجنة: أي تحرك مرتبط بالبيانات', 'ماذا يعني ذلك للأسواق؟'],
+      points: st.fmt === 'facts' ? ['القرار: تثبيت أسعار الفائدة', 'التكرار: الثالث على التوالي', 'السبب المعلن: التضخم أعلى من المستهدف', 'الاتجاه: التضخم تراجع في الربع الأخير', 'الإسناد: بيان لجنة السياسة النقدية'] : ['ثالث تثبيت متتالٍ لأسعار الفائدة', 'التضخم تراجع لكنه أعلى من المستهدف', 'اللجنة تربط أي تحرك بالبيانات المقبلة']
+    } : {
+      dir: it.en ? 'ltr' : 'rtl', hook: it.t, dek: it.x, body: it.x, tags: TAGS[it.topic], alts: [it.t], cover: it.t.split(' ').slice(0, 5).join(' '), vtitle: it.t, vhook: it.t, script: it.x,
+      shots: [{ n: '١', text: 'لقطة افتتاحية من موقع الحدث' }], slidesText: [it.t, it.x, it.t, it.x].map(function (s) { return s.split(' ').slice(0, 7).join(' '); }), points: [it.x]
+    };
+    var arts = ['radial-gradient(circle at 72% 28%, #2b86a8, #0c2340 70%)', 'radial-gradient(circle at 28% 70%, #0d9b8a, #0c2340 75%)', 'linear-gradient(160deg, #13305a, #0a7cc0)', 'radial-gradient(circle at 60% 35%, #c03b25, #2a0f12 80%)'];
+    var nums = ['١', '٢', '٣', '٤'];
+    var slides = draft.slidesText.map(function (t, i) { var ready = i < st.painted; return { n: nums[i], text: t, art: arts[i], cls: ready ? 'fade-in' : 'is-painting', status: ready ? 'جاهزة' : 'تُرسم…' }; });
+    var fmt = st.fmt;
+    var shape = { post: fmt === 'social', video: fmt === 'video', carousel: fmt === 'carousel', docLike: ['desk', 'bulletin', 'facts', 'context'].indexOf(fmt) >= 0, briefing: fmt === 'briefing' };
+    var doc = { dek: fmt !== 'bulletin' && fmt !== 'facts', body: fmt !== 'facts', points: fmt === 'facts' || fmt === 'desk' || fmt === 'context', pointsLabel: fmt === 'facts' ? 'الحقائق' : (fmt === 'context' ? 'لماذا يهم الآن' : 'أبرز النقاط') };
+    var stepsText = fmt === 'carousel' ? ['قراءة ' + story.sourcesPhrase, 'تخطيط ٤ شرائح وكتابة العناوين', 'تجهيز رسم الصور'] : fmt === 'briefing' ? ['جمع أهم ٥ عناوين', 'ترتيبها حسب الأهمية', 'صياغة الموجز'] : ['قراءة ' + story.sourcesPhrase, 'كتابة ' + F[fmt].name, 'تطبيق أسلوب الفريق والإسناد'];
+    var steps = stepsText.map(function (t, i) { return { text: t, done: i < st.step, cls: i < st.step ? 'is-done' : (i === st.step ? 'is-active' : '') }; });
+    var vnums = ['ن١', 'ن٢', 'ن٣', 'ن٤', 'ن٥', 'ن٦'];
+    var versions = []; for (var v = 0; v <= Math.min(st.rev, 5); v++) versions.push({ label: vnums[v], cur: String(v === st.rev) });
+    var qsets = { video: ['قوِّ الهوك', 'اختصر لـ٣٠ ثانية'], carousel: ['قصّر العناوين', 'شدّ الشريحة الأولى'], briefing: ['اجعله ٣ عناوين', 'أضف سطر السياق'] };
+    var quick = (qsets[fmt] || ['اجعل الخطاف سؤالاً', 'اختصر دون إضافات', 'انسب الادعاءات لأصحابها']).map(function (q) { return { text: q, run: function () { self.revise(q); } }; });
+    var brief = base.slice(0, 5).map(function (b, i) { return { n: nums[i] || String(i + 1), t: b.t, src: S[b.src[0]].name + ' · ' + b.time }; });
+    brief[4].n = '٥';
+    var c = st.copied;
+    function cpl(k) { return c === k ? 'تم النسخ' : 'نسخ'; }
+    return {
+      theme: this.props.theme ?? 'light', count: String(all.length).replace(/\d/g, function (x) { return '٠١٢٣٤٥٦٧٨٩'[x]; }),
+      feed: { loading: this.props.state === 'loading', empty: this.props.state === 'empty', error: this.props.state === 'error' },
+      skRows: ['70%', '55%', '82%', '64%', '76%', '60%'],
+      rows: (this.props.state === 'loading' || this.props.state === 'empty') ? [] : rows, topics: topics, story: story, tiles: tiles, fmt: F[fmt], draft: draft, shape: shape, doc: doc, steps: steps, slides: slides, versions: versions, quick: quick, brief: brief,
+      docLabel: fmt === 'bulletin' ? 'النشرة' : 'العنوان', hookLabel: st.rev > 0 ? 'الخطاف · عُدّل في ' + vnums[st.rev] : 'الخطاف', hookCls: st.rev > 0 ? 'is-changed' : '',
+      paintLine: st.painted >= 4 ? 'رُسمت الشرائح الأربع بأسلوب «قصة». اضغط شريحة لإعادة رسمها.' : 'يرسم الذكاء الاصطناعي الصور… ' + nums[Math.max(0, st.painted - 1)] + ' من ٤ جاهزة',
+      msgs: st.msgs, revising: st.revising,
+      isIdle: st.phase === 'idle' && this.props.state !== 'loading' && this.props.state !== 'empty', isGen: st.phase === 'gen', isDraft: st.phase === 'draft',
+      showNewPill: !st.revealed && (!this.props.state || this.props.state === 'idle' || this.props.state === 'filters'), filterOpen: st.filterOpen, filterOpenStr: String(st.filterOpen),
+      sourceList: ['arabiya', 'sky', 'jazeera', 'bbcar', 'asharq', 'reuters'].map(function (k, i) { return { name: S[k].name, ch: S[k].ch, bg: S[k].bg, on: String(i < 2) }; }),
+      cp: { hook: c === 'hook' ? 'is-done' : '', body: c === 'body' ? 'is-done' : '', tags: c === 'tags' ? 'is-done' : '' }, cpl: { hook: cpl('hook'), body: cpl('body'), tags: cpl('tags') },
+      copyAllLabel: c === 'all' ? 'تم النسخ' : 'نسخ الكل',
+      hasToast: !!st.toast, toast: st.toast,
+      copyHook: function () { self.flash('نُسخ الخطاف', 'hook'); }, copyBody: function () { self.flash('نُسخ النص', 'body'); }, copyTags: function () { self.flash('نُسخت الوسوم', 'tags'); }, copyAll: function () { self.flash('نُسخ ' + F[fmt].name + ' كاملاً', 'all'); },
+      reveal: function () { self.setState({ revealed: true }); },
+      toggleFilter: function () { self.setState({ filterOpen: !self.state.filterOpen }); },
+      openArchive: function () { self.flash('الأرشيف في اللوحة المجاورة'); },
+      generate: function () { self.run(self.state.fmt); },
+      briefing: function () { self.run('briefing'); },
+      back: function () { self.clear(); self.setState({ phase: 'idle', fmt: self.state.fmt === 'briefing' ? 'social' : self.state.fmt }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

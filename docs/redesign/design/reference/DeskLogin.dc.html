@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — تسجيل الدخول</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np" data-theme="{{theme}}" dir="{{dir}}" lang="{{lang}}" style="display: flex; flex-wrap: wrap; width: 100%; min-height: 900px; background: var(--surface); direction: {{dir}}; font-family: {{font}}">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2dd4bf"></stop><stop offset="1" stop-color="#38bdf8"></stop></linearGradient></defs></svg>
+  <main class="col" style="flex: 1 1 520px; padding: 30px 48px">
+    <div class="row" style="justify-content: space-between">
+      <span class="row"><img src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="" style="width: 40px; height: 40px; border-radius: 11px"><span class="t-title">Newsplus</span></span>
+      <div class="row" style="gap: 4px"><button class="icon-btn" type="button" aria-label="{{t.dark}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg></button><button class="btn btn--ghost btn--sm" type="button" lang="{{t.otherLang}}">{{t.switchLang}}</button></div>
+    </div>
+    <div class="grow" style="display: grid; place-items: center">
+      <sc-if value="{{isLogin}}" hint-placeholder-val="{{ true }}">
+        <form class="col enter" style="width: 100%; max-width: 380px; gap: 18px">
+          <header class="col" style="gap: 6px; margin-bottom: 6px"><h1 class="t-hero" style="font-size: 32px; font-family: {{displayFont}}">{{t.title}}</h1><p class="t-small">{{t.subtitle}}</p></header>
+          <sc-if value="{{hasAlert}}" hint-placeholder-val="{{ false }}"><div class="notice {{alertCls}} arrive" role="alert"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color: {{alertColor}}; margin-top: 2px"><path d="{{alertIcon}}"></path></svg><span>{{alertText}}</span></div></sc-if>
+          <div class="col" style="gap: 8px"><label class="t-label" for="l-id">{{t.idLabel}}</label><div class="field {{idCls}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 20a8 8 0 0 1 16 0"></path></svg><input id="l-id" autocomplete="username" value="{{idVal}}" placeholder="{{t.idPh}}" readOnly="{{ true }}"></div><sc-if value="{{isValidation}}" hint-placeholder-val="{{ false }}"><p class="hint hint--error">{{t.idRequired}}</p></sc-if></div>
+          <div class="col" style="gap: 8px"><label class="t-label" for="l-pw">{{t.pwLabel}}</label><div class="field {{pwCls}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3"></path></svg><input id="l-pw" type="password" autocomplete="current-password" value="{{pwVal}}" placeholder="{{t.pwPh}}" readOnly="{{ true }}"><button class="icon-btn" type="button" aria-label="{{t.show}}" style="width: 32px; height: 32px; margin-inline-end: -8px"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg></button></div><sc-if value="{{isValidation}}" hint-placeholder-val="{{ false }}"><p class="hint hint--error">{{t.pwRequired}}</p></sc-if></div>
+          <div class="row" style="justify-content: space-between; font-size: 14px">
+            <label class="row" style="gap: 8px"><span class="check is-on"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>{{t.remember}}</label>
+            <button class="btn btn--ghost btn--sm" type="button" onClick="{{toForgot}}" style="color: var(--teal); padding: 0 6px">{{t.forgot}}</button>
+          </div>
+          <button class="btn btn--ink btn--block btn--lg" type="button" onClick="{{submit}}" disabled="{{submitDisabled}}">
+            <sc-if value="{{isLoading}}" hint-placeholder-val="{{ false }}"><svg class="pulse-line" width="54" height="20" viewBox="0 0 54 20" aria-hidden="true"><path d="M0 10h14l4-7 6 14 5-11 4 4h21"></path></svg></sc-if>
+            <sc-if value="{{isOk}}" hint-placeholder-val="{{ false }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color: #5eead4"><path d="M5 12l5 5 9-10"></path></svg></sc-if>
+            {{submitLabel}}
+          </button>
+          <sc-if value="{{isLocked}}" hint-placeholder-val="{{ false }}"><p class="t-meta num" style="text-align: center">{{t.lockedIn}}</p></sc-if>
+        </form>
+      </sc-if>
+      <sc-if value="{{isForgot}}" hint-placeholder-val="{{ false }}">
+        <div class="col enter" style="width: 100%; max-width: 380px; gap: 18px">
+          <span class="ic-wrap ic-wrap--teal" style="width: 52px; height: 52px; border-radius: 16px"><svg class="ic ic--lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3"></path></svg></span>
+          <header class="col" style="gap: 6px"><h1 class="t-hero" style="font-size: 30px; font-family: {{displayFont}}">{{t.forgotTitle}}</h1><p class="t-small">{{t.forgotText}}</p></header>
+          <div class="panel panel--flat row" style="gap: 12px; padding: 14px 16px; background: var(--surface-2)"><span class="avatar" style="border: 0">{{t.adminInitial}}</span><span class="col grow"><span style="font-weight: 600">{{t.adminName}}</span><span class="t-meta" dir="ltr">admin@newsplus.app</span></span></div>
+          <a class="btn btn--ink btn--block btn--lg" href="mailto:admin@newsplus.app">{{t.contact}}</a>
+          <button class="btn btn--ghost btn--block" type="button" onClick="{{toLogin}}">{{t.back}}</button>
+        </div>
+      </sc-if>
+    </div>
+    <p class="t-meta" style="text-align: center">{{t.footer}}</p>
+  </main>
+
+  <aside aria-hidden="true" style="flex: 1 1 520px; position: relative; overflow: hidden; background: #0c2340; color: #e8eef5; padding: 56px; display: flex; flex-direction: column; justify-content: space-between">
+    <div style="position: absolute; inset: 0; background: radial-gradient(circle at 80% 10%, rgb(14 165 233 / .22), transparent 45%), radial-gradient(circle at 10% 90%, rgb(13 155 138 / .25), transparent 50%)"></div>
+    <div class="col" style="position: relative; gap: 14px; max-width: 480px">
+      <p style="font-family: {{displayFont}}; font-size: 40px; line-height: 1.35; font-weight: 700">{{t.hero}}</p>
+      <p style="font-size: 16.5px; line-height: 1.85; color: #a9b8c9">{{t.heroText}}</p>
+    </div>
+    <div class="col" style="position: relative; gap: 14px">
+      <svg class="pulse-line" width="100%" height="56" viewBox="0 0 520 56" preserveAspectRatio="none"><path class="base" d="M0 28h180l16-22 22 44 18-34 14 12h270" style="stroke: rgb(255 255 255 / .1)"></path><path d="M0 28h180l16-22 22 44 18-34 14 12h270"></path></svg>
+      <div class="col" style="border-radius: 20px; background: rgb(255 255 255 / .04); border: 1px solid rgb(255 255 255 / .09); overflow: hidden">
+        <sc-for list="{{wire}}" as="w" hint-placeholder-count="3">
+          <div style="position: relative; padding: 14px 20px; padding-inline-start: 38px; border-bottom: 1px solid rgb(255 255 255 / .07); opacity: {{w.op}}">
+            <span style="position: absolute; inset-inline-start: 14px; top: 20px; width: 11px; height: 11px; border-radius: 50%; background: {{w.dot}}"></span>
+            <p style="font-size: 12.5px; color: #8296ab">{{w.meta}}</p><p style="font-size: 15px; font-weight: 600; line-height: 1.6">{{w.t}}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["ready","validation","error","network","locked","forgot","english"],"default":"ready"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    var s = props.state || 'ready';
+    this.state = { view: s === 'forgot' ? 'forgot' : 'login', tries: s === 'error' ? 1 : 0, phase: ['validation', 'error', 'network', 'locked'].indexOf(s) >= 0 ? s : 'idle' };
+    this.t = [];
+  }
+  componentWillUnmount() { this.t.forEach(function (x) { clearTimeout(x); }); }
+  renderVals() {
+    var self = this, st = this.state, en = this.props.state === 'english';
+    var AR = { title: 'أهلاً بعودتك', subtitle: 'ادخل إلى مكتب التحرير', idLabel: 'اسم المستخدم أو رقم الهاتف', idPh: 'مثال: sara أو 010…', pwLabel: 'كلمة المرور', pwPh: 'أدخل كلمة المرور', show: 'إظهار كلمة المرور', remember: 'تذكّرني على هذا الجهاز', forgot: 'نسيت كلمة المرور؟', idRequired: 'اكتب اسم المستخدم أو رقم الهاتف.', pwRequired: 'اكتب كلمة المرور.', invalid: 'اسم المستخدم أو كلمة المرور غير صحيحة. باقي ٤ محاولات.', network: 'تعذّر الوصول للسيرفر. تأكد من الإنترنت وحاول تاني.', locked: 'محاولات كتير ورا بعض. استنى شوية وجرّب تاني.', lockedIn: 'تقدر تحاول تاني بعد ٠:٤٥', idle: 'دخول', loading: 'جاري الدخول…', ok: 'أهلاً سارة', wait: 'استنى ٠:٤٥', forgotTitle: 'استعادة كلمة المرور', forgotText: 'مسؤول النظام يعيد تعيين كلمات المرور لفريق التحرير. ابعتله اسم المستخدم وهيرد عليك.', adminInitial: 'أ', adminName: 'أدهم · مسؤول النظام', contact: 'راسل المسؤول', back: 'رجوع لتسجيل الدخول', footer: 'Newsplus · مساعد غرفة الأخبار', hero: 'من العاجل إلى المنشور في دقيقة.', heroText: 'تابع المصادر، اختار الخبر، والمحرّر يكتب منشور أو سكريبت أو كاروسيل بصور مرسومة، بأسلوب فريقك.', switchLang: 'English', otherLang: 'en', dark: 'الوضع الداكن' };
+    var EN = { title: 'Welcome back', subtitle: 'Sign in to the newsroom desk', idLabel: 'Username or phone number', idPh: 'e.g. sara or 010…', pwLabel: 'Password', pwPh: 'Enter your password', show: 'Show password', remember: 'Remember me on this device', forgot: 'Forgot password?', idRequired: 'Enter a username or phone number.', pwRequired: 'Enter your password.', invalid: 'Incorrect username or password. 4 attempts left.', network: 'Could not reach the server. Check your connection and try again.', locked: 'Too many attempts. Wait a moment and try again.', lockedIn: 'You can try again in 0:45', idle: 'Sign in', loading: 'Signing in…', ok: 'Welcome, Sara', wait: 'Wait 0:45', forgotTitle: 'Reset password', forgotText: 'Your system admin resets passwords for the newsroom team. Send them your username and they will get back to you.', adminInitial: 'A', adminName: 'Adham · System admin', contact: 'Email the admin', back: 'Back to sign in', footer: 'Newsplus · Newsroom assistant', hero: 'From breaking to posted in a minute.', heroText: 'Follow your sources, pick a story, and the editor drafts a post, a script or a carousel with painted slides, in your team’s style.', switchLang: 'عربي', otherLang: 'ar', dark: 'Dark mode' };
+    var t = en ? EN : AR;
+    var warn = 'M12 8v5M12 16.5v.5M10.3 4.2L2.8 17.5A2 2 0 0 0 4.5 20.5h15a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0z';
+    var A = { error: ['notice--error', 'var(--breaking)', 'M12 8v5M12 16.5v.5M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z', t.invalid], network: ['notice--warn', 'var(--warn)', 'M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18', t.network], locked: ['notice--warn', 'var(--warn)', warn, t.locked] };
+    var a = A[st.phase];
+    var labels = { idle: t.idle, loading: t.loading, error: t.idle, ok: t.ok, validation: t.idle, network: t.idle, locked: t.wait };
+    var arWire = [
+      { t: 'البنك المركزي يثبت أسعار الفائدة للمرة الثالثة على التوالي', meta: 'عاجل · العربية · الآن', dot: '#ef6c57', op: '1' },
+      { t: 'اجتماع طارئ لوزراء الخارجية العرب لبحث تطورات الأوضاع', meta: 'الجزيرة نت · قبل ١١ دقيقة', dot: '#2dd4bf', op: '.8' },
+      { t: 'أسعار النفط ترتفع بعد إشارات أوبك+ بتمديد خفض الإنتاج', meta: 'Reuters · قبل ٢٦ دقيقة', dot: '#1e8f82', op: '.55' }
+    ];
+    var enWire = [
+      { t: 'Central bank holds rates for a third straight meeting', meta: 'Breaking · Al Arabiya · now', dot: '#ef6c57', op: '1' },
+      { t: 'Arab foreign ministers to hold emergency meeting tonight', meta: 'Al Jazeera · 11 min ago', dot: '#2dd4bf', op: '.8' },
+      { t: 'Oil prices climb after OPEC+ signals extended output cuts', meta: 'Reuters · 26 min ago', dot: '#1e8f82', op: '.55' }
+    ];
+    return {
+      theme: this.props.theme ?? 'light', t: t, dir: en ? 'ltr' : 'rtl', lang: en ? 'en' : 'ar',
+      font: en ? "'IBM Plex Sans', system-ui, sans-serif" : 'var(--f-ui)', displayFont: en ? "'IBM Plex Sans', system-ui, sans-serif" : 'var(--f-display)',
+      isLogin: st.view === 'login', isForgot: st.view === 'forgot',
+      hasAlert: !!a, alertCls: a ? a[0] : '', alertColor: a ? a[1] : '', alertIcon: a ? a[2] : '', alertText: a ? a[3] : '',
+      isValidation: st.phase === 'validation', isLocked: st.phase === 'locked',
+      idCls: st.phase === 'error' || st.phase === 'validation' ? 'is-error' : '', pwCls: st.phase === 'error' || st.phase === 'validation' ? 'is-error' : '',
+      idVal: st.phase === 'validation' ? '' : 'sara', pwVal: st.phase === 'validation' ? '' : 'password',
+      isLoading: st.phase === 'loading', isOk: st.phase === 'ok', submitLabel: labels[st.phase], submitDisabled: st.phase === 'locked',
+      submit: function () {
+        if (self.state.phase === 'loading' || self.state.phase === 'locked') return;
+        var tries = self.state.tries + 1;
+        self.setState({ phase: 'loading', tries: tries });
+        self.t.push(setTimeout(function () { self.setState({ phase: tries === 1 ? 'error' : 'ok' }); }, 1000));
+      },
+      toForgot: function () { self.setState({ view: 'forgot' }); },
+      toLogin: function () { self.setState({ view: 'login', phase: 'idle' }); },
+      wire: en ? enWire : arWire
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus موبايل — ترجمة</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+<link rel="stylesheet" href="/_blob/210170dd5a2fa534503e7d6a475c3fc9">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np m" data-theme="{{theme}}">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+  <header class="m-head" style="gap: 12px">
+    <div class="m-head__row"><span class="m-title">ترجمة</span><div class="seg"><button type="button" aria-pressed="true">نص</button><button type="button" aria-pressed="false">رابط</button></div></div>
+    <div class="panel row" style="gap: 4px; padding: 5px; border-radius: 16px; box-shadow: none; background: var(--surface-2)">
+      <span class="col grow" style="text-align: center"><span class="t-meta" style="font-size: 11px">من · تلقائي</span><b style="font-weight: 700">العربية</b></span>
+      <button class="icon-btn icon-btn--line" type="button" aria-label="تبديل الاتجاه" style="border-radius: 50%"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h13l-4-4M17 17H4l4 4"></path></svg></button>
+      <span class="col grow" style="text-align: center"><span class="t-meta" style="font-size: 11px">إلى</span><b style="font-weight: 700">الإنجليزية</b></span>
+    </div>
+  </header>
+
+  <main class="m-scroll col" style="padding: 4px 16px 18px; gap: 12px">
+    <sc-if value="{{isEmpty}}" hint-placeholder-val="{{ true }}">
+      <label class="panel col" style="padding: 14px 16px; gap: 8px; min-height: 260px"><span class="t-label">النص الأصلي</span><textarea style="flex: 1; border: 0; outline: 0; resize: none; background: transparent; font-size: 16px; line-height: 1.85; color: var(--ink)" placeholder="الصق نص الخبر هنا. هنعرف لغته لوحدنا…"></textarea></label>
+      <div class="row" style="gap: 6px; flex-wrap: wrap"><span class="chip chip--sm chip--soft"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9zM5 15H4V4h11v1"></path></svg>الصق من الحافظة</span><span class="chip chip--sm chip--soft">آخر مسودة: التثبيت الثالث</span></div>
+    </sc-if>
+
+    <sc-if value="{{hasSource}}" hint-placeholder-val="{{ false }}">
+      <section class="panel col" style="padding: 14px 16px; gap: 6px; border-color: {{srcBorder}}">
+        <div class="row" style="justify-content: space-between"><h2 class="t-label">الأصل</h2><span class="t-meta">{{srcMeta}}</span></div>
+        <p style="font-size: 15px; line-height: 1.85; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden">{{srcText}}</p>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isStale}}" hint-placeholder-val="{{ false }}">
+      <p class="notice notice--warn arrive" role="status"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--warn); margin-top: 2px"><path d="M12 8v5M12 16.5v.5M10.3 4.2L2.8 17.5A2 2 0 0 0 4.5 20.5h15a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0z"></path></svg>عدّلت الأصل بعد الترجمة. الترجمة القديمة ظاهرة لحد ما تعيدها.</p>
+    </sc-if>
+
+    <sc-if value="{{isBusy}}" hint-placeholder-val="{{ false }}">
+      <section class="ai-panel col" style="padding: 16px; gap: 12px; box-shadow: none">
+        <div class="row"><svg class="pulse-line" width="80" height="24" viewBox="0 0 80 24" aria-hidden="true"><path d="M0 12h22l6-9 8 18 7-13 5 4h32"></path></svg><span class="ai-mark t-ai">يترجم ويراجع الصياغة…</span></div>
+        <div class="sk" style="height: 13px"></div><div class="sk" style="height: 13px; width: 92%"></div><div class="sk" style="height: 13px; width: 96%"></div><div class="sk" style="height: 13px; width: 50%"></div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{hasOutput}}" hint-placeholder-val="{{ false }}">
+      <section class="ai-panel col typeset" style="overflow: hidden; box-shadow: none; opacity: {{outOpacity}}">
+        <div class="ai-strip"></div>
+        <div class="col" style="padding: 14px 16px; gap: 10px">
+          <div class="row" style="justify-content: space-between"><h2 class="t-label t-ai">الترجمة الصحفية</h2><span class="t-meta">٣٨٦ حرف</span></div>
+          <article lang="en" dir="ltr" class="col" style="font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; line-height: 1.75; gap: 10px"><p>The central bank held interest rates steady for a third consecutive time, in a decision that matched most analysts’ expectations.</p><p>The move comes as inflation has eased but remains above the target range.</p></article>
+          <p class="ai-mark" style="color: var(--ink-3)"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>الأسماء والأرقام محفوظة · راجعها قبل النشر</p>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+
+  <div class="m-cta" style="padding-bottom: 12px">
+    <sc-if value="{{isDone}}" hint-placeholder-val="{{ false }}"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px"><a class="btn btn--quiet" href="MobDraft.dc.html">في منشور</a><button class="btn btn--ink" type="button"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9zM5 15H4V4h11v1"></path></svg>نسخ</button></div></sc-if>
+    <sc-if value="{{showAction}}" hint-placeholder-val="{{ true }}"><button class="btn btn--ai btn--block btn--lg" type="button" disabled="{{ctaDisabled}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg>{{ctaLabel}}</button></sc-if>
+  </div>
+  <nav class="m-tabbar" aria-label="التنقل">
+    <a class="m-tab" href="MobHome.dc.html"><span class="m-tab__ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg></span>الرئيسية</a>
+    <a class="m-tab" href="MobWire.dc.html"><span class="m-tab__ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H5a1 1 0 0 1-1-1zM17 9h3v9a1 1 0 0 1-2 0M7 9h7M7 13h7M7 16h4"></path></svg></span>الأخبار</a>
+    <a class="m-tab m-tab--ai" href="MobGenerate.dc.html"><span class="m-tab__ic"><svg class="ic ic--lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span>توليد</a>
+    <a class="m-tab" href="MobTranslate.dc.html" aria-current="page"><span class="m-tab__ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg></span>ترجمة</a>
+    <a class="m-tab" href="MobMore.dc.html"><span class="m-tab__ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width: 3"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></span>المزيد</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["empty","busy","done","stale"],"default":"empty"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var s = this.props.state ?? 'empty';
+    var stale = s === 'stale';
+    return {
+      theme: this.props.theme ?? 'light',
+      isEmpty: s === 'empty', isBusy: s === 'busy', isDone: s === 'done', isStale: stale,
+      hasSource: s !== 'empty', hasOutput: s === 'done' || stale,
+      srcText: stale ? 'أبقى البنك المركزي على أسعار الفائدة دون تغيير للمرة الثالثة على التوالي، وهو قرار توقعه معظم المحللين.' : 'أبقى البنك المركزي على أسعار الفائدة دون تغيير للمرة الثالثة على التوالي، في قرار جاء متسقاً مع توقعات معظم المحللين.',
+      srcMeta: stale ? 'اتعدّل الآن' : '٢٢٨ حرف', srcBorder: stale ? 'var(--warn-dot)' : 'var(--line)',
+      outOpacity: stale ? '.55' : '1',
+      showAction: s !== 'done', ctaDisabled: s === 'empty' || s === 'busy',
+      ctaLabel: stale ? 'أعد الترجمة' : (s === 'busy' ? 'جاري الترجمة…' : 'ترجم إلى الإنجليزية')
+    };
+  }
+}
+</script>
+</body>
+</html>

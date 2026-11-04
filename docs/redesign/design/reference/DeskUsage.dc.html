@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — استهلاك AI</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np" data-theme="{{theme}}" style="display: flex; width: 100%; min-height: 900px">
+  <nav class="rail" aria-label="التنقل الرئيسي">
+    <img class="rail__logo" src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="Newsplus">
+    <a class="rail__item" href="DeskHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>الرئيسية</a>
+    <a class="rail__item" href="Main.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H5a1 1 0 0 1-1-1zM17 9h3v9a1 1 0 0 1-2 0M7 9h7M7 13h7M7 16h4"></path></svg>الأخبار</a>
+    <a class="rail__item" href="NewBoard.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v10h-4zM16 4h4v13h-4z"></path></svg>سير العمل</a>
+    <a class="rail__item" href="DeskGenerate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"></path></svg>توليد</a>
+    <a class="rail__item" href="DeskTranslate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg>ترجمة</a>
+    <a class="rail__item" href="DeskUsage.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"></path></svg>الاستهلاك</a>
+    <div style="flex: 1"></div>
+    <button class="avatar" type="button" aria-label="حساب سارة">س</button>
+  </nav>
+
+  <main class="grow" style="padding: 30px 40px 40px">
+    <div class="col" style="max-width: 1220px; margin: 0 auto; gap: 20px">
+      <header class="row" style="justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px">
+        <div class="col"><h1 class="t-hero" style="font-size: 30px">استهلاك الذكاء الاصطناعي</h1><p class="live">{{syncLine}}</p></div>
+        <div class="row" style="flex-wrap: wrap">
+          <div class="seg" role="group" aria-label="الفترة"><button type="button" aria-pressed="false">اليوم</button><button type="button" aria-pressed="true">٧ أيام</button><button type="button" aria-pressed="false">٣٠ يوماً</button><button type="button" aria-pressed="false">هذا الشهر</button><button type="button" aria-pressed="false">مخصّص</button></div>
+          <button class="icon-btn icon-btn--line" type="button" aria-label="تحديث"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"></path></svg></button>
+          <button class="btn btn--quiet btn--sm" type="button"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"></path></svg>تصدير CSV</button>
+        </div>
+      </header>
+
+      <sc-if value="{{isCustom}}" hint-placeholder-val="{{ false }}">
+        <div class="panel row arrive" style="padding: 16px 18px; gap: 14px; align-items: flex-end; flex-wrap: wrap; box-shadow: var(--shadow-2)">
+          <div class="col" style="gap: 6px"><label class="t-label" for="u-from">من</label><div class="field" style="width: 190px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"></path></svg><input id="u-from" value="٢٠ أكتوبر ٢٠٢٦" readOnly="{{ true }}"></div></div>
+          <div class="col" style="gap: 6px"><label class="t-label" for="u-to">إلى</label><div class="field is-error" style="width: 190px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"></path></svg><input id="u-to" value="١٥ أكتوبر ٢٠٢٦" readOnly="{{ true }}"></div></div>
+          <div class="col grow" style="gap: 6px; min-width: 200px"><span class="t-label">النطاق</span><div class="field"><select aria-label="النطاق"><option>المؤسسة بالكامل</option><option>مشروع Newsplus</option></select></div></div>
+          <button class="btn btn--ink" type="button" disabled="{{ true }}">طبّق الفترة</button>
+          <p class="hint hint--error" style="width: 100%"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5M12 16.5v.5M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z"></path></svg>تاريخ النهاية قبل تاريخ البداية. الأيام بتوقيت UTC والحد الأقصى ٩٠ يوم.</p>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isLoading}}" hint-placeholder-val="{{ false }}">
+        <div style="display: grid; grid-template-columns: 1.35fr 1fr 1fr 1fr; gap: 14px"><div class="sk" style="height: 150px; border-radius: 20px"></div><div class="sk" style="height: 150px; border-radius: 20px"></div><div class="sk" style="height: 150px; border-radius: 20px"></div><div class="sk" style="height: 150px; border-radius: 20px"></div></div>
+        <div class="panel col" style="padding: 20px 22px; gap: 16px"><div class="sk" style="height: 18px; width: 22%"></div><div class="row" style="align-items: flex-end; height: 200px; gap: 18px"><div class="sk grow" style="height: 40%"></div><div class="sk grow" style="height: 55%"></div><div class="sk grow" style="height: 30%"></div><div class="sk grow" style="height: 50%"></div><div class="sk grow" style="height: 80%"></div><div class="sk grow" style="height: 92%"></div><div class="sk grow" style="height: 70%"></div></div></div>
+        <p class="live" style="justify-content: center">بنجيب الأرقام من حساب OpenAI…</p>
+      </sc-if>
+
+      <sc-if value="{{isError}}" hint-placeholder-val="{{ false }}">
+        <section class="panel" style="padding: 56px 40px; display: grid; place-items: center"><div class="empty" style="max-width: 460px"><span class="empty__art" style="background: var(--breaking-soft); color: var(--breaking)"><svg class="ic ic--xl" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18"></path></svg></span><h2 class="t-title">تعذّر الاتصال بصفحة الاستهلاك</h2><p class="t-small">حساب OpenAI ما ردّش. المحرّر شغال عادي، المشكلة في عرض الأرقام بس.</p><button class="btn btn--ink" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"></path></svg>حاول تاني</button></div></section>
+      </sc-if>
+
+      <sc-if value="{{isReady}}" hint-placeholder-val="{{ true }}">
+        <div style="display: grid; grid-template-columns: 1.35fr 1fr 1fr 1fr; gap: 14px">
+          <section class="ai-panel col" style="padding: 20px; gap: 10px; box-shadow: none">
+            <span class="t-meta">تكلفة آخر ٧ أيام</span>
+            <strong class="t-num" dir="ltr" style="font-size: 38px; line-height: 1.1; text-align: right">$18.42</strong>
+            <div class="meter"><span style="width: 37%"></span></div>
+            <span class="t-meta num">٣٧٪ من حد الشهر ($100) · متاح $63.10</span>
+          </section>
+          <section class="panel col" style="padding: 20px; gap: 6px"><span class="ic-wrap" style="margin-bottom: 6px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span><span class="t-meta">طلبات المحرّر</span><strong class="t-num" style="font-size: 26px">١٬٢٤٨</strong><span class="t-meta">متوسط ١٧٨ يومياً</span></section>
+          <section class="panel col" style="padding: 20px; gap: 6px"><span class="ic-wrap" style="margin-bottom: 6px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h13"></path></svg></span><span class="t-meta">التوكنز</span><strong class="t-num" style="font-size: 26px" dir="ltr">3.9M</strong><span class="t-meta">٤١٪ منها من الذاكرة المؤقتة</span></section>
+          <section class="panel col" style="padding: 20px; gap: 6px"><span class="ic-wrap" style="margin-bottom: 6px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4"></path></svg></span><span class="t-meta">شرائح مرسومة</span><strong class="t-num" style="font-size: 26px">٨٦</strong><span class="t-meta">صور كاروسيل</span></section>
+        </div>
+
+        <section class="panel col" style="padding: 20px 22px; gap: 16px">
+          <div class="row" style="justify-content: space-between"><h2 class="t-head">التكلفة يوماً بيوم</h2><div class="seg"><button type="button" aria-pressed="true">التكلفة</button><button type="button" aria-pressed="false">التوكنز</button></div></div>
+          <div dir="ltr" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 18px; align-items: end; height: 220px">
+            <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
+              <div class="col" style="align-items: center; gap: 8px; height: 100%; justify-content: flex-end">
+                <span class="t-meta num">{{d.v}}</span>
+                <div style="width: 100%; max-width: 64px; border-radius: 10px 10px 4px 4px; background: {{d.bg}}; height: {{d.h}}"></div>
+                <span class="t-meta">{{d.day}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+          <section class="panel" style="padding: 18px 22px">
+            <h2 class="t-head" style="margin-bottom: 8px">النماذج</h2>
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px">
+              <thead><tr class="t-meta"><th style="text-align: start; padding: 8px 0; font-weight: 600">النموذج</th><th style="text-align: start; font-weight: 600">طلبات</th><th style="text-align: start; font-weight: 600">إدخال</th><th style="text-align: start; font-weight: 600">إخراج</th></tr></thead>
+              <tbody class="num">
+                <tr style="border-top: 1px solid var(--line)"><td style="padding: 11px 0" dir="ltr">gpt-5.6</td><td>١٬٠٢١</td><td dir="ltr">2.7M</td><td dir="ltr">0.6M</td></tr>
+                <tr style="border-top: 1px solid var(--line)"><td style="padding: 11px 0" dir="ltr">gpt-5.6-mini</td><td>١٤١</td><td dir="ltr">0.4M</td><td dir="ltr">0.1M</td></tr>
+                <tr style="border-top: 1px solid var(--line)"><td style="padding: 11px 0" dir="ltr">gpt-image</td><td>٨٦</td><td>—</td><td>—</td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="panel col" style="padding: 18px 22px; gap: 12px">
+            <h2 class="t-head">أين يذهب الإنفاق؟</h2>
+            <div class="col" style="gap: 12px">
+              <div><div class="row" style="justify-content: space-between; font-size: 14px"><span>النصوص</span><span class="num" dir="ltr">$11.20</span></div><div class="meter" style="height: 6px; margin-top: 6px"><span style="width: 61%; background: var(--navy)"></span></div></div>
+              <div><div class="row" style="justify-content: space-between; font-size: 14px"><span>صور الشرائح</span><span class="num" dir="ltr">$6.02</span></div><div class="meter" style="height: 6px; margin-top: 6px"><span style="width: 33%"></span></div></div>
+              <div><div class="row" style="justify-content: space-between; font-size: 14px"><span>البحث على الويب</span><span class="num" dir="ltr">$1.20</span></div><div class="meter" style="height: 6px; margin-top: 6px"><span style="width: 6%; background: var(--ink-3)"></span></div></div>
+            </div>
+            <p class="t-meta">الأرقام من حساب OpenAI وقد تشمل استخداماً خارج Newsplus.</p>
+          </section>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isSetup}}" hint-placeholder-val="{{ false }}">
+        <section class="panel" style="padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center">
+          <div class="col" style="gap: 12px">
+            <span class="ic-wrap ic-wrap--ai" style="width: 56px; height: 56px; border-radius: 16px"><svg class="ic ic--lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"></path></svg></span>
+            <h2 class="t-display">خطوة واحدة لعرض أرقام حسابك</h2>
+            <p class="t-small">اربط مفتاح إدارة OpenAI على السيرفر عشان تظهر هنا التكلفة والتوكنز وحدود الإنفاق. مفتاح تشغيل المحرّر لوحده مش كفاية.</p>
+            <a class="btn btn--ink" href="https://platform.openai.com/settings/organization/admin-keys" style="align-self: flex-start">افتح إعدادات مفاتيح الإدارة<svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></a>
+          </div>
+          <ol class="steps panel panel--flat" style="padding: 22px; background: var(--surface-2); gap: 16px">
+            <li class="step is-done"><span class="step__dot"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>المحرّر متصل بـ OpenAI</li>
+            <li class="step is-active"><span class="step__dot"></span>أنشئ Admin API Key من إعدادات المؤسسة</li>
+            <li class="step"><span class="step__dot"></span>أضفه في OPENAI_ADMIN_KEY على السيرفر</li>
+            <li class="step"><span class="step__dot"></span>أعد تشغيل الـ API</li>
+          </ol>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{isForbidden}}" hint-placeholder-val="{{ false }}">
+        <section class="panel" style="padding: 56px 40px; display: grid; place-items: center">
+          <div class="empty" style="max-width: 440px">
+            <span class="empty__art"><svg class="ic ic--xl" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3"></path></svg></span>
+            <h2 class="t-title">الصفحة دي لمسؤول الحساب</h2>
+            <p class="t-small">بيانات التكلفة والحدود بتظهر للأدمن بس. لو محتاجها، اطلب صلاحية من مسؤول النظام.</p>
+            <a class="btn btn--quiet" href="DeskHome.dc.html">ارجع للرئيسية</a>
+          </div>
+        </section>
+      </sc-if>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["ready","loading","error","custom","not-configured","forbidden"],"default":"ready"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var s = this.props.state ?? 'ready';
+    var raw = [['أربعاء', 1.9], ['خميس', 2.4], ['جمعة', 1.1], ['سبت', 2.2], ['أحد', 3.6], ['اثنين', 4.1], ['اليوم', 3.1]];
+    return {
+      theme: this.props.theme ?? 'light',
+      isReady: s === 'ready' || s === 'custom', isSetup: s === 'not-configured', isForbidden: s === 'forbidden', isLoading: s === 'loading', isError: s === 'error', isCustom: s === 'custom',
+      syncLine: s === 'ready' || s === 'custom' ? 'متصل بحساب OpenAI · آخر جلب منذ دقيقتين' : s === 'loading' ? 'جاري التحميل…' : s === 'error' ? 'غير متصل' : s === 'not-configured' ? 'الحساب غير مربوط بعد' : 'صلاحية غير كافية',
+      days: raw.map(function (r, i) { return { day: r[0], v: '$' + r[1].toFixed(2), h: Math.round(r[1] / 4.1 * 170) + 'px', bg: i === raw.length - 1 ? 'var(--ai)' : 'var(--line-strong)' }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

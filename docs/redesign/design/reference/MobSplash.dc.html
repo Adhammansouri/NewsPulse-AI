@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus موبايل — شاشة البدء</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+<link rel="stylesheet" href="/_blob/210170dd5a2fa534503e7d6a475c3fc9">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np m" data-theme="{{theme}}" style="display: grid; place-items: center; background: {{bg}}">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2dd4bf"></stop><stop offset="1" stop-color="#38bdf8"></stop></linearGradient></defs></svg>
+  <sc-if value="{{isChecking}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 42%, rgb(14 165 233 / .22), transparent 50%)"></div>
+    <div class="col fade-in" style="position: relative; align-items: center; gap: 18px; color: #fff" role="status">
+      <img src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="Newsplus" style="width: 88px; height: 88px; border-radius: 24px; box-shadow: 0 0 0 1px rgb(255 255 255 / .14), 0 24px 60px -20px rgb(14 165 233 / .6)">
+      <b style="font-family: var(--f-display); font-size: 26px">Newsplus</b>
+      <svg class="pulse-line" width="200" height="36" viewBox="0 0 200 36" aria-hidden="true"><path class="base" d="M0 18h64l9-13 13 26 11-20 7 7h96" style="stroke: rgb(255 255 255 / .12)"></path><path d="M0 18h64l9-13 13 26 11-20 7 7h96"></path></svg>
+    </div>
+    <span style="position: absolute; bottom: 48px; inset-inline: 0; text-align: center; font-size: 13px; color: #a9b8c9">بنتأكد من جلستك…</span>
+  </sc-if>
+  <sc-if value="{{isOffline}}" hint-placeholder-val="{{ false }}">
+    <div class="empty fade-in" style="padding: 32px">
+      <span class="empty__art" style="width: 96px; height: 96px; border-radius: 30px; background: var(--warn-soft); color: var(--warn)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width: 40px; height: 40px; stroke-width: 1.5"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18"></path></svg></span>
+      <h1 class="t-display">لا يوجد اتصال</h1>
+      <p class="t-small" style="max-width: 280px">الأخبار والتوليد والترجمة محتاجين إنترنت. هنفتح Newsplus أول ما الشبكة ترجع.</p>
+      <button class="btn btn--ink btn--lg" type="button" style="margin-top: 8px; min-width: 200px">حاول تاني</button>
+      <p class="live">بنحاول تلقائياً كل ١٥ ثانية</p>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["checking","offline"],"default":"checking"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var s = this.props.state ?? 'checking';
+    return { theme: this.props.theme ?? 'light', isChecking: s === 'checking', isOffline: s === 'offline', bg: s === 'checking' ? '#0c2340' : 'var(--bg)' };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — جاهز للنشر</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+<link rel="stylesheet" href="/_blob/a7940d8c65f26d316bd1f2cee73fd657">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np" data-theme="{{theme}}" style="position: relative; display: flex; width: 100%; height: 900px; overflow: hidden">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+<nav class="rail" aria-label="التنقل الرئيسي"><img class="rail__logo" src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="Newsplus"><a class="rail__item" href="DeskHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>الرئيسية</a><a class="rail__item" href="Main.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H5a1 1 0 0 1-1-1zM17 9h3v9a1 1 0 0 1-2 0M7 9h7M7 13h7M7 16h4"></path></svg>الأخبار</a><a class="rail__item" href="NewBoard.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v10h-4zM16 4h4v13h-4z"></path></svg>سير العمل</a><a class="rail__item" href="DeskGenerate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"></path></svg>توليد</a><a class="rail__item" href="DeskTranslate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg>ترجمة</a><a class="rail__item" href="DeskUsage.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"></path></svg>الاستهلاك</a><div style="flex: 1"></div><button class="rail__btn" type="button" aria-label="اختصارات الكيبورد"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v10H3zM7 11h.01M11 11h.01M15 11h.01M8 14h8"></path></svg></button><a class="rail__btn" href="DeskNotifications.dc.html" aria-label="الإشعارات"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"></path></svg></a><button class="avatar" type="button" aria-label="حساب سارة" style="margin-top: 8px">س</button></nav>
+<main class="grow col" style="background:var(--bg)">
+  <div class="row" style="padding:12px 24px;background:var(--surface);border-bottom:1px solid var(--line)">
+    <a class="btn btn--ghost btn--sm" href="Main.dc.html"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>المسودة</a>
+    <span class="badge badge--ai">منشور سوشيال</span><span class="vchip" aria-current="true">ن٢</span>
+    <span class="grow"></span>
+    <span class="t-meta">انسخ للمنصة اللي هتنشر عليها، بالشكل المناسب ليها</span>
+  </div>
+  <div class="grow" style="display:flex;gap:28px;padding:26px 32px;overflow:hidden">
+    <section class="col grow" style="gap:16px;align-items:center" aria-label="معاينة المنصة">
+      <div class="seg" role="tablist" aria-label="المنصة"><sc-for list="{{tabs}}" as="t" hint-placeholder-count="5"><button type="button" role="tab" aria-pressed="{{t.on}}" aria-selected="{{t.on}}" onClick="{{t.pick}}">{{t.name}}</button></sc-for></div>
+      <article class="pf" style="width:520px">
+        <div class="pf__head"><img src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="" style="width:42px;height:42px;border-radius:50%"><span class="col grow"><b style="font-size:14.5px">Newsplus</b><span class="t-meta" dir="ltr" style="text-align:right">{{p.handle}}</span></span><span class="badge badge--topic">{{p.name}}</span></div>
+        <div class="pf__body"><p style="font-weight:700">{{hook}}</p><sc-if value="{{p.showBody}}" hint-placeholder-val="{{ true }}"><p style="margin-top:6px;color:var(--ink-2)">قررت لجنة السياسة النقدية الإبقاء على أسعار الفائدة دون تغيير للمرة الثالثة على التوالي، وربطت أي تحرك مقبل ببيانات التضخم.</p></sc-if><p style="margin-top:8px;color:var(--cyan);direction:rtl">#البنك_المركزي #أسعار_الفائدة #التضخم</p></div>
+        <sc-if value="{{p.media}}" hint-placeholder-val="{{ true }}"><div class="pf__media">المركزي يثبّت الفائدة للمرة الثالثة</div></sc-if>
+        <div class="pf__bar"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"></path></svg><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"></path></svg><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg></div>
+      </article>
+      <div class="row" style="width:520px;gap:12px">
+        <span class="ring" style="--p:{{p.pct}};--c:{{p.ringColor}}"><span>{{p.count}}</span></span>
+        <span class="col grow"><b style="font-weight:600;font-size:14px">{{p.limitTitle}}</b><span class="t-meta">{{p.limitNote}}</span></span>
+        <button class="btn btn--ink" type="button"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9zM5 15H4V4h11v1"></path></svg>نسخ لـ {{p.name}}</button>
+      </div>
+    </section>
+    <aside class="panel col" aria-label="فحص قبل النشر" style="width:390px;flex:none;align-self:flex-start;overflow:hidden">
+      <div class="ai-strip"></div>
+      <div class="col" style="padding:16px 18px 6px;gap:4px">
+        <div class="row" style="justify-content:space-between"><span class="row"><span class="ic-wrap ic-wrap--ai" style="width:30px;height:30px;border-radius:9px"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span><b style="font-weight:600">فحص قبل النشر</b></span><span class="badge {{sumCls}}">{{sumText}}</span></div>
+        <p class="t-meta">المحرّر راجع المسودة على المصادر وقواعد الفريق</p>
+      </div>
+      <div class="col" style="padding:0 18px 8px"><sc-for list="{{checks}}" as="c" hint-placeholder-count="6"><div class="check-row"><span class="check-ic {{c.cls}}"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{c.icon}}"></path></svg></span><span class="col grow" style="gap:2px"><b style="font-weight:600;font-size:14px">{{c.title}}</b><span class="t-meta" style="font-size:12.5px;line-height:1.6">{{c.note}}</span></span><sc-if value="{{c.fixable}}" hint-placeholder-val="{{ false }}"><button class="btn btn--quiet btn--sm" type="button" onClick="{{c.fix}}">{{c.cta}}</button></sc-if></div></sc-for></div>
+      <sc-if value="{{hasFixes}}" hint-placeholder-val="{{ true }}"><div style="padding:12px 18px 16px;border-top:1px solid var(--line)"><button class="btn btn--ai btn--block" type="button" onClick="{{fixAll}}"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>صلّح الملاحظات تلقائياً</button></div></sc-if>
+      <sc-if value="{{allOk}}" hint-placeholder-val="{{ false }}"><div class="notice notice--ok fade-in" style="margin:0 18px 16px"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--ok);margin-top:3px"><path d="M5 12l5 5 9-10"></path></svg><span>المسودة جاهزة للنشر. النسخة ٣ محفوظة بالتعديلات.</span></div></sc-if>
+    </aside>
+  </div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { plat: 'x', fixed: {} }; }
+  renderVals() {
+    var self = this, st = this.state;
+    var P = {
+      x: { name: 'X', handle: '@newsplus', count: '٢٤٨', pct: 89, ringColor: 'var(--warn-dot)', limitTitle: '٢٤٨ من ٢٨٠ حرف', limitNote: 'قريب من الحد · الوسوم محسوبة', showBody: true, media: false },
+      ig: { name: 'إنستجرام', handle: 'newsplus', count: '٢٤٨', pct: 11, ringColor: 'var(--teal-dot)', limitTitle: 'أول سطرين ظاهرين قبل «المزيد»', limitNote: 'الخطاف لازم يكفي لوحده', showBody: true, media: true },
+      fb: { name: 'فيسبوك', handle: 'Newsplus', count: '٢٤٨', pct: 8, ringColor: 'var(--teal-dot)', limitTitle: 'طول مناسب', limitNote: 'الرابط يتحط في أول تعليق', showBody: true, media: true },
+      tg: { name: 'تيليجرام', handle: 't.me/newsplus', count: '٢٤٨', pct: 6, ringColor: 'var(--teal-dot)', limitTitle: '٢٤٨ من ٤٬٠٩٦ حرف', limitNote: 'الوسوم اختيارية هنا', showBody: true, media: false },
+      tt: { name: 'تيك توك', handle: '@newsplus', count: '٩٦', pct: 10, ringColor: 'var(--teal-dot)', limitTitle: 'كابشن قصير', limitNote: 'الهوك بيتقال في الفيديو', showBody: false, media: true }
+    };
+    var order = ['x', 'ig', 'fb', 'tg', 'tt'];
+    var fx = st.fixed;
+    var raw = [
+      { k: 'attr', ok: true, title: 'الإسناد', note: 'كل ادعاء منسوب للجنة أو لمصدر من الثلاثة' },
+      { k: 'nums', ok: true, title: 'الأرقام مطابقة للمصادر', note: 'رقمين اتراجعوا على ٣ مصادر' },
+      { k: 'hook', ok: !!fx.hook, warn: true, title: fx.hook ? 'الخطاف اتقصّر' : 'الخطاف طويل على إنستجرام', note: fx.hook ? 'بقى يظهر كامل قبل «المزيد»' : 'هيتقص قبل «المزيد». فيه نسخة أقصر جاهزة', cta: 'قصّره' },
+      { k: 'word', ok: !!fx.word, warn: true, title: fx.word ? 'اتشالت كلمة «صادم»' : 'كلمة الفريق بيتجنبها: «صادم»', note: fx.word ? 'حسب قاعدة ذاكرة الفريق' : 'قاعدة في ذاكرة الفريق من شهر', cta: 'استبدلها' },
+      { k: 'tags', ok: true, title: '٣ وسوم بالعربي', note: 'جوه حد الفريق (٤ وسوم)' },
+      { k: 'lang', ok: true, title: 'الإملاء والنحو', note: 'مفيش أخطاء' }
+    ];
+    var toAr = function (n) { return String(n).replace(/\d/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'[d]; }); };
+    var warns = raw.filter(function (c) { return !c.ok; }).length;
+    var checkPath = 'M5 12l5 5 9-10', warnPath = 'M12 8v5M12 16.5v.5';
+    return {
+      theme: this.props.theme ?? 'light',
+      tabs: order.map(function (k) { return { name: P[k].name, on: String(st.plat === k), pick: function () { self.setState({ plat: k }); } }; }),
+      p: P[st.plat],
+      hook: fx.hook ? 'هل انتهى زمن خفض الفائدة؟' : 'هل انتهى زمن خفض الفائدة؟ المركزي يثبّتها للمرة الثالثة رغم تراجع التضخم',
+      checks: raw.map(function (c) { return { cls: c.ok ? 'ok' : 'warn', icon: c.ok ? checkPath : warnPath, title: c.title, note: c.note, fixable: !c.ok, cta: c.cta, fix: function () { var f = Object.assign({}, self.state.fixed); f[c.k] = true; self.setState({ fixed: f }); } }; }),
+      sumCls: warns ? 'badge--warn' : 'badge--ok', sumText: warns ? (warns === 1 ? 'ملاحظة واحدة' : (warns === 2 ? 'ملاحظتين' : toAr(warns) + ' ملاحظات')) + ' · ' + toAr(6 - warns) + ' تمام' : '٦ من ٦ تمام',
+      hasFixes: warns > 0, allOk: warns === 0,
+      fixAll: function () { self.setState({ fixed: { hook: true, word: true } }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

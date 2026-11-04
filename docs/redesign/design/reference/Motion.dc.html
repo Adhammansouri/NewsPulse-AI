@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — الحركة</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np" data-theme="{{theme}}" style="width: 100%; min-height: 900px; padding: 48px 56px">
+  <div style="max-width: 1328px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px">
+    <header><h1 class="t-display">الحركة</h1><p class="t-meta" style="font-size: 14px">أربع حركات فقط، وكلها ردّ على فعل. اضغط على أي زر لإعادة التشغيل.</p></header>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+
+      <section class="panel" style="display: flex; flex-direction: column; overflow: hidden">
+        <div style="padding: 18px 18px 12px; display: flex; flex-direction: column; gap: 4px"><h2 class="t-head">١ · المسودة تتجمّع</h2><p class="t-meta">بعد التوليد: كل جزء يظهر بعد اللي قبله بـ٨٠ ms، مع إزالة ضبابية خفيفة.</p></div>
+        <div style="flex: 1; min-height: 330px; padding: 6px 18px; background: var(--surface-2); border-block: 1px solid var(--line)">
+          <sc-if value="{{showType}}" hint-placeholder-val="{{ true }}">
+            <div class="typeset" style="display: flex; flex-direction: column; gap: 4px">
+              <div class="block"><div class="block__label">الخطاف</div><p class="t-head" style="font-size: 17px">المركزي يثبّت الفائدة للمرة الثالثة</p></div>
+              <div class="block"><div class="block__label">النص</div><p style="font-size: 14px; line-height: 1.8; color: var(--ink-2)">اللجنة قالت إن التضخم تراجع لكنه ما زال فوق المستهدف.</p></div>
+              <div class="block"><div class="block__label">الوسوم</div><div style="display: flex; gap: 6px; flex-wrap: wrap"><span class="tag">#التضخم</span><span class="tag">#اقتصاد</span></div></div>
+            </div>
+          </sc-if>
+        </div>
+        <div style="padding: 14px 18px"><button class="btn btn--ai btn--block" type="button" onClick="{{replayType}}">اكتب المنشور</button></div>
+      </section>
+
+      <section class="panel" style="display: flex; flex-direction: column; overflow: hidden">
+        <div style="padding: 18px 18px 12px; display: flex; flex-direction: column; gap: 4px"><h2 class="t-head">٢ · وصول عنوان جديد</h2><p class="t-meta">ينزل من فوق بـ spring، ونقطته تنبض مرة. القائمة ما تقفزش تحت إيد المستخدم.</p></div>
+        <div style="flex: 1; min-height: 330px; overflow: hidden; background: var(--surface); border-block: 1px solid var(--line)">
+          <sc-for list="{{wire}}" as="w" hint-placeholder-count="4">
+            <div class="wire-row {{w.cls}}"><span class="tick" aria-hidden="true"></span><span class="wire-row__meta"><span style="font-weight: 600; color: var(--ink-2)">{{w.src}}</span><span style="flex: 1"></span><span class="num">{{w.time}}</span></span><span class="wire-row__title" style="display: block; font-size: 14px">{{w.t}}</span></div>
+          </sc-for>
+        </div>
+        <div style="padding: 14px 18px"><button class="btn btn--ink btn--block" type="button" onClick="{{addRow}}">وصل عنوان جديد</button></div>
+      </section>
+
+      <section class="panel" style="display: flex; flex-direction: column; overflow: hidden">
+        <div style="padding: 18px 18px 12px; display: flex; flex-direction: column; gap: 4px"><h2 class="t-head">٣ · اختيار الصيغة</h2><p class="t-meta">الحد يتحول تيل وعلامة الصح تقفز. زر التوليد يغيّر اسمه حسب الصيغة.</p></div>
+        <div style="flex: 1; min-height: 330px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; background: var(--surface-2); border-block: 1px solid var(--line)">
+          <sc-for list="{{fmts}}" as="f" hint-placeholder-count="3">
+            <button class="tile tile--row" type="button" aria-pressed="{{f.pressed}}" onClick="{{f.pick}}"><span style="flex: 1; display: flex; flex-direction: column"><span class="tile__name">{{f.name}}</span><span class="tile__hint">{{f.hint}}</span></span><sc-if value="{{f.on}}" hint-placeholder-val="{{ false }}"><span class="tile__check" style="position: static"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span></sc-if></button>
+          </sc-for>
+        </div>
+        <div style="padding: 14px 18px"><button class="btn btn--ai btn--block" type="button">{{action}}</button></div>
+      </section>
+
+      <section class="panel" style="display: flex; flex-direction: column; overflow: hidden">
+        <div style="padding: 18px 18px 12px; display: flex; flex-direction: column; gap: 4px"><h2 class="t-head">٤ · الشيت على الموبايل</h2><p class="t-meta">يطلع من تحت بـ spring بسيط، والخلفية تغمق. يتقفل بالسحب أو الضغط برا.</p></div>
+        <div style="position: relative; flex: 1; min-height: 330px; overflow: hidden; background: var(--bg); border-block: 1px solid var(--line)">
+          <div style="padding: 16px; display: flex; flex-direction: column; gap: 10px" aria-hidden="true"><div class="panel" style="height: 60px"></div><div class="panel" style="height: 60px"></div><div class="panel" style="height: 60px"></div></div>
+          <sc-if value="{{sheetOpen}}" hint-placeholder-val="{{ false }}">
+            <button class="scrim" type="button" aria-label="إغلاق" onClick="{{closeSheet}}" style="border: 0"></button>
+            <div class="sheet" style="padding: 0 16px 16px">
+              <div class="grabber" aria-hidden="true"></div>
+              <p class="t-head" style="margin: 6px 0 12px">تصفية</p>
+              <div class="seg" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr))"><button type="button" aria-pressed="true">الكل</button><button type="button" aria-pressed="false">ساعة</button><button type="button" aria-pressed="false">اليوم</button></div>
+              <button class="btn btn--ink btn--block" type="button" style="margin-top: 14px" onClick="{{closeSheet}}">عرض ٤ عناوين</button>
+            </div>
+          </sc-if>
+        </div>
+        <div style="padding: 14px 18px"><button class="btn btn--quiet btn--block" type="button" onClick="{{openSheet}}">افتح التصفية</button></div>
+      </section>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { showType: true, added: 0, fmt: 'social', sheet: false };
+  }
+  componentWillUnmount() { if (this.t) clearTimeout(this.t); }
+  renderVals() {
+    var self = this;
+    var pool = [
+      { t: 'مجلس الأمن يعقد جلسة مغلقة مساء اليوم', src: 'الجزيرة نت', cls: 'is-breaking' },
+      { t: 'منصات التواصل تبدأ وسم المحتوى المولّد آلياً', src: 'سكاي نيوز عربية', cls: 'is-now' },
+      { t: 'ارتفاع الصادرات غير النفطية ١٢٪ في الربع الثالث', src: 'العربية', cls: 'is-now' }
+    ];
+    var base = [
+      { t: 'البنك المركزي يثبت أسعار الفائدة للمرة الثالثة', src: 'العربية +٢', time: 'قبل ٣ د', cls: 'is-now' },
+      { t: 'اجتماع طارئ لوزراء الخارجية العرب', src: 'الجزيرة نت', time: 'قبل ١١ د', cls: 'is-now' },
+      { t: 'Oil prices climb after OPEC+ signal', src: 'Reuters', time: 'قبل ٢٦ د', cls: 'is-hour' },
+      { t: 'منتخب مصر يعلن قائمة المعسكر', src: 'العين', time: 'قبل ٤٨ د', cls: 'is-hour' }
+    ];
+    var added = [];
+    for (var i = 0; i < this.state.added; i++) {
+      var p = pool[i % pool.length];
+      added.unshift({ t: p.t, src: p.src, time: 'الآن', cls: p.cls + (i === this.state.added - 1 ? ' arrive' : '') });
+    }
+    var F = { social: ['منشور سوشيال', '٤٠–٧٠ كلمة + وسوم', 'اكتب المنشور'], video: ['سكريبت فيديو', 'هوك + نص + لقطات', 'اكتب السكريبت'], carousel: ['كاروسيل', '٤ شرائح + كابشن', 'اكتب الشرائح'] };
+    return {
+      theme: this.props.theme ?? 'light',
+      showType: this.state.showType,
+      replayType: function () { self.setState({ showType: false }); self.t = setTimeout(function () { self.setState({ showType: true }); }, 60); },
+      wire: added.concat(base).slice(0, 5),
+      addRow: function () { self.setState({ added: self.state.added + 1 }); },
+      fmts: Object.keys(F).map(function (k) { return { name: F[k][0], hint: F[k][1], pressed: String(self.state.fmt === k), on: self.state.fmt === k, pick: function () { self.setState({ fmt: k }); } }; }),
+      action: F[this.state.fmt][2],
+      sheetOpen: this.state.sheet,
+      openSheet: function () { self.setState({ sheet: true }); },
+      closeSheet: function () { self.setState({ sheet: false }); }
+    };
+  }
+}
+</script>
+</body>
+</html>
