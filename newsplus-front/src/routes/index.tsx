@@ -9,6 +9,7 @@ const LoginPage = lazy(() => import("@/modules/Login/pages/LoginPage"));
 const HomePage = lazy(() => import("@/modules/Home/pages/HomePage"));
 const NewsPage = lazy(() => import("@/modules/News/pages/NewsPage"));
 const NewsStoryPage = lazy(() => import("@/modules/News/pages/NewsStoryPage"));
+const BreakingPage = lazy(() => import("@/modules/News/pages/BreakingPage"));
 const ArchivePage = lazy(() => import("@/modules/News/pages/ArchivePage"));
 const GeneratePage = lazy(() => import("@/modules/Generate/pages/GeneratePage"));
 const TranslatePage = lazy(() => import("@/modules/Translate/pages/TranslatePage"));
@@ -54,6 +55,7 @@ export default function AppRoutes() {
           <Route path="/" element={page(<HomePage />, "stack")} />
           <Route path="/news" element={page(<NewsPage />, "split")} />
           <Route path="/news/:itemId" element={page(<NewsStoryPage />, "split")} />
+          <Route path="/news/:itemId/breaking" element={page(<BreakingPage />, "split")} />
           <Route path="/archive" element={page(<ArchivePage />, "stack")} />
           <Route path="/generate" element={page(<GeneratePage />, "split")} />
           <Route path="/translate" element={page(<TranslatePage />, "stack")} />

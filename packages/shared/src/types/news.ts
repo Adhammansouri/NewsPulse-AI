@@ -109,6 +109,44 @@ export type NewsSummarizeRequest = {
   carousel?: CarouselOptions;
 };
 
+/** S13 `POST /news/breaking`: three short breaking-news outputs for one feed item. */
+export type NewsBreakingRequest = {
+  itemId: string;
+};
+
+export type NewsBreakingData = {
+  /** X post: starts with «عاجل |», at most 280 characters (hashtags included). */
+  post: string;
+  /** News ticker: one line starting with «عاجل:». */
+  ticker: string;
+  /** Follower push alert: at most 80 characters. */
+  alert: string;
+  /** How long the editor took to write the three outputs. */
+  ms: number;
+};
+
+/** S13 `POST /news/digest`: «اللي فاتك» since the editor's previous visit (cached 10 minutes per `since` hour). */
+export type NewsDigestRequest = {
+  /** ISO 8601 time of the previous visit. */
+  since: string;
+};
+
+export type NewsDigestItem = {
+  itemId: string;
+  title: string;
+  /** Short label: «الأهم اقتصادياً», «الأكثر تحديثاً», «متوقع يتفاعل عليه الجمهور». */
+  reason: string;
+};
+
+export type NewsDigestData = {
+  /** The top three stories (fewer when fewer arrived), most important first. */
+  items: NewsDigestItem[];
+  /** Plain-text summary of those stories, ready to paste. */
+  summaryText: string;
+  /** Headlines published since the `since` hour that the digest was written from. */
+  sourceCount: number;
+};
+
 export type CarouselRenderRequest = {
   conversationId: string;
   versionId: string;

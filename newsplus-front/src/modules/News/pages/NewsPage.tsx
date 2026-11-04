@@ -2,13 +2,17 @@
 // in `?item=`. Mobile: the wire (MobWire); a story opens as its own screen, /news/:itemId (NewsStoryPage), and a
 // mobile `?item=` deep link goes there. The briefing and drafts without a story stay on this page.
 // Arrivals: the generate/translate hand-off `{ conversationId }` opens that conversation; «افتح» on the
-// «المسودة جاهزة» toast brings `{ draftRunId }` (a finished background run). The state is cleared once used.
+// «المسودة جاهزة» toast brings `{ draftRunId }` (a finished background run); the home digest's `{ briefing }`
+// starts the briefing. The state is cleared once used. `&breaking=1` opens breaking mode (S13) on the story,
+// over the whole content area on desktop, as /news/:itemId/breaking on mobile.
 import { useEffect, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate, useNavigationType, useSearchParams } from "react-router-dom";
 import type { NewsFeedItem } from "@newsplus/shared";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { readDeskHandoff } from "@/services/deskHandoff";
 import { IconButton } from "@/ui/IconButton";
+import { DeskBreaking } from "../breaking/DeskBreaking";
+import { BREAKING_PARAM, breakingPath, isBreakingMode } from "../breaking/breakingModel";
 import { ArchiveDrawer } from "../studio/ArchiveDrawer";
 import { DeskStudio } from "../studio/DeskStudio";
 import { draftRunEstimate, draftRunInfo } from "../studio/draftRuns";
@@ -114,8 +118,9 @@ export default function NewsPage() {
     if (redirectToStory || arrivalKey.current === location.key) return;
     arrivalKey.current = location.key;
     const conversationId = handoff?.conversationId;
+    const briefing = handoff?.briefing === true;
     const { draftRunId } = arrival;
-    if (draftRunId === undefined && !conversationId) return;
+    if (draftRunId === undefined && !conversationId && !briefing) return;
     if (draftRunId !== undefined) {
       const itemId = draftRunInfo(draftRunId)?.itemId ?? null;
       if (desk.adoptRun(draftRunId)) {
@@ -128,6 +133,9 @@ export default function NewsPage() {
       }
     } else if (conversationId) {
       desk.openConversation(conversationId);
+    } else if (briefing) {
+      // «حوّله لموجز صباحي» (S13 home digest): its stories are pinned first in the briefing.
+      startBriefing();
     }
     navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
   });
@@ -155,7 +163,7 @@ export default function NewsPage() {
 
   if (redirectToStory) {
     const state: StudioLinkState = { ...arrival, conversationId: arrival.conversationId ?? handoff?.conversationId, listSearch: listSearchOf(searchParams) };
-    return <Navigate to={storyPath(itemParam)} replace state={state} />;
+    return <Navigate to={isBreakingMode(searchParams) ? breakingPath(itemParam) : storyPath(itemParam)} replace state={state} />;
   }
 
   if (mobile) {
@@ -228,9 +236,28 @@ export default function NewsPage() {
 
   // DeskCarousel takes the whole content area (no headlines column).
   const carouselDraft = desk.showEditorial && desk.resultFormat === "carousel" && Boolean(desk.summary);
+  // NewBreaking (S13, `?item=…&breaking=1`) also takes the whole content area.
+  const breakingMode = isBreakingMode(searchParams) && selected !== null;
+
+  /** «اكتب منشور مفصّل»: leave breaking mode for the story's normal social flow. */
+  function leaveBreaking(item: NewsFeedItem) {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete(BREAKING_PARAM);
+        return next;
+      },
+      { replace: true },
+    );
+    desk.openStory();
+    desk.startSocial(item);
+  }
+
   return (
     <div className="grow" style={{ display: "flex", minHeight: 0, overflow: "hidden" }}>
-      {!carouselDraft && <WireColumn wire={wire} selectedId={selectedId} onSelect={openStory} onBriefing={startBriefing} />}
+      {!carouselDraft && !breakingMode && (
+        <WireColumn wire={wire} selectedId={selectedId} onSelect={openStory} onBriefing={startBriefing} />
+      )}
       <div
         style={{
           position: "relative",
@@ -241,12 +268,11 @@ export default function NewsPage() {
           background: "var(--bg)",
         }}
       >
-        <DeskStudio
-          desk={desk}
-          selected={selected}
-          languages={wire.languages}
-          wireLoading={wire.loading}
-        />
+        {breakingMode && selected ? (
+          <DeskBreaking key={selected.id} item={selected} onExit={() => leaveBreaking(selected)} />
+        ) : (
+          <DeskStudio desk={desk} selected={selected} languages={wire.languages} wireLoading={wire.loading} />
+        )}
         <ArchiveDrawer desk={desk} />
       </div>
     </div>

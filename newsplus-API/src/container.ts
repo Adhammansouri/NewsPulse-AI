@@ -15,6 +15,8 @@ import { TranslateService } from "./services/translateService.js";
 import { TeamService } from "./services/teamService.js";
 import { PresenceService, PresenceStore } from "./services/presenceService.js";
 import { EditorialWorkflowService } from "./services/editorialWorkflowService.js";
+import { BreakingService } from "./services/breakingService.js";
+import { DigestService } from "./services/digestService.js";
 
 export async function createAuthService(app: FastifyInstance): Promise<AuthService> {
   const hasher = new ScryptPasswordHasher();
@@ -47,7 +49,19 @@ export function createToolServices(app: FastifyInstance) {
   const editorialService = new EditorialConversationService({ openai, workspace });
   const generateService = new GenerateService(openai);
   const translateService = new TranslateService(openai);
-  return { aggregator, workspace, newsService, editorialService, generateService, translateService };
+  /** S13: breaking mode and «اللي فاتك». */
+  const breakingService = new BreakingService({ aggregator, openai, workspace });
+  const digestService = new DigestService({ aggregator, openai });
+  return {
+    aggregator,
+    workspace,
+    newsService,
+    editorialService,
+    generateService,
+    translateService,
+    breakingService,
+    digestService,
+  };
 }
 
 /** S15 «سير العمل»: the team directory, the in-memory presence store and the board's workflow service. */

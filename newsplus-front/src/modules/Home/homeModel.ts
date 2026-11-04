@@ -20,7 +20,7 @@ export const RESUME_MAX = 4;
 export const TOP_ROWS_DESK = 4;
 export const TOP_ROWS_MOB = 3;
 
-const SOURCE_COUNT: CountForms = { one: "مصدر واحد", two: "مصدرين", few: "{n} مصادر", many: "{n} مصدر" };
+export const SOURCE_COUNT: CountForms = { one: "مصدر واحد", two: "مصدرين", few: "{n} مصادر", many: "{n} مصدر" };
 
 /** «ذاكرة الفريق · ٤ قواعد مفعّلة» (same forms as MorePage). */
 const ACTIVE_RULES: CountForms = {
@@ -162,7 +162,16 @@ export type HomeRow = Pick<WireRowModel, "id" | "title" | "freshness"> & {
   time: string;
 };
 
-export type BreakingStory = { id: string; title: string; meta: string };
+export type BreakingStory = {
+  id: string;
+  title: string;
+  /** «قبل ٣ دقائق · ٣ مصادر» (DeskHome, MobHome). */
+  meta: string;
+  /** «قبل ٣ دقائق» (MobNewDigest). */
+  time: string;
+  /** The item as the strip saw it: breaking mode opens with it while the feed moves on. */
+  item: NewsFeedItem;
+};
 
 function rowOf(item: NewsFeedItem, now: number): WireRowModel {
   return toRowModel(item, { languages: NO_LANGUAGES, drafts: NO_IDS, arrived: NO_IDS, now });
@@ -179,10 +188,13 @@ export function breakingStory(items: readonly NewsFeedItem[], now: number): Brea
     if (!found || timeOf(item.publishedAt) > timeOf(found.publishedAt)) found = item;
   }
   if (!found) return null;
+  const time = relativeTimeAr(found.publishedAt, new Date(now));
   return {
     id: found.id,
     title: found.title,
-    meta: `${relativeTimeAr(found.publishedAt, new Date(now))} · ${countPhrase(found.sources.length, SOURCE_COUNT)}`,
+    meta: `${time} · ${countPhrase(found.sources.length, SOURCE_COUNT)}`,
+    time,
+    item: found,
   };
 }
 

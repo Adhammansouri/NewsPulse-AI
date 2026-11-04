@@ -9,7 +9,7 @@ import { useHome } from "../useHome";
 export default function HomePage() {
   const mobile = useIsMobile();
   const online = useOnline();
-  const home = useHome({ mobile });
+  const home = useHome({ mobile, online });
   const compose = useCompose({ online });
 
   return mobile ? (

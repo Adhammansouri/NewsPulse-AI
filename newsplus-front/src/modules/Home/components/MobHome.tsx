@@ -1,7 +1,10 @@
 // MobHome / MobHome-loading / MobHome-offline (S07) — port of docs/redesign/design/reference/MobHome.dc.html.
 // Inline styles are the board's own. The offline `m-banner` above the header is the shell's (MainLayout).
+// S13: «اللي فاتك» replaces the `main` with MobNewDigest's (MobDigest); the breaking card opens breaking mode.
 import { Link } from "react-router-dom";
 import { useNotificationNudge } from "@/components/shell/useNotificationNudge";
+import { breakingPath } from "@/modules/News/breaking/breakingModel";
+import type { StudioLinkState } from "@/modules/News/studio/studioLink";
 import { AiPanel } from "@/ui/AiPanel";
 import { Badge } from "@/ui/Badge";
 import { Button, buttonClassName } from "@/ui/Button";
@@ -12,6 +15,7 @@ import { cx } from "@/ui/cx";
 import { ARCHIVE_PATH, storyLink } from "../homeModel";
 import type { Compose } from "../useCompose";
 import type { Home } from "../useHome";
+import { MobDigest } from "./MobDigest";
 
 const SECTION_LINK_STYLE = { fontSize: "13px", fontWeight: 600 } as const;
 const SMALL_BTN_STYLE = { minHeight: "42px" } as const;
@@ -40,57 +44,64 @@ export function MobHome({ home, compose, online }: { home: Home; compose: Compos
         </div>
       </header>
 
-      <main className="m-scroll col" style={{ padding: "4px 16px 20px", gap: "18px" }}>
-        <AiPanel as="section" className="col" style={{ padding: "14px", gap: "10px", opacity: online ? "1" : ".55" }}>
-          <label className="field field--area field--sunken" style={{ minHeight: "76px" }}>
-            <span className="sr">رابط أو فكرة</span>
-            <textarea
-              ref={compose.fieldRef}
-              rows={2}
-              placeholder="الصق رابطاً أو اكتب فكرة…"
-              value={compose.text}
-              onChange={(event) => compose.setText(event.target.value)}
-            />
-          </label>
-          <Button
-            variant="ai"
-            block
-            size="lg"
-            loading={compose.pending}
-            aria-disabled={compose.aiBlocked || undefined}
-            onClick={compose.startAi}
-          >
-            {!compose.pending && <Icon name="sparkle" />}
-            {compose.aiLabel}
-          </Button>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "8px" }}>
-            <Link
-              className={buttonClassName({ variant: "quiet", size: "sm" })}
-              to="/generate"
-              state={compose.generateState}
-              style={SMALL_BTN_STYLE}
-            >
-              اكتب مقالاً
-            </Link>
-            <Link
-              className={buttonClassName({ variant: "quiet", size: "sm" })}
-              to="/translate"
-              state={compose.translateState}
-              style={SMALL_BTN_STYLE}
-            >
-              ترجم
-            </Link>
-          </div>
-          {!online && (
-            <p className="hint" style={{ justifyContent: "center" }}>
-              المحرّر محتاج إنترنت. هيشتغل أول ما الشبكة ترجع.
-            </p>
-          )}
-        </AiPanel>
-
-        {home.loading ? <MobSkeleton /> : <MobContent home={home} />}
-      </main>
+      {home.digest.shown ? <MobDigest home={home} /> : <MobMain home={home} compose={compose} online={online} />}
     </>
+  );
+}
+
+/** MobHome's `main`: the compose panel and the content (or MobHome-loading). */
+function MobMain({ home, compose, online }: { home: Home; compose: Compose; online: boolean }) {
+  return (
+    <main className="m-scroll col" style={{ padding: "4px 16px 20px", gap: "18px" }}>
+      <AiPanel as="section" className="col" style={{ padding: "14px", gap: "10px", opacity: online ? "1" : ".55" }}>
+        <label className="field field--area field--sunken" style={{ minHeight: "76px" }}>
+          <span className="sr">رابط أو فكرة</span>
+          <textarea
+            ref={compose.fieldRef}
+            rows={2}
+            placeholder="الصق رابطاً أو اكتب فكرة…"
+            value={compose.text}
+            onChange={(event) => compose.setText(event.target.value)}
+          />
+        </label>
+        <Button
+          variant="ai"
+          block
+          size="lg"
+          loading={compose.pending}
+          aria-disabled={compose.aiBlocked || undefined}
+          onClick={compose.startAi}
+        >
+          {!compose.pending && <Icon name="sparkle" />}
+          {compose.aiLabel}
+        </Button>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "8px" }}>
+          <Link
+            className={buttonClassName({ variant: "quiet", size: "sm" })}
+            to="/generate"
+            state={compose.generateState}
+            style={SMALL_BTN_STYLE}
+          >
+            اكتب مقالاً
+          </Link>
+          <Link
+            className={buttonClassName({ variant: "quiet", size: "sm" })}
+            to="/translate"
+            state={compose.translateState}
+            style={SMALL_BTN_STYLE}
+          >
+            ترجم
+          </Link>
+        </div>
+        {!online && (
+          <p className="hint" style={{ justifyContent: "center" }}>
+            المحرّر محتاج إنترنت. هيشتغل أول ما الشبكة ترجع.
+          </p>
+        )}
+      </AiPanel>
+
+      {home.loading ? <MobSkeleton /> : <MobContent home={home} />}
+    </main>
   );
 }
 
@@ -100,7 +111,8 @@ function MobContent({ home }: { home: Home }) {
     <>
       {breaking && (
         <Link
-          to={storyLink(breaking.id)}
+          to={breakingPath(breaking.id)}
+          state={{ item: breaking.item } satisfies StudioLinkState}
           className="col"
           style={{ gap: "8px", padding: "16px", borderRadius: "20px", color: "var(--ink)", background: "var(--breaking-soft)" }}
         >

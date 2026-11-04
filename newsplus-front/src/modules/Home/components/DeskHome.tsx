@@ -1,7 +1,9 @@
 // DeskHome / DeskHome-loading / DeskHome-offline (S07) — port of docs/redesign/design/reference/DeskHome.dc.html.
 // Inline styles are the board's own. The board's `main` is a div here: the shell renders the content `<main>`,
 // and its offline banner heads the page (MainLayout), so offline the page starts one column gap (24px) below it.
+// S13: «اللي فاتك» shows NewDigest instead (DeskDigest); the breaking strip opens breaking mode.
 import { Link } from "react-router-dom";
+import { breakingLink } from "@/modules/News/breaking/breakingModel";
 import { AiPanel } from "@/ui/AiPanel";
 import { Badge } from "@/ui/Badge";
 import { Button, buttonClassName } from "@/ui/Button";
@@ -12,6 +14,7 @@ import { cx } from "@/ui/cx";
 import { ARCHIVE_MEMORY_PATH, ARCHIVE_PATH, storyLink } from "../homeModel";
 import type { Compose } from "../useCompose";
 import type { Home } from "../useHome";
+import { DeskDigest } from "./DeskDigest";
 
 const GRID_STYLE = { display: "grid", gridTemplateColumns: "1.15fr 1fr 0.85fr", gap: "18px" } as const;
 const HEAD_STYLE = { justifyContent: "space-between", padding: "16px 20px 10px" } as const;
@@ -19,6 +22,8 @@ const HEAD_LINK_STYLE = { fontSize: "13.5px", fontWeight: 600 } as const;
 const NUM_STYLE = { fontSize: "28px" } as const;
 
 export function DeskHome({ home, compose, online }: { home: Home; compose: Compose; online: boolean }) {
+  // S13: after a long absence (or on a new morning) the home opens on «اللي فاتك» (NewDigest).
+  if (home.digest.shown) return <DeskDigest home={home} />;
   return (
     <div className="grow" style={{ padding: online ? "34px 48px 48px" : "24px 48px 48px", overflowY: "auto" }}>
       <div className="col" style={{ maxWidth: "1200px", margin: "0 auto", gap: "24px" }}>
@@ -101,7 +106,7 @@ function DeskContent({ home }: { home: Home }) {
     <>
       {breaking && (
         <Link
-          to={storyLink(breaking.id)}
+          to={breakingLink(breaking.id)}
           className="panel row"
           style={{
             gap: "16px",
