@@ -2,6 +2,11 @@
 /// <reference types="vite-plugin-pwa/client" />
 /// <reference types="vite-plugin-pwa/react" />
 
+interface ImportMetaEnv {
+  /** System admin address behind «راسل المسؤول» (`mailto:`) on the login screen's forgot-password view. */
+  readonly VITE_ADMIN_EMAIL?: string;
+}
+
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
   prompt(): Promise<void>;

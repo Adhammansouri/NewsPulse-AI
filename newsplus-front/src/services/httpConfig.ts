@@ -31,6 +31,29 @@ async function readError(response: Response) {
   return `request-failed-${response.status}`;
 }
 
+const WHOLE_NUMBER = /^\d+$/;
+
+/** `Retry-After` is either delay-seconds or an HTTP date (RFC 9110 §10.2.3) → whole seconds from now. */
+function parseRetryAfter(value: string | null): number | undefined {
+  const raw = value?.trim();
+  if (!raw) return undefined;
+  if (WHOLE_NUMBER.test(raw)) return Number(raw);
+  const at = Date.parse(raw);
+  return Number.isNaN(at) ? undefined : Math.max(0, Math.ceil((at - Date.now()) / 1000));
+}
+
+function parseCount(value: string | null): number | undefined {
+  const raw = value?.trim();
+  return raw && WHOLE_NUMBER.test(raw) ? Number(raw) : undefined;
+}
+
+async function toApiError(response: Response) {
+  return new ApiError(response.status, await readError(response), {
+    retryAfterSeconds: parseRetryAfter(response.headers.get("Retry-After")),
+    rateLimitRemaining: parseCount(response.headers.get("X-RateLimit-Remaining")),
+  });
+}
+
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { params, headers, auth = false, ...rest } = options;
   const token = auth ? getAccessToken() : null;
@@ -45,7 +68,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   if (!response.ok) {
     if (response.status === 401 && token && token === getAccessToken()) clearSession();
-    throw new ApiError(response.status, await readError(response));
+    throw await toApiError(response);
   }
 
   return response.json() as Promise<T>;
@@ -58,7 +81,7 @@ export async function apiBlob(path: string): Promise<Blob> {
   });
   if (!response.ok) {
     if (response.status === 401 && token && token === getAccessToken()) clearSession();
-    throw new ApiError(response.status, await readError(response));
+    throw await toApiError(response);
   }
   return response.blob();
 }

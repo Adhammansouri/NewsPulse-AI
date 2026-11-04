@@ -6,14 +6,14 @@
    and the mobile frame (`.np.m`) also hit the legacy screens, beating single-class legacy rules
    and every Tailwind utility. This file hands those properties back to the legacy cascade,
    only under the legacy roots: the legacy content area `.np-legacy` (shell/LegacyContent, around
-   each not-yet-rebuilt page inside the S02 shell) and LoginPage's `.np-login`.
+   each not-yet-rebuilt page inside the S02 shell).
 
    It is imported right after the design CSS (top of index.css), so the legacy index.css rules
    that tie with these selectors still win by order (module CSS loads earlier, see §4 — the
    routes keep those stylesheets eager for that reason).
    Delete a scope as soon as no legacy screen renders under it:
-   `.np-login` with S03 (login rebuild); `.np-legacy` once its last legacy page is rebuilt
-   (S10 at the latest).
+   `.np-legacy` once its last legacy page is rebuilt (S10 at the latest). The login
+   scope was removed with the S03 login rebuild.
    ============================================================================================= */
 
 /* 0 · The legacy content area takes the place of the old MainLayout column inside the new shell
@@ -41,52 +41,40 @@
   color: var(--text-primary);
 }
 
-:where(.np) > .np-login {
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
 /* 2 · Undo the `.np` element resets (same specificity, later) → back to preflight, Tailwind and
    layered legacy rules. Unlayered legacy rules that lose to the resets are restored in §4. */
-:is(.np-legacy, .np-login) :is(button, input, textarea, select) {
+.np-legacy :is(button, input, textarea, select) {
   font: revert-layer;
   color: revert-layer;
 }
 
-:is(.np-legacy, .np-login) button {
+.np-legacy button {
   cursor: revert-layer;
 }
 
-:is(.np-legacy, .np-login) :is(h1, h2, h3, h4, p, ul, ol, figure) {
+.np-legacy :is(h1, h2, h3, h4, p, ul, ol, figure) {
   margin: revert-layer;
 }
 
-:is(.np-legacy, .np-login) :is(ul, ol) {
+.np-legacy :is(ul, ol) {
   padding: revert-layer;
   list-style: revert-layer;
 }
 
-:is(.np-legacy, .np-login) a {
+.np-legacy a {
   color: revert-layer;
   text-decoration: revert-layer;
 }
 
-:is(.np-legacy, .np-login) :focus-visible {
+.np-legacy :focus-visible {
   outline: revert-layer;
   outline-offset: revert-layer;
 }
 
-/* 3 · Below 1024px: no 44px box on class-less links (npm2 `.np.m a:not([class])`); the login
-   screen also opts out of the `.np.m` app frame (it scrolls the document). Legacy pages inside
-   the S02 shell keep the frame and scroll inside `.np-legacy` (§0). */
-.np.m:has(> .np-login) {
-  position: static;
-  display: block;
-  height: auto;
-  overflow: visible;
-}
+/* 3 · Below 1024px: no 44px box on class-less links (npm2 `.np.m a:not([class])`). Legacy pages
+   inside the S02 shell keep the `.np.m` frame and scroll inside `.np-legacy` (§0). */
 
-.m :is(.np-legacy, .np-login) a:not([class]) {
+.m .np-legacy a:not([class]) {
   display: revert-layer;
   align-items: revert-layer;
   justify-content: revert-layer;
@@ -100,141 +88,10 @@
    specificity and order relative to each other. Module CSS loads before index.css, so its rules
    also lose ties with the resets. Generated from the live CSSOM over every legacy route plus
    scripted states (source sheet, filters, history drawer, editorial view, collapsed rail, menu,
-   login error and reset, usage not configured, generate and translate results), at desktop and
+   usage not configured, generate and translate results), at desktop and
    mobile, light and dark. A rule is copied when it sets a reset property on an element the
    reset hits, with lower specificity than the reset (or equal and loaded earlier), together
    with every other legacy rule competing for that property on the same elements. */
-
-/* modules/Login/login.css */
-.np-login__chrome-btn:is(button):is(.np *) {
-  cursor: pointer;
-}
-.np-login__chrome-btn:is(button,input,textarea,select,a):is(.np *) {
-  color: #0d9b8a;
-}
-.np-login__chrome-btn:hover:is(button,input,textarea,select,a):is(.np *) {
-  color: #0c2340;
-}
-.np-login.is-dark .np-login__chrome-btn:is(button,input,textarea,select,a):is(.np *) {
-  color: #5eead4;
-}
-.np-login.is-dark .np-login__chrome-btn:hover:is(button,input,textarea,select,a):is(.np *) {
-  color: #f8fafc;
-}
-.np-login__chrome-btn:focus-visible:focus-visible:is(.np *) {
-  outline: none;
-}
-@media (min-width: 1024px) {
-  .np-login.is-dark .np-login__form-wrap .np-login__input:is(button,input,textarea,select,a):is(.np *) {
-    color: #e2e8f0;
-  }
-  .np-login.is-dark .np-login__form-wrap .np-login__toggle:is(button,input,textarea,select,a):is(.np *) {
-    color: #94a3b8;
-  }
-  .np-login.is-dark .np-login__form-wrap .np-login__toggle:hover:is(button,input,textarea,select,a):is(.np *) {
-    color: var(--login-primary-soft);
-  }
-  .np-login.is-dark .np-login__form-wrap .np-login__submit:is(button,input,textarea,select,a):is(.np *) {
-    color: #fff;
-  }
-}
-.np-login__title:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 0 0 0.5rem;
-}
-.np-login__subtitle:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 0;
-}
-.np-login__dev-hint:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 0.65rem 0 0;
-}
-.np-login__input:is(button,input,textarea,select):is(.np *) {
-  font-size: 0.9375rem;
-  font-weight: 400;
-  font-family: inherit;
-  line-height: 1.5;
-}
-.np-login__input:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--login-text);
-}
-.np-login__input:focus:focus-visible:is(.np *) {
-  outline: none;
-}
-.np-login__toggle:is(button):is(.np *) {
-  cursor: pointer;
-}
-.np-login__toggle:is(button,input,textarea,select,a):is(.np *) {
-  color: #64748b;
-}
-.np-login__toggle:hover:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--login-primary);
-}
-.np-login__forgot:is(button):is(.np *) {
-  cursor: pointer;
-}
-.np-login__forgot:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--login-link);
-}
-.np-login__forgot:is(button,input,textarea,select):is(.np *) {
-  font-size: 0.875rem;
-  font-weight: 600;
-  font-family: inherit;
-}
-.np-login__forgot:hover:not(:disabled):is(button,input,textarea,select,a):is(.np *) {
-  color: var(--login-primary-hover);
-}
-.np-login__auth-switch:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 2rem 0 0;
-}
-.np-login__auth-switch-link:is(button):is(.np *) {
-  cursor: pointer;
-}
-.np-login__auth-switch-link:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--login-link);
-}
-.np-login__auth-switch-link:is(button,input,textarea,select):is(.np *) {
-  font-size: inherit;
-  font-weight: 600;
-  font-family: inherit;
-}
-.np-login__submit:is(button):is(.np *) {
-  cursor: pointer;
-}
-.np-login__submit:is(button,input,textarea,select):is(.np *) {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  font-family: inherit;
-}
-.np-login__submit:is(button,input,textarea,select,a):is(.np *) {
-  color: #fff;
-}
-.np-login__submit:focus-visible:focus-visible:is(.np *) {
-  outline: none;
-}
-@media (min-width: 1024px) {
-  .np-login.is-dark .np-login__toggle:is(button,input,textarea,select,a):is(.np *) {
-    color: #94a3b8;
-  }
-}
-@media (max-width: 1023px) {
-  .np-login__title:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-    margin-bottom: 0.3rem;
-  }
-  .np-login__forgot:is(button,input,textarea,select):is(.np *) {
-    font-size: 0.84rem;
-  }
-  .np-login.is-dark .np-login__form-wrap .np-login__submit:is(button,input,textarea,select,a):is(.np *) {
-    color: #fff;
-  }
-  .np-login.is-dark .np-login__form-wrap .np-login__input:is(button,input,textarea,select,a):is(.np *) {
-    color: #e2e8f0;
-  }
-  .np-login.is-dark .np-login__form-wrap .np-login__toggle:is(button,input,textarea,select,a):is(.np *) {
-    color: #94a3b8;
-  }
-  .np-login.is-dark .np-login__form-wrap .np-login__toggle:hover:is(button,input,textarea,select,a):is(.np *) {
-    color: var(--login-primary-soft);
-  }
-}
 
 /* modules/News/newsroom.css */
 .newsroom-pane-tabs button:is(button,input,textarea,select):is(.np *),

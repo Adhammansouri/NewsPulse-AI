@@ -7,7 +7,6 @@ import { PageSkeleton, type PageSkeletonLayout } from "@/components/shell/PageSk
 // TRANSITIONAL: the legacy pages' own stylesheets stay in the entry bundle. Imported here (before
 // index.css, as when the pages were eager) they keep their place in the cascade that styles/legacy-bridge.css
 // relies on; a lazily loaded stylesheet would land after index.css. Drop each import with its page's rebuild.
-import "@/modules/Login/login.css";
 import "@/modules/News/newsroom.css";
 import "@/modules/Translate/translate.css";
 import "@/modules/Usage/usage.css";

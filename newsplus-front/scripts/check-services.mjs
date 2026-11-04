@@ -73,6 +73,29 @@ try {
     sessions.clearSession();
   });
 
+  await test("error responses expose Retry-After and X-RateLimit-Remaining on ApiError", async () => {
+    globalThis.fetch = async () => new Response(JSON.stringify({ status: "fail", message: "too-many-requests" }), { status: 429, headers: { "Retry-After": "45", "X-RateLimit-Remaining": "0" } });
+    for (const request of [() => http.apiRequest("/auth/login", { method: "POST" }), () => http.apiBlob("/news/carousel/test/asset")]) {
+      const error = await request().then(() => null, (reason) => reason);
+      assert.equal(error?.status, 429);
+      assert.equal(error.code, "too-many-requests");
+      assert.equal(error.retryAfterSeconds, 45);
+      assert.equal(error.rateLimitRemaining, 0);
+    }
+
+    const retryAt = new Date(Date.now() + 90_000).toUTCString();
+    globalThis.fetch = async () => new Response("{}", { status: 429, headers: { "Retry-After": retryAt } });
+    const dated = await http.apiRequest("/auth/login").then(() => null, (reason) => reason);
+    assert.ok(dated.retryAfterSeconds >= 88 && dated.retryAfterSeconds <= 90, `HTTP-date Retry-After → ${dated.retryAfterSeconds}s`);
+    assert.equal(dated.rateLimitRemaining, undefined);
+
+    globalThis.fetch = async () => new Response("{}", { status: 401, headers: { "Retry-After": "soon", "X-RateLimit-Remaining": "-1" } });
+    const malformed = await http.apiRequest("/auth/login").then(() => null, (reason) => reason);
+    assert.equal(malformed.status, 401);
+    assert.equal(malformed.retryAfterSeconds, undefined);
+    assert.equal(malformed.rateLimitRemaining, undefined);
+  });
+
   await test("late unauthorized requests cannot clear a newer login", async () => {
     sessions.saveSession({ token: "old-token", user }, false);
     let respond;
