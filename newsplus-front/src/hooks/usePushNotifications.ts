@@ -28,6 +28,26 @@ export function pushStatusDot(status: PushNotificationStatus, hasSubscription = 
   return "unavailable";
 }
 
+/** When this device subscribed (ISO), for the notifications screen's device line. Local to this browser. */
+const SUBSCRIBED_AT_KEY = "newsplus-push-subscribed-at";
+
+function readSubscribedAt(): string | null {
+  try {
+    return localStorage.getItem(SUBSCRIBED_AT_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeSubscribedAt(value: string | null) {
+  try {
+    if (value) localStorage.setItem(SUBSCRIBED_AT_KEY, value);
+    else localStorage.removeItem(SUBSCRIBED_AT_KEY);
+  } catch {
+    /* private mode */
+  }
+}
+
 function readPermission(): NotificationPermission | "unavailable" {
   if (typeof Notification === "undefined") return "unavailable";
   return Notification.permission;
@@ -63,8 +83,11 @@ export function usePushNotifications() {
   const [vapidConfigured, setVapidConfigured] = useState<boolean | null>(null);
   const [hasSubscription, setHasSubscription] = useState(false);
   const [lastTestSent, setLastTestSent] = useState<number | null>(null);
+  const [lastTestAt, setLastTestAt] = useState<number | null>(null);
+  const [subscribedAt, setSubscribedAt] = useState<string | null>(() => readSubscribedAt());
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(true);
+  const [checked, setChecked] = useState(false);
 
   const refresh = useCallback(async () => {
     const canPush = canUseWebPush();
@@ -92,6 +115,10 @@ export function usePushNotifications() {
       }
     }
     setHasSubscription(subscription);
+    if (!subscription) {
+      writeSubscribedAt(null);
+      setSubscribedAt(null);
+    }
 
     const next = resolveStatus({
       permission: currentPermission,
@@ -102,6 +129,7 @@ export function usePushNotifications() {
     });
     setStatus(next);
     setPending(false);
+    setChecked(true);
     return next;
   }, [session]);
 
@@ -117,6 +145,10 @@ export function usePushNotifications() {
       const subscription = await subscribeToPush();
       if (!subscription) {
         setError("لم يكتمل الاشتراك في هذا المتصفح.");
+      } else {
+        const now = new Date().toISOString();
+        writeSubscribedAt(now);
+        setSubscribedAt(now);
       }
     } catch (cause) {
       setError(describeError(cause));
@@ -132,6 +164,7 @@ export function usePushNotifications() {
     try {
       await unsubscribeFromPush();
       setLastTestSent(null);
+      setLastTestAt(null);
     } catch (cause) {
       setError(describeError(cause));
     } finally {
@@ -147,6 +180,7 @@ export function usePushNotifications() {
     try {
       const result = await sendTestPush();
       setLastTestSent(result.sent);
+      setLastTestAt(Date.now());
       setStatus("subscribed");
     } catch (cause) {
       setError(describeError(cause));
@@ -164,6 +198,12 @@ export function usePushNotifications() {
     vapidConfigured,
     hasSubscription,
     lastTestSent,
+    /** `Date.now()` of the last successful `POST /push/test`. */
+    lastTestAt,
+    /** ISO time this device subscribed (stored locally by `enable`); null when unknown. */
+    subscribedAt,
+    /** The first status check finished (until then `status` is `busy`). */
+    checked,
     error,
     refresh,
     enable,

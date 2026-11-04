@@ -19,7 +19,7 @@
 /* 0 · The legacy content area takes the place of the old MainLayout column inside the new shell
    (desktop: the content `main`; mobile: the `.np.m` frame, above the tab bar): it fills the space
    left by the shell and scrolls the page. The old tool routes (`--tools`: news, generate,
-   translate, usage) instead pass a fixed-height column down to the page, which scrolls its own panes. */
+   translate) instead pass a fixed-height column down to the page, which scrolls its own panes. */
 .np-legacy {
   flex: 1 1 auto;
   min-width: 0;
@@ -129,88 +129,4 @@
 }
 .translate-source-link button:is(button,input,textarea,select,a):is(.np *) {
   color: var(--nd-text-primary);
-}
-
-/* modules/Usage/usage.css */
-.usage-page button:is(button,input,textarea,select):is(.np *),
-.usage-page select:is(button,input,textarea,select):is(.np *),
-.usage-page input:is(button,input,textarea,select):is(.np *) {
-  font: inherit;
-}
-.usage-page button:is(button):is(.np *) {
-  cursor: pointer;
-}
-.usage-eyebrow:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 0 0 12px;
-}
-.usage-heading h1:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 0;
-}
-.usage-intro:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 12px 0 0;
-}
-.usage-actions button:is(button,input,textarea,select):is(.np *) {
-  font-size: 12px;
-}
-.usage-presets button:is(button,input,textarea,select,a):is(.np *),
-.usage-chart-switch button:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-text-secondary);
-}
-.usage-presets button:is(button,input,textarea,select):is(.np *),
-.usage-chart-switch button:is(button,input,textarea,select):is(.np *) {
-  font-size: 13px;
-}
-.usage-presets button[aria-pressed="true"]:is(button,input,textarea,select,a):is(.np *),
-.usage-chart-switch button[aria-pressed="true"]:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-black);
-}
-.usage-project select:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-text-primary);
-}
-.usage-date-form input:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-text-primary);
-}
-.usage-date-form input:is(button,input,textarea,select):is(.np *) {
-  font-size: 12px;
-}
-.usage-text-button:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-text-primary);
-}
-.usage-notice h2:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 0 0 8px;
-}
-.usage-external:is(a):is(.np *) {
-  text-decoration: underline;
-}
-.usage-external:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-text-primary);
-}
-.usage-hero p:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 12px 0;
-}
-.usage-section-heading h2:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 0;
-}
-.usage-section-heading h3:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 0;
-}
-.usage-chart-switch button:is(button,input,textarea,select):is(.np *) {
-  font-size: 12px;
-}
-.usage-state:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 14px 0;
-}
-.usage-cost-list:is(ul,ol):is(.np *) {
-  padding: 0;
-}
-.usage-cost-list:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 0;
-}
-.usage-cost-list:is(ul,ol):is(.np *) {
-  list-style: none;
-}
-@media (max-width: 640px) {
-  .usage-presets button:is(button,input,textarea,select):is(.np *) {
-    font-size: 12px;
-  }
 }

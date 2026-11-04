@@ -9,7 +9,6 @@ import { PageSkeleton, type PageSkeletonLayout } from "@/components/shell/PageSk
 // relies on; a lazily loaded stylesheet would land after index.css. Drop each import with its page's rebuild.
 import "@/modules/News/newsroom.css";
 import "@/modules/Translate/translate.css";
-import "@/modules/Usage/usage.css";
 
 const LoginPage = lazy(() => import("@/modules/Login/pages/LoginPage"));
 const HomePage = lazy(() => import("@/modules/Home/pages/HomePage"));
@@ -66,8 +65,8 @@ export default function AppRoutes() {
           <Route path="/news" element={page(<NewsPage />, "split")} />
           <Route path="/generate" element={page(<GeneratePage />, "split", "tools")} />
           <Route path="/translate" element={page(<TranslatePage />, "stack", "tools")} />
-          <Route path="/notifications" element={page(<NotificationsPage />, "stack", "page")} />
-          <Route path="/usage" element={page(<UsagePage />, "stack", "tools")} />
+          <Route path="/notifications" element={page(<NotificationsPage />, "stack")} />
+          <Route path="/usage" element={page(<UsagePage />, "stack")} />
           <Route path="/more" element={page(<MorePage />, "stack")} />
         </Route>
       </Route>
