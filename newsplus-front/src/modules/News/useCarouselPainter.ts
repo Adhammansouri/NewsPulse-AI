@@ -1,9 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { CarouselSlide, EditorialConversationDetail, NewsSummarizeData } from "@newsplus/shared";
+import { incrementDailyStat } from "@/services/dailyStats";
 import { renderCarouselSlide } from "@/services/newsService";
 
 const paintsStarted = new Set<string>();
+/** Slides counted in Home «شغلك النهارده» (S07 §4 / S06 §6): once per slide of a version, when it turns ready. */
+const slidesCounted = new Set<string>();
+
+function countPaintedSlide(key: string, slide: CarouselSlide | undefined) {
+  if (slide?.status !== "ready" || slidesCounted.has(key)) return;
+  slidesCounted.add(key);
+  incrementDailyStat("slides");
+}
 
 function slideKey(versionId: string, index: number) {
   return `${versionId}:${index}`;
@@ -46,6 +55,7 @@ export function useCarouselPainter(summary: NewsSummarizeData | undefined) {
         const copy = await renderCarouselSlide({ conversationId: id, versionId: version, index });
         const slide = copy.carousel?.slides.find((item) => item.index === index);
         if (slide) setOverlay((prev) => ({ ...prev, [key]: slide }));
+        countPaintedSlide(key, slide);
         queryClient.setQueryData<EditorialConversationDetail>(["editorial-conversation", id], (existing) => {
           if (!existing || existing.currentVersionId !== version) return existing;
           return {
@@ -59,7 +69,10 @@ export function useCarouselPainter(summary: NewsSummarizeData | undefined) {
         await queryClient.refetchQueries({ queryKey: ["editorial-conversation", id] });
         const fresh = queryClient.getQueryData<EditorialConversationDetail>(["editorial-conversation", id]);
         const serverSlide = fresh?.copy.carousel?.slides.find((item) => item.index === index);
-        if (serverSlide?.assetId) return;
+        if (serverSlide?.assetId) {
+          countPaintedSlide(key, serverSlide);
+          return;
+        }
         const previous = summaryRef.current?.carousel?.slides.find((item) => item.index === index);
         if (previous) {
           setOverlay((prev) => ({

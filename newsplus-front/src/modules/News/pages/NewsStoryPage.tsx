@@ -1,6 +1,6 @@
 // /news/:itemId — the story as its own mobile screen (S05 §3): MobStory (the article, «ماذا ننشر؟», the sticky
 // CTA), the carousel settings sheet (MobStory-carousel), MobGenerating while the editor writes, then the draft
-// (the legacy view until S06). Desktop has no such screen: it opens the story in the studio, `/news?item=`.
+// (MobDraft, S06). Desktop has no such screen: it opens the story in the studio, `/news?item=`.
 // Arrival state (studioLink.ts), used once then cleared: «افتح» adopts a finished run, an archived or handed-off
 // conversation opens, swipe «اكتب منشور» starts the social post.
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -13,7 +13,7 @@ import { getNewsSources } from "@/services/newsService";
 import { ArchiveDrawer } from "../studio/ArchiveDrawer";
 import { draftRunEstimate } from "../studio/draftRuns";
 import { formatCopy, mobileCtaHint, mobileSteps } from "../studio/formats";
-import { LegacyStudio } from "../studio/LegacyStudio";
+import { MobDraft } from "../studio/draft/MobDraft";
 import { MobCarouselSheet } from "../studio/MobCarouselSheet";
 import { MobGenerating } from "../studio/MobGenerating";
 import { MobStory, MobStoryBar } from "../studio/MobStory";
@@ -78,9 +78,10 @@ export default function NewsStoryPage() {
   if (!mobile) return <Navigate to={studioLink(itemId)} replace state={location.state} />;
 
   if (desk.showEditorial) {
+    // «رجوع إلى الخبر»: the story and its formats, the draft's format still chosen.
     return (
       <>
-        <LegacyStudio desk={desk} selected={desk.resultFormat === "briefing" ? null : item} mobile onBack={backToList} />
+        <MobDraft desk={desk} onBack={desk.closeDraft} />
         <ArchiveDrawer desk={desk} />
       </>
     );
@@ -113,7 +114,6 @@ export default function NewsStoryPage() {
       backHref={listHref}
       onBack={backToList}
       onOpenSource={source ? () => window.open(source.url, "_blank", "noopener") : undefined}
-      onArchive={() => desk.setDrawerOpen(true)}
     />
   );
 

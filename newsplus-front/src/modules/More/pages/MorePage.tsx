@@ -40,8 +40,8 @@ const ACTIVE_RULES: CountForms = {
   many: "{n} قاعدة مفعّلة",
 };
 
-/** The archive's «ذاكرة الفريق» tab — the archive drawer lives on the news screen until S06. */
-const ARCHIVE_MEMORY_PATH = "/news";
+/** The archive's «ذاكرة الفريق» tab (MobArchive-memory). */
+const ARCHIVE_MEMORY_PATH = "/archive?tab=memory";
 
 const SECTION_TITLE_STYLE = { fontWeight: 600, paddingInline: "4px" } as const;
 

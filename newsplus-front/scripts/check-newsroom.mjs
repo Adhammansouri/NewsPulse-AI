@@ -20,15 +20,18 @@ const vite = await createServer({
 
 try {
   const { default: NewsPage } = await vite.ssrLoadModule("/src/modules/News/pages/NewsPage.tsx");
-  const { CarouselControls } = await vite.ssrLoadModule("/src/modules/News/studio/LegacyStudio.tsx");
+  const { DeskDraft } = await vite.ssrLoadModule("/src/modules/News/studio/draft/DeskDraft.tsx");
+  const { MobDraft } = await vite.ssrLoadModule("/src/modules/News/studio/draft/MobDraft.tsx");
+  const { DeskCarousel } = await vite.ssrLoadModule("/src/modules/News/studio/carousel/DeskCarousel.tsx");
   const { FilterSheet } = await vite.ssrLoadModule("/src/modules/News/wire/FilterSheet.tsx");
   const { applyFilters, readFilters, sourceLanguages, writeFilters } = await vite.ssrLoadModule("/src/modules/News/wire/filters.ts");
   const { emptyText, HEADLINES, NEW_HEADLINES } = await vite.ssrLoadModule("/src/modules/News/wire/copy.ts");
   const pins = await vite.ssrLoadModule("/src/modules/News/wire/briefingPins.ts");
   const { countPhrase, relativeTimeArShort } = await vite.ssrLoadModule("/src/utils/arabic.ts");
   const { ToastProvider } = await vite.ssrLoadModule("/src/ui/Toast.tsx");
-  const { ConversationDrawer } = await vite.ssrLoadModule("/src/modules/News/components/editorial/ConversationDrawer.tsx");
-  const { RevisionThread } = await vite.ssrLoadModule("/src/modules/News/components/editorial/RevisionThread.tsx");
+  const archive = await vite.ssrLoadModule("/src/modules/News/studio/archive/archiveModel.ts");
+  const { DeskArchive } = await vite.ssrLoadModule("/src/modules/News/studio/archive/DeskArchive.tsx");
+  const { MobArchive } = await vite.ssrLoadModule("/src/modules/News/studio/archive/MobArchive.tsx");
   const { sourceHost } = await vite.ssrLoadModule("/src/modules/News/sourceLogos.ts");
   const { SourceMark } = await vite.ssrLoadModule("/src/modules/News/SourceMark.tsx");
   const formats = await vite.ssrLoadModule("/src/modules/News/studio/formats.ts");
@@ -224,35 +227,164 @@ try {
     assert.doesNotMatch(fallback, /<img/);
   });
 
-  await test("saved conversations and team memory use a native dialog with a named close control", () => {
-    const html = renderToStaticMarkup(h(ConversationDrawer, { open: true, search: "", conversations: [], memory: [], activeId: null, onSearch() {}, onClose() {}, onSelect() {}, onDisableMemory() {} }));
-    assert.match(html, /^<dialog/);
-    assert.ok(html.includes('aria-label="إغلاق المحادثات"'));
-    assert.ok(html.includes("ذاكرة الفريق"));
+  await test("the archive groups drafts by day, names formats and versions per board, and dates the memory rules", () => {
+    const now = new Date(2026, 10, 4, 15, 0);
+    const at = (days, hours = 0, minutes = 0) => new Date(2026, 10, 4 - days, 15 - hours, -minutes).toISOString();
+    const draft = (id, format, versionCount, updatedAt) => ({ id, title: `t-${id}`, format, versionCount, updatedAt });
+    const items = [
+      draft("a", "video", 3, at(0, 0, 4)),
+      draft("b", "social", 1, at(0, 1)),
+      draft("c", "desk", 2, at(1, 0)),
+      draft("d", "facts", 11, at(3, 0)),
+    ];
+    const desk = archive.archiveGroups(items, { now, currentId: "b", mobile: false });
+    assert.deepEqual(desk.map((group) => group.label), ["اليوم", "أمس", "١ نوفمبر"]);
+    assert.deepEqual(desk[0].rows.map((row) => [row.kind, row.format, row.versions, row.time, row.icon]), [
+      ["فيديو", "سكريبت فيديو", "٣ نسخ", "قبل ٤ دقائق", "ic-wrap--teal"],
+      ["سوشيال", "منشور سوشيال", "نسخة واحدة", "قبل ساعة", "ic-wrap--ai"],
+    ]);
+    assert.deepEqual(desk[1].rows.map((row) => [row.versions, row.time, row.icon]), [["نسختان", "أمس ٣:٠٠ م", ""]]);
+    assert.equal(desk[2].rows[0].versions, "١١ نسخة");
+    const mob = archive.archiveGroups(items, { now, currentId: "a", mobile: true });
+    assert.equal(archive.rowMeta(mob[0].rows[0]), "سكريبت فيديو · ٣ نسخ · قبل ٤ د");
+    assert.equal(archive.rowMeta(mob[0].rows[1]), "منشور سوشيال · نسخة · قبل ساعة");
+    assert.equal(archive.rowMeta(mob[1].rows[0]), "خبر مكتبي · نسختان · ٣:٠٠ م");
+
+    const rule = (id, status, createdAt, createdBy = "u1") => ({ id, instruction: `rule ${id}`, rationale: "", status, createdAt, updatedAt: createdAt, createdBy });
+    const who = { now, userId: "u1", userName: "سارة", mobile: false };
+    assert.equal(archive.ruleMeta(rule("r1", "approved", at(0, 2)), who), "أُضيفت اليوم · من تعديلات سارة");
+    assert.equal(archive.ruleMeta(rule("r2", "approved", at(0, 2), "u2"), who), "أُضيفت اليوم");
+    assert.equal(archive.ruleMeta(rule("r3", "approved", at(14)), who), "تُطبَّق منذ أسبوعين");
+    assert.equal(archive.ruleMeta(rule("r4", "approved", at(31)), { ...who, mobile: true }), "تُطبّق منذ شهر");
+    assert.equal(archive.ruleMeta(rule("r5", "disabled", at(40)), who), "موقوفة");
+    const split = archive.splitMemory([rule("old", "approved", at(9)), rule("p", "pending", at(0)), rule("x", "rejected", at(0)), rule("new", "disabled", at(1))]);
+    assert.deepEqual(split.pending.map((r) => r.id), ["p"]);
+    assert.deepEqual(split.rules.map((r) => r.id), ["new", "old"]);
+    assert.equal(archive.tabLabel("المسودات", 12), "المسودات · ١٢");
+    assert.equal(archive.ruleCounter(58), "٥٨ / ٢٤٠");
+    assert.equal(archive.archivePath("memory"), "/archive?tab=memory");
+    assert.equal(archive.archiveDrawerPath("drafts"), "/news?archive=drafts");
   });
 
-  await test("revision view retains version restoration, instructions and quick actions", () => {
-    const html = renderToStaticMarkup(h(RevisionThread, {
-      id: "news-editorial-revision", messages: [], versions: [{ id: "v1", number: 1, note: "الأولى" }, { id: "v2", number: 2, note: "تعديل" }], currentVersionId: "v2", pendingMemory: [], instruction: "", busy: false, format: "desk",
-      onInstructionChange() {}, onSubmit() {}, onQuickAction() {}, onRestore() {}, onMemorySave() {}, onMemoryEdit() {}, onMemoryDismiss() {},
-    }));
-    assert.ok(html.includes('aria-label="استعادة النسخة 1"'));
-    assert.ok(html.includes('aria-label="إرسال التعديل"'));
-    assert.ok(html.includes("اختصر دون إضافات"));
-    assert.ok(html.includes('id="news-editorial-revision"'));
+  await test("the archive drawer is a labelled modal with the board's tabs; the mobile screen lists drafts and rules", () => {
+    const iso = new Date().toISOString();
+    const archiveClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
+    archiveClient.setQueryData(["editorial-conversations", ""], { items: [{ id: "c1", title: "مسودة", format: "video", versionCount: 3, updatedAt: iso }] });
+    archiveClient.setQueryData(["editorial-memory", "archive"], {
+      rules: [
+        { id: "p1", instruction: "ابدأ خطافات الأخبار الاقتصادية بسؤال مباشر.", rationale: "", status: "pending", createdAt: iso, updatedAt: iso, createdBy: "u1" },
+        { id: "r1", instruction: "تجنب كلمة «صادم» في الخطافات.", rationale: "", status: "disabled", createdAt: iso, updatedAt: iso, createdBy: "u1" },
+      ],
+    });
+    const render = (node) =>
+      renderToStaticMarkup(h(QueryClientProvider, { client: archiveClient }, h(ToastProvider, null, h(MemoryRouter, null, node))));
+    const desk = render(h(DeskArchive, { tab: "drafts", onTab() {}, currentId: "c1", onOpen() {}, onClose() {} }));
+    assert.match(desk, /role="dialog" aria-modal="true"/);
+    assert.ok(desk.includes('aria-label="إغلاق الأرشيف"'));
+    assert.ok(desk.includes('aria-label="إغلاق"'));
+    assert.match(desk, /role="tab" aria-pressed="true" aria-selected="true"[^>]*>المسودات · ١</);
+    assert.match(desk, /role="tab" aria-pressed="false" aria-selected="false"[^>]*>ذاكرة الفريق · ١</);
+    assert.ok(desk.includes("ic-wrap ic-wrap--ai"));
+    assert.ok(desk.includes('role="switch" aria-checked="false" aria-label="تفعيل القاعدة"'));
+    const memory = render(h(MobArchive, { tab: "memory", onTab() {} }));
+    assert.ok(memory.includes("مقترحة · محتاجة موافقتك"));
+    assert.ok(memory.includes("احفظ للفريق"));
+    assert.ok(memory.includes("القواعد الحالية"));
+    assert.ok(memory.includes("موقوفة"));
+    archiveClient.clear();
   });
 
-  await test("carousel settings preserve slide count, story style, density and the saved brand mark", () => {
-    const html = renderToStaticMarkup(h(CarouselControls, { options: { slides: 6, style: "frame", density: "line", mark: false }, busy: false, showApply: true, onChange() {}, onApply() {} }));
-    assert.match(html, /aria-label="عدد الشرائح"/);
-    assert.match(html, /aria-label="أسلوب النص"/);
-    assert.match(html, /aria-label="كثافة نص الشرائح"/);
-    assert.match(html, /aria-pressed="true"[^>]*>6<\/button>/);
-    assert.match(html, /aria-pressed="true"[^>]*>بطاقة<\/button>/);
+  // S06 draft: a desk (useEditorialDesk's shape) holding a social draft at its second version.
+  const at = new Date().toISOString();
+  const copyV1 = { title: "المركزي يثبّت الفائدة", dek: "", summary: "النص الأول", bullets: ["#اقتصاد", "خطاف بديل"], sources: [{ name: "المصدر العربي", url: "https://example.com/a" }], language: "ar", format: "social", conversationId: "c1", versionId: "v1", versionNumber: 1 };
+  const copyV2 = { ...copyV1, title: "هل انتهى زمن خفض الفائدة؟", versionId: "v2", versionNumber: 2 };
+  const message = (id, role, content, versionId) => ({ id, conversationId: "c1", role, content, versionId, createdAt: at, createdBy: "u1" });
+  const draftDesk = (summary, extra = {}) => ({
+    summary,
+    detail: undefined,
+    conversationId: summary.conversationId,
+    approvedRules: 4,
+    busy: false,
+    revising: false,
+    restoring: false,
+    pendingInstruction: null,
+    failedInstruction: null,
+    reviseError: null,
+    draftError: null,
+    instruction: "",
+    resultFormat: summary.format,
+    carouselOptions: { slides: 4, style: "cinematic", density: "banner", mark: true },
+    setInstruction() {}, submitRevision() {}, revise() {}, retryRevision() {}, restore() {}, closeDraft() {}, switchFormat() {},
+    saveMemory() {}, dismissMemory() {}, setCarouselOptions() {},
+    ...extra,
+  });
+  const renderDraft = (node) =>
+    renderToStaticMarkup(h(QueryClientProvider, { client: new QueryClient() }, h(ToastProvider, null, h(MemoryRouter, null, node))));
+
+  await test("the draft keeps version restoration, the revise dock and quick actions, and marks what the revision changed", () => {
+    const detail = {
+      id: "c1", title: copyV2.title, format: "social", language: "ar", createdAt: at, updatedAt: at, createdBy: "u1", versionCount: 2,
+      status: "draft", assigneeId: "u1", publishedPlatforms: [], commentCount: 0, sourcePacket: "", currentVersionId: "v2", copy: copyV2,
+      versions: [
+        { id: "v1", conversationId: "c1", number: 1, copy: copyV1, note: "مسودة أولى", createdAt: at, createdBy: "u1" },
+        { id: "v2", conversationId: "c1", number: 2, copy: copyV2, note: "حوّلت الخطاف لسؤال.", createdAt: at, createdBy: "u1" },
+      ],
+      messages: [
+        message("m1", "user", "توليد social", "v1"),
+        message("m2", "assistant", "مسودة أولى", "v1"),
+        message("m3", "user", "اجعل الخطاف سؤالاً", "v2"),
+        message("m4", "assistant", "حوّلت الخطاف لسؤال.", "v2"),
+      ],
+      pendingMemory: [{ id: "r1", instruction: "ابدأ خطافات الأخبار الاقتصادية بسؤال مباشر.", rationale: "لاحظتها من تعديلين متشابهين.", status: "pending", createdAt: at, updatedAt: at, createdBy: "u1" }],
+    };
+    const desk = draftDesk(copyV2, { detail });
+    const html = renderDraft(h(DeskDraft, { desk }));
+    assert.ok(html.includes('aria-label="استعادة النسخة ١"'));
+    assert.match(html, /aria-current="true" aria-label="النسخة ٢ الحالية"/);
+    assert.ok(html.includes('role="list" aria-label="النسخ"'));
+    assert.ok(html.includes('aria-label="تحويل الصيغة"'));
+    assert.ok(html.includes('aria-label="إرسال"'));
+    assert.ok(html.includes('aria-label="المحرّر"'));
+    for (const chip of ["اجعل الخطاف سؤالاً", "اختصر دون إضافات", "انسب الادعاءات لأصحابها"]) assert.ok(html.includes(chip), chip);
+    assert.ok(html.includes("كتبه المحرّر من مصدر واحد وطبّق ٤ قواعد من ذاكرة الفريق · راجعه قبل النشر"));
+    assert.match(html, /class="block is-changed"><div class="block__label">الخطاف · عُدّل في ن٢/);
+    assert.ok(html.includes("جهّزت المنشور وطبّقت ٤ قواعد من ذاكرة الفريق."));
+    assert.ok(html.includes("حوّلت الخطاف لسؤال. النسخة ٢ محفوظة."));
+    assert.doesNotMatch(html, /توليد social|مسودة أولى/);
+    assert.ok(html.includes("المحرّر تعلّم قاعدة جديدة"));
+    assert.ok(html.includes("نسختان محفوظة"));
+
+    const mobile = renderDraft(h(MobDraft, { desk, onBack() {} }));
+    assert.ok(mobile.includes('aria-label="رجوع إلى الخبر"'));
+    assert.ok(mobile.includes("حوّله لفيديو"));
+    assert.ok(mobile.includes("m-float ai-panel"));
+    assert.ok(mobile.includes("اطلب تعديلاً…"));
+
+    const failed = renderDraft(h(MobDraft, { desk: draftDesk(copyV2, { detail, reviseError: new Error("x"), failedInstruction: "اختصر دون إضافات" }), onBack() {} }));
+    assert.ok(failed.includes("المحرّر ما قدرش يعدّل"));
+    assert.ok(failed.includes("النموذج ما ردّش. طلبك «اختصر دون إضافات» محفوظ."));
+    const revising = renderDraft(h(MobDraft, { desk: draftDesk(copyV2, { detail, busy: true, revising: true, pendingInstruction: "قوِّ الهوك" }), onBack() {} }));
+    assert.ok(revising.includes("استنى المحرّر يخلص…"));
+    assert.ok(revising.includes("يعدّل النص…"));
+    assert.ok(revising.includes("قوِّ الهوك"));
+  });
+
+  await test("carousel settings preserve slide count, story style, density and the saved brand mark; slide statuses follow S06 §6", () => {
+    const slide = (index, status, extra = {}) => ({ index, role: "beat", headline: `شريحة ${index}`, banner: "", attribution: "", scene: "", status, ...extra });
+    const carousel = { ...copyV1, format: "carousel", summary: "الكابشن", bullets: ["#اقتصاد"], carousel: { style: "frame", density: "line", mark: false, arc: "sequence", styleLock: "", slides: [slide(0, "ready"), slide(1, "pending"), slide(2, "mismatch", { mismatch: "الصورة لا تطابق النص." }), slide(3, "failed")] } };
+    const html = renderDraft(h(DeskCarousel, { desk: draftDesk(carousel, { carouselOptions: { slides: 6, style: "frame", density: "line", mark: false } }), storyTitle: "عنوان الخبر" }));
+    assert.ok(html.includes('aria-label="إعدادات الكاروسيل"'));
+    assert.match(html, /aria-pressed="true"[^>]*>٦<\/button>/);
+    assert.match(html, /aria-pressed="true"[^>]*><span class="tile__shape"[^>]*><span[^>]*><span[^>]*><\/span><span[^>]*>عنوان في إطار<\/span><\/span><\/span><span class="tile__name"[^>]*>بطاقة<\/span>/);
     assert.match(html, /aria-pressed="true"[^>]*>سطر توضيحي<\/button>/);
-    assert.ok(html.includes("إظهار علامة Newsplus"));
-    assert.doesNotMatch(html, /checked=/);
-    assert.ok(html.includes("تحديث الشرائح"));
+    assert.match(html, /role="switch" aria-checked="false" aria-label="علامة Newsplus"/);
+    assert.ok(html.includes("حدّث الشرائح"));
+    for (const status of ["جاهزة", "تُرسم…", "راجعها", "فشل الرسم"]) assert.ok(html.includes(status), status);
+    assert.ok(html.includes("الشريحة ٣ لا تطابق نصها"));
+    assert.ok(html.includes("الصورة لا تطابق النص."));
+    assert.ok(html.includes("تعذّر رسم الشريحة ٤"));
+    assert.ok(html.includes("١ جاهزة · ١ تُرسم · ٢ تحتاج مراجعة"));
+    assert.ok(html.includes("الكابشن"));
   });
   client.clear();
 } finally {

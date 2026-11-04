@@ -9,7 +9,7 @@ import { Icon } from "@/ui/Icon";
 import { Panel } from "@/ui/Panel";
 import { Skeleton } from "@/ui/Skeleton";
 import { cx } from "@/ui/cx";
-import { ARCHIVE_PATH, storyLink } from "../homeModel";
+import { ARCHIVE_MEMORY_PATH, ARCHIVE_PATH, storyLink } from "../homeModel";
 import type { Compose } from "../useCompose";
 import type { Home } from "../useHome";
 
@@ -216,7 +216,7 @@ function DeskContent({ home }: { home: Home }) {
             )}
             {memory && (
               <Link
-                to={ARCHIVE_PATH}
+                to={ARCHIVE_MEMORY_PATH}
                 className="ai-panel col"
                 style={{ padding: "18px 20px", gap: "8px", color: "var(--ink)", boxShadow: "none" }}
               >

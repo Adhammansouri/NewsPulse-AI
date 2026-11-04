@@ -1,10 +1,11 @@
 // The desktop studio (Main, studio area): the story with its formats and footer (idle), «المحرّر يكتب»
-// (Main-generating), or the draft (still the legacy view until S06). Inline styles are the board's own.
+// (Main-generating), or the draft (S06: DeskDraft; the carousel is DeskCarousel). Inline styles are the board's own.
 import type { NewsFeedItem } from "@newsplus/shared";
 import type { SourceLanguages } from "../wire/filters";
 import { deskSteps, footerHint, formatCopy } from "./formats";
+import { DeskCarousel } from "./carousel/DeskCarousel";
+import { DeskDraft } from "./draft/DeskDraft";
 import { FormatDeck } from "./FormatDeck";
-import { LegacyStudio } from "./LegacyStudio";
 import { StoryPanel } from "./StoryPanel";
 import { StudioEmpty, StudioLoading } from "./StudioStates";
 import { StudioError } from "./StudioError";
@@ -21,18 +22,19 @@ export function DeskStudio({
   selected,
   languages,
   wireLoading,
-  onBack,
 }: {
   desk: EditorialDesk;
   selected: NewsFeedItem | null;
   languages: SourceLanguages;
   /** The headlines' first load (Main-loading). */
   wireLoading: boolean;
-  onBack: () => void;
 }) {
   const story = selected ? storyModel(selected, languages, false) : null;
 
-  if (desk.showEditorial) return <LegacyStudio desk={desk} selected={selected} mobile={false} onBack={onBack} />;
+  if (desk.showEditorial) {
+    if (desk.resultFormat === "carousel" && desk.summary) return <DeskCarousel desk={desk} storyTitle={story?.title ?? null} />;
+    return <DeskDraft desk={desk} />;
+  }
 
   if (desk.generating && desk.runFormat) {
     const copy = formatCopy(desk.runFormat, desk.runSlides);

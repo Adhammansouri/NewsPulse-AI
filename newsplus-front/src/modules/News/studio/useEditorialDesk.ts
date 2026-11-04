@@ -9,15 +9,12 @@ import { useNavigate } from "react-router-dom";
 import type { CarouselOptions, NewsFeedItem, NewsStoryFormat, NewsSummarizeData, NewsSummarizeRequest } from "@newsplus/shared";
 import {
   getEditorialConversation,
-  listEditorialConversations,
   listEditorialMemory,
   restoreEditorialVersion,
   reviseEditorialConversation,
   updateEditorialMemory,
 } from "@/services/editorialService";
-import { copyText } from "@/services/toolErrors";
 import { useToast } from "@/ui/Toast";
-import { formatSummaryClipboard } from "../newsFormat";
 import { readBriefingPins } from "../wire/briefingPins";
 import {
   abandonDraftRun,
@@ -31,7 +28,6 @@ import {
 import { readCarouselOptions, readLastFormat, writeCarouselOptions, writeLastFormat } from "./formatPrefs";
 import { studioLink } from "./studioLink";
 
-export type EditorialPane = "draft" | "revision";
 type Format = NewsSummarizeData["format"];
 /** The run this studio shows while it is generating. */
 type ActiveRun = { id: number; body: NewsSummarizeRequest };
@@ -55,15 +51,11 @@ export function useEditorialDesk({
   const queryClient = useQueryClient();
   const toast = useToast();
   const navigate = useNavigate();
-  const [editorialPane, setEditorialPane] = useState<EditorialPane>("draft");
-  const [copied, setCopied] = useState(false);
-  const [copyError, setCopyError] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<Format>(readLastFormat);
   const [carouselOptions, setCarouselOptionsState] = useState<CarouselOptions>(readCarouselOptions);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [instruction, setInstruction] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [conversationQuery, setConversationQuery] = useState("");
 
   const [activeRun, setActiveRun] = useState<ActiveRun | null>(null);
   /** The finished run's draft, kept here once the run is done (the cache collects it later). */
@@ -88,7 +80,6 @@ export function useEditorialDesk({
     if (runState.status === "success" && runState.data) {
       const data = runState.data;
       setRunResult(data);
-      setEditorialPane("draft");
       setActiveRun(null);
       if (data.conversationId) {
         setConversationId(data.conversationId);
@@ -106,12 +97,6 @@ export function useEditorialDesk({
     enabled: Boolean(conversationId),
   });
 
-  const conversationListQuery = useQuery({
-    queryKey: ["editorial-conversations", conversationQuery],
-    queryFn: () => listEditorialConversations(conversationQuery),
-    enabled: drawerOpen || Boolean(conversationId),
-  });
-
   // Always on: the studio's «ذاكرة الفريق: N قواعد تُطبَّق تلقائياً» counts the approved rules.
   const memoryQuery = useQuery({
     queryKey: ["editorial-memory"],
@@ -121,10 +106,6 @@ export function useEditorialDesk({
   const reviseMutation = useMutation({
     mutationFn: ({ id, text }: { id: string; text: string }) => reviseEditorialConversation(id, text),
     onSuccess(data) {
-      setInstruction("");
-      setCopied(false);
-      setCopyError(false);
-      setEditorialPane("draft");
       queryClient.setQueryData(["editorial-conversation", data.conversation.id], data.conversation);
       void queryClient.invalidateQueries({ queryKey: ["editorial-conversations"] });
       void queryClient.invalidateQueries({ queryKey: ["editorial-memory"] });
@@ -137,8 +118,6 @@ export function useEditorialDesk({
   const restoreMutation = useMutation({
     mutationFn: ({ id, versionId }: { id: string; versionId: string }) => restoreEditorialVersion(id, versionId),
     onSuccess(data) {
-      setCopied(false);
-      setEditorialPane("draft");
       queryClient.setQueryData(["editorial-conversation", data.conversation.id], data.conversation);
       void queryClient.invalidateQueries({ queryKey: ["editorial-conversations"] });
     },
@@ -179,12 +158,9 @@ export function useEditorialDesk({
     restoreMutation.error ??
     memoryMutation.error;
   const resultFormat: Format = summary?.format ?? (activeRun ? requestFormat(activeRun.body) : selectedFormat);
-
-  useEffect(() => {
-    if (!copied) return;
-    const timer = window.setTimeout(() => setCopied(false), 2500);
-    return () => window.clearTimeout(timer);
-  }, [copied]);
+  /** The revision request on its way / the one that failed (MobDraft-revising / MobDraft-error). */
+  const pendingInstruction = reviseMutation.isPending ? (reviseMutation.variables?.text ?? null) : null;
+  const failedInstruction = reviseMutation.isError ? (reviseMutation.variables?.text ?? null) : null;
 
   useEffect(() => {
     if (!detail) return;
@@ -222,8 +198,6 @@ export function useEditorialDesk({
   }
 
   function start(body: NewsSummarizeRequest) {
-    setCopied(false);
-    setCopyError(false);
     setRunError(null);
     setRunResult(null);
     setLastBody(body);
@@ -255,9 +229,6 @@ export function useEditorialDesk({
     memoryMutation.reset();
     setConversationId(null);
     setInstruction("");
-    setCopied(false);
-    setCopyError(false);
-    setEditorialPane("draft");
   }
 
   /** A story picked in the wire (never blocked by a running generation). */
@@ -303,27 +274,14 @@ export function useEditorialDesk({
     return true;
   }
 
-  async function onCopy(data: NewsSummarizeData) {
-    try {
-      await copyText(formatSummaryClipboard(data));
-      setCopied(true);
-      setCopyError(false);
-    } catch {
-      setCopied(false);
-      setCopyError(true);
-    }
-  }
-
   /** A format tile: remembered as the last chosen format (S05 §1). */
   function selectFormat(format: Format) {
     setSelectedFormat(format);
-    setCopied(false);
     if (format !== "briefing") writeLastFormat(format);
   }
 
   function generateSummary() {
     if (!selected && selectedFormat !== "briefing") return;
-    setCopied(false);
     runSummarize(storyRequest(selectedFormat));
   }
 
@@ -338,7 +296,7 @@ export function useEditorialDesk({
     runSummarize(storyRequest(format));
   }
 
-  /** Format switch on a finished draft (the old desk's «switch» bar). */
+  /** A finished draft written again in another format (or the carousel with new settings), for the same story. */
   function switchFormat(next: Format) {
     setRunResult(null);
     setConversationId(null);
@@ -346,23 +304,38 @@ export function useEditorialDesk({
     else runStoryFormat(next);
   }
 
-  /** «خبر آخر»: back to the story and its formats. */
+  /** «الخبر» / «تحويل الصيغة»: back to the story and its formats, the draft's format still chosen. */
   function closeDraft() {
     setRunResult(null);
     setConversationId(null);
-    setCopied(false);
     setInstruction("");
     setSelectedFormat((current) => (current === "briefing" ? readLastFormat() : current));
   }
 
-  function submitRevision() {
-    if (busy || !conversationId || !instruction.trim()) return;
-    reviseMutation.mutate({ id: conversationId, text: instruction.trim() });
+  /** Sends a revision: every one is saved as a new version (`POST /editorial/conversations/:id/revise`). */
+  function revise(text: string) {
+    const value = text.trim();
+    if (busy || !conversationId || !value) return;
+    reviseMutation.mutate({ id: conversationId, text: value });
   }
 
-  function quickRevision(value: string) {
-    setInstruction(value);
-    if (conversationId) reviseMutation.mutate({ id: conversationId, text: value });
+  /** The dock: Enter / «إرسال». The request shows in the thread while the editor works, so the field empties. */
+  function submitRevision() {
+    if (busy || !conversationId || !instruction.trim()) return;
+    revise(instruction);
+    setInstruction("");
+  }
+
+  /** «أعد المحاولة» (MobDraft-error): the saved request again. */
+  function retryRevision() {
+    const failed = reviseMutation.variables;
+    if (!busy && failed) reviseMutation.mutate(failed);
+  }
+
+  /** An older version chip: the API copies it into a new version (`POST /editorial/conversations/:id/restore`). */
+  function restore(versionId: string) {
+    if (busy || !conversationId) return;
+    restoreMutation.mutate({ id: conversationId, versionId });
   }
 
   function openConversation(id: string) {
@@ -375,7 +348,6 @@ export function useEditorialDesk({
 
   function closeDrawer() {
     setDrawerOpen(false);
-    setConversationQuery("");
   }
 
   const memory = memoryQuery.data?.rules ?? [];
@@ -389,6 +361,13 @@ export function useEditorialDesk({
     showEditorial,
     busy,
     error,
+    /** Opening a saved conversation, restoring a version or a memory decision failed. */
+    draftError: conversationDetailQuery.error ?? restoreMutation.error ?? memoryMutation.error,
+    revising: reviseMutation.isPending,
+    restoring: restoreMutation.isPending,
+    pendingInstruction,
+    failedInstruction,
+    reviseError: reviseMutation.error,
     generating,
     generateError,
     /** Format of the run being written. */
@@ -400,24 +379,14 @@ export function useEditorialDesk({
     resultFormat,
     selectedFormat,
     carouselOptions,
-    editorialPane,
     instruction,
-    copied,
-    copyError,
     drawerOpen,
-    conversationQuery,
-    conversations: conversationListQuery.data?.items ?? [],
-    conversationsLoading: conversationListQuery.isFetching,
-    memory,
     /** Approved team-memory rules (`GET /editorial/memory`). */
     approvedRules: memory.filter((rule) => rule.status === "approved").length,
-    drawerError: conversationListQuery.error ?? memoryQuery.error ?? memoryMutation.error,
     // actions
     setCarouselOptions,
-    setEditorialPane,
     setInstruction,
     setDrawerOpen,
-    setConversationQuery,
     selectFormat,
     generateSummary,
     retry,
@@ -427,14 +396,13 @@ export function useEditorialDesk({
     runStoryFormat,
     switchFormat,
     closeDraft,
-    onCopy,
+    revise,
     submitRevision,
-    quickRevision,
-    restore: (versionId: string) => conversationId && restoreMutation.mutate({ id: conversationId, versionId }),
+    retryRevision,
+    restore,
     saveMemory: (id: string, next?: string) =>
       memoryMutation.mutate(next === undefined ? { id, status: "approved" } : { id, status: "approved", instruction: next }),
     dismissMemory: (id: string) => memoryMutation.mutate({ id, status: "rejected" }),
-    disableMemory: (id: string) => memoryMutation.mutate({ id, status: "disabled" }),
     openConversation,
     closeDrawer,
     openStory,

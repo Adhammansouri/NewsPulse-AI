@@ -10,8 +10,9 @@ import type { DeskHandoffState } from "@/services/deskHandoff";
 import type { DailyStats } from "@/services/dailyStats";
 import { clockAr, countPhrase, relativeTimeAr, toArabicDigits, type CountForms } from "@/utils/arabic";
 
-/** The archive (and its «ذاكرة الفريق» tab) lives on the news screen until S06 — as MorePage's link. */
-export const ARCHIVE_PATH = "/news";
+/** The archive (S06: the MobArchive screen, the studio's drawer from 1024px) and its «ذاكرة الفريق» tab. */
+export const ARCHIVE_PATH = "/archive";
+export const ARCHIVE_MEMORY_PATH = "/archive?tab=memory";
 
 /** «كمّل شغلك» rows (DeskHome `drafts`). */
 export const RESUME_MAX = 4;

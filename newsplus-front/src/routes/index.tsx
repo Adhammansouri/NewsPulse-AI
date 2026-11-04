@@ -4,22 +4,19 @@ import MainLayout from "@/components/layouts/MainLayout";
 import RequireAuth from "@/components/shared/RequireAuth";
 import { PageSkeleton, type PageSkeletonLayout } from "@/components/shell/PageSkeleton";
 import { features } from "@/config/features";
-// TRANSITIONAL: the legacy pages' own stylesheets stay in the entry bundle. Imported here (before
-// index.css, as when the pages were eager) they keep their place in the cascade that styles/legacy-bridge.css
-// relies on; a lazily loaded stylesheet would land after index.css. Drop each import with its page's rebuild.
-import "@/modules/News/newsroom.css";
 
 const LoginPage = lazy(() => import("@/modules/Login/pages/LoginPage"));
 const HomePage = lazy(() => import("@/modules/Home/pages/HomePage"));
 const NewsPage = lazy(() => import("@/modules/News/pages/NewsPage"));
 const NewsStoryPage = lazy(() => import("@/modules/News/pages/NewsStoryPage"));
+const ArchivePage = lazy(() => import("@/modules/News/pages/ArchivePage"));
 const GeneratePage = lazy(() => import("@/modules/Generate/pages/GeneratePage"));
 const TranslatePage = lazy(() => import("@/modules/Translate/pages/TranslatePage"));
 const NotificationsPage = lazy(() => import("@/modules/Notifications/pages/NotificationsPage"));
 const UsagePage = lazy(() => import("@/modules/Usage/pages/UsagePage"));
 const MorePage = lazy(() => import("@/modules/More/pages/MorePage"));
-
 const BoardPage = lazy(() => import("@/modules/Board/pages/BoardPage"));
+
 // Dev-only UI-kit gallery (S01 §7). `import.meta.env.DEV` is `false` in production builds, so the
 // lazy import is dead code there and the gallery chunk is never emitted.
 const DesignGalleryPage = import.meta.env.DEV
@@ -57,6 +54,7 @@ export default function AppRoutes() {
           <Route path="/" element={page(<HomePage />, "stack")} />
           <Route path="/news" element={page(<NewsPage />, "split")} />
           <Route path="/news/:itemId" element={page(<NewsStoryPage />, "split")} />
+          <Route path="/archive" element={page(<ArchivePage />, "stack")} />
           <Route path="/generate" element={page(<GeneratePage />, "split")} />
           <Route path="/translate" element={page(<TranslatePage />, "stack")} />
           <Route path="/notifications" element={page(<NotificationsPage />, "stack")} />

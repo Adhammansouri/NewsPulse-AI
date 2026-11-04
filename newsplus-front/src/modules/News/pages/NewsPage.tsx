@@ -8,12 +8,15 @@ import { Navigate, useLocation, useNavigate, useNavigationType, useSearchParams 
 import type { NewsFeedItem } from "@newsplus/shared";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { readDeskHandoff } from "@/services/deskHandoff";
+import { IconButton } from "@/ui/IconButton";
 import { ArchiveDrawer } from "../studio/ArchiveDrawer";
 import { DeskStudio } from "../studio/DeskStudio";
 import { draftRunEstimate, draftRunInfo } from "../studio/draftRuns";
-import { formatCopy, mobileSteps } from "../studio/formats";
-import { LegacyStudio } from "../studio/LegacyStudio";
+import { DraftError } from "../studio/draft/Editor";
+import { MobDraft } from "../studio/draft/MobDraft";
+import { formatCopy, mobileSteps, STUDIO_COPY } from "../studio/formats";
 import { MobGenerating } from "../studio/MobGenerating";
+import { StudioError } from "../studio/StudioError";
 import { readStudioLinkState, storyPath, type StudioLinkState } from "../studio/studioLink";
 import { useEditorialDesk } from "../studio/useEditorialDesk";
 import { pinForBriefing } from "../wire/briefingPins";
@@ -179,10 +182,31 @@ export default function NewsPage() {
         />
       );
     }
-    if (showPane) {
+    if (showPane && desk.showEditorial) {
+      // The briefing, or a draft opened without its story: «رجوع» leaves it for the headlines.
       return (
         <>
-          <LegacyStudio desk={desk} selected={null} mobile onBack={() => setMobilePane("feed")} />
+          <MobDraft
+            desk={desk}
+            onBack={() => {
+              desk.closeDraft();
+              setMobilePane("feed");
+            }}
+          />
+          <ArchiveDrawer desk={desk} />
+        </>
+      );
+    }
+    if (showPane) {
+      // The briefing failed to generate (or a saved draft failed to open): the error, its retry, and the way back.
+      return (
+        <>
+          <header className="m-bar">
+            <IconButton label={STUDIO_COPY.back} icon="arrow-back" onClick={() => setMobilePane("feed")} />
+          </header>
+          <main className="m-scroll col" style={{ padding: "14px 18px 18px", gap: "12px" }}>
+            {desk.generateError ? <StudioError error={desk.generateError} onRetry={desk.retry} /> : <DraftError error={desk.error} />}
+          </main>
           <ArchiveDrawer desk={desk} />
         </>
       );
@@ -202,9 +226,11 @@ export default function NewsPage() {
     );
   }
 
+  // DeskCarousel takes the whole content area (no headlines column).
+  const carouselDraft = desk.showEditorial && desk.resultFormat === "carousel" && Boolean(desk.summary);
   return (
     <div className="grow" style={{ display: "flex", minHeight: 0, overflow: "hidden" }}>
-      <WireColumn wire={wire} selectedId={selectedId} onSelect={openStory} onBriefing={startBriefing} />
+      {!carouselDraft && <WireColumn wire={wire} selectedId={selectedId} onSelect={openStory} onBriefing={startBriefing} />}
       <div
         style={{
           position: "relative",
@@ -220,7 +246,6 @@ export default function NewsPage() {
           selected={selected}
           languages={wire.languages}
           wireLoading={wire.loading}
-          onBack={() => syncItemParam(null)}
         />
         <ArchiveDrawer desk={desk} />
       </div>

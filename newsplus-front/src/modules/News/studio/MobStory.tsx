@@ -3,10 +3,12 @@
 // Choosing «كاروسيل بصور AI» opens its settings sheet (MobStory-carousel). Inline styles are the board's own.
 import type { MouseEvent, ReactNode } from "react";
 import type { NewsStoryFormat, NewsSummaryFormat } from "@newsplus/shared";
+import { Link } from "react-router-dom";
 import { Button } from "@/ui/Button";
 import { Icon } from "@/ui/Icon";
 import { SourceMarks } from "@/ui/SourceMarks";
 import { COPY } from "../wire/copy";
+import { ARCHIVE_ROUTE } from "./archive/archiveModel";
 import { MOB_SHAPES } from "./FormatShapes";
 import { SOCIAL_FORMATS, STUDIO_COPY, TILE_COPY, WEB_FORMATS } from "./formats";
 import type { StoryModel } from "./storyModel";
@@ -22,12 +24,10 @@ export function MobStoryBar({
   backHref,
   onBack,
   onOpenSource,
-  onArchive,
 }: {
   backHref: string;
   onBack: () => void;
   onOpenSource?: () => void;
-  onArchive: () => void;
 }) {
   return (
     <header className="m-bar">
@@ -47,9 +47,9 @@ export function MobStoryBar({
       <button className="icon-btn" type="button" aria-label={STUDIO_COPY.openSource} onClick={onOpenSource} disabled={!onOpenSource}>
         <Icon name="external" />
       </button>
-      <button className="icon-btn" type="button" aria-label={STUDIO_COPY.archive} onClick={onArchive}>
+      <Link className="icon-btn" to={ARCHIVE_ROUTE} aria-label={STUDIO_COPY.archive}>
         <Icon name="history" />
-      </button>
+      </Link>
     </header>
   );
 }

@@ -92,23 +92,3 @@
    mobile, light and dark. A rule is copied when it sets a reset property on an element the
    reset hits, with lower specificity than the reset (or equal and loaded earlier), together
    with every other legacy rule competing for that property on the same elements. */
-
-/* modules/News/newsroom.css */
-.newsroom-pane-tabs button:is(button,input,textarea,select):is(.np *),
-.newsroom-editor-tabs button:is(button,input,textarea,select):is(.np *) {
-  font-size: 14px;
-}
-.newsroom-pane-tabs button:is(button,input,textarea,select,a):is(.np *),
-.newsroom-editor-tabs button:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-text-secondary);
-}
-.newsroom-pane-tabs button.is-active:is(button,input,textarea,select,a):is(.np *),
-.newsroom-editor-tabs button.is-active:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-surface);
-}
-.newsroom-back:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-text-primary);
-}
-.newsroom-editor-tabs button:is(button,input,textarea,select):is(.np *) {
-  font-size: 12px;
-}
