@@ -1,22 +1,40 @@
 /* =============================================================================================
-   TRANSITIONAL — legacy (pre-Pulse) screens inside the Pulse `.np` root (S01).
+   TRANSITIONAL — legacy (pre-Pulse) screens inside the Pulse `.np` root (S01, rescoped in S02).
 
    src/styles/design is unlayered and scoped to `.np`, so once AppRoot wraps every route its
    root text baseline, its element resets (`.np button`, `.np a`, `.np p`, … = specificity 0,1,1)
    and the mobile frame (`.np.m`) also hit the legacy screens, beating single-class legacy rules
    and every Tailwind utility. This file hands those properties back to the legacy cascade,
-   only under the legacy roots: MainLayout's `.brand-app-shell` and LoginPage's `.np-login`.
+   only under the legacy roots: the legacy content area `.np-legacy` (shell/LegacyContent, around
+   each not-yet-rebuilt page inside the S02 shell) and LoginPage's `.np-login`.
 
    It is imported right after the design CSS (top of index.css), so the legacy index.css rules
-   that tie with these selectors still win by order (module CSS loads earlier, see §4).
+   that tie with these selectors still win by order (module CSS loads earlier, see §4 — the
+   routes keep those stylesheets eager for that reason).
    Delete a scope as soon as no legacy screen renders under it:
-   `.np-login` with S03 (login rebuild); `.brand-app-shell` once its last legacy page is rebuilt
-   (S10 at the latest). S02 replaces MainLayout: if legacy pages then render inside the new
-   shell, move the `.brand-app-shell` scope to a wrapper around those pages.
+   `.np-login` with S03 (login rebuild); `.np-legacy` once its last legacy page is rebuilt
+   (S10 at the latest).
    ============================================================================================= */
 
+/* 0 · The legacy content area takes the place of the old MainLayout column inside the new shell
+   (desktop: the content `main`; mobile: the `.np.m` frame, above the tab bar): it fills the space
+   left by the shell and scrolls the page. The old tool routes (`--tools`: news, generate,
+   translate, usage) instead pass a fixed-height column down to the page, which scrolls its own panes. */
+.np-legacy {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.np-legacy--tools {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 /* 1 · Text baseline the legacy screens inherited from html/body (index.css `body`, preflight). */
-:where(.np) > .brand-app-shell {
+:where(.np) .np-legacy {
   font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;
   font-size: 1rem;
   line-height: 1.5;
@@ -30,44 +48,45 @@
 
 /* 2 · Undo the `.np` element resets (same specificity, later) → back to preflight, Tailwind and
    layered legacy rules. Unlayered legacy rules that lose to the resets are restored in §4. */
-:is(.brand-app-shell, .np-login) :is(button, input, textarea, select) {
+:is(.np-legacy, .np-login) :is(button, input, textarea, select) {
   font: revert-layer;
   color: revert-layer;
 }
 
-:is(.brand-app-shell, .np-login) button {
+:is(.np-legacy, .np-login) button {
   cursor: revert-layer;
 }
 
-:is(.brand-app-shell, .np-login) :is(h1, h2, h3, h4, p, ul, ol, figure) {
+:is(.np-legacy, .np-login) :is(h1, h2, h3, h4, p, ul, ol, figure) {
   margin: revert-layer;
 }
 
-:is(.brand-app-shell, .np-login) :is(ul, ol) {
+:is(.np-legacy, .np-login) :is(ul, ol) {
   padding: revert-layer;
   list-style: revert-layer;
 }
 
-:is(.brand-app-shell, .np-login) a {
+:is(.np-legacy, .np-login) a {
   color: revert-layer;
   text-decoration: revert-layer;
 }
 
-:is(.brand-app-shell, .np-login) :focus-visible {
+:is(.np-legacy, .np-login) :focus-visible {
   outline: revert-layer;
   outline-offset: revert-layer;
 }
 
-/* 3 · Below 1024px: no `.np.m` app frame (legacy screens scroll the document) and no 44px
-   box on class-less links (npm2 `.np.m a:not([class])`). */
-.np.m:has(> .brand-app-shell, > .np-login) {
+/* 3 · Below 1024px: no 44px box on class-less links (npm2 `.np.m a:not([class])`); the login
+   screen also opts out of the `.np.m` app frame (it scrolls the document). Legacy pages inside
+   the S02 shell keep the frame and scroll inside `.np-legacy` (§0). */
+.np.m:has(> .np-login) {
   position: static;
   display: block;
   height: auto;
   overflow: visible;
 }
 
-.m > :is(.brand-app-shell, .np-login) a:not([class]) {
+.m :is(.np-legacy, .np-login) a:not([class]) {
   display: revert-layer;
   align-items: revert-layer;
   justify-content: revert-layer;
