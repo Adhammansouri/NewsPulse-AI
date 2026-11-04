@@ -62,9 +62,9 @@ export default function AppRoutes() {
           <Route path="/notifications" element={page(<NotificationsPage />, "stack")} />
           <Route path="/usage" element={page(<UsagePage />, "stack")} />
           <Route path="/more" element={page(<MorePage />, "stack")} />
+          {features.workflow && <Route path="/board" element={page(<BoardPage />, "stack")} />}
         </Route>
       </Route>
-          {features.workflow && <Route path="/board" element={page(<BoardPage />, "stack")} />}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
