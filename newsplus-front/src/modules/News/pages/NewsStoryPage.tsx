@@ -12,6 +12,7 @@ import { useNewsFeed } from "@/hooks/useNewsFeed";
 import { getNewsSources } from "@/services/newsService";
 import { ArchiveDrawer } from "../studio/ArchiveDrawer";
 import { draftRunEstimate } from "../studio/draftRuns";
+import { DuplicateWorkNotice } from "../studio/DuplicateWorkNotice";
 import { formatCopy, mobileCtaHint, mobileSteps } from "../studio/formats";
 import { MobDraft } from "../studio/draft/MobDraft";
 import { MobCarouselSheet } from "../studio/MobCarouselSheet";
@@ -21,6 +22,7 @@ import { StudioError } from "../studio/StudioError";
 import { storyModel } from "../studio/storyModel";
 import { readStudioLinkState, storyPath, studioLink, type StudioLinkState } from "../studio/studioLink";
 import { useEditorialDesk } from "../studio/useEditorialDesk";
+import { useStudioPresence } from "../studio/useStudioPresence";
 import { sourceLanguages } from "../wire/filters";
 
 export default function NewsStoryPage() {
@@ -60,6 +62,7 @@ export default function NewsStoryPage() {
     },
     onShowDesk: () => undefined,
   });
+  useStudioPresence(desk, mobile ? item : null);
 
   // Arrivals, once per history entry; the state is cleared so a reload doesn't repeat them.
   const arrivalKey = useRef<string | null>(null);
@@ -140,6 +143,7 @@ export default function NewsStoryPage() {
         hint={mobileCtaHint(desk.selectedFormat, copy, story.sourceCount)}
         action={copy.action}
         notice={desk.generateError && <StudioError error={desk.generateError} onRetry={desk.retry} />}
+        deckNotice={<DuplicateWorkNotice itemId={itemId} headline={story.title} onOpenDraft={desk.openConversation} stacked />}
         onSelect={(format) => {
           desk.selectFormat(format);
           if (format === "carousel") setSheetOpen(true);

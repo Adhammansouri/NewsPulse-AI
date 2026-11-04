@@ -5,6 +5,7 @@ import type { SourceLanguages } from "../wire/filters";
 import { deskSteps, footerHint, formatCopy } from "./formats";
 import { DeskCarousel } from "./carousel/DeskCarousel";
 import { DeskDraft } from "./draft/DeskDraft";
+import { DuplicateWorkNotice } from "./DuplicateWorkNotice";
 import { FormatDeck } from "./FormatDeck";
 import { StoryPanel } from "./StoryPanel";
 import { StudioEmpty, StudioLoading } from "./StudioStates";
@@ -13,9 +14,12 @@ import { StudioFooter } from "./StudioFooter";
 import { StudioGenerating } from "./StudioGenerating";
 import { storyModel } from "./storyModel";
 import type { EditorialDesk } from "./useEditorialDesk";
+import { useStudioPresence } from "./useStudioPresence";
 
 /** Space under the failed-generation notice: the board's gap above «ماذا ننشر؟». */
 const NOTICE_STYLE = { marginBottom: "24px" } as const;
+/** The duplicate-work notice (S15 §4) between the story and the deck: the same 24px gap as above «ماذا ننشر؟». */
+const DECK_NOTICE_STYLE = { marginTop: "24px" } as const;
 
 export function DeskStudio({
   desk,
@@ -30,6 +34,7 @@ export function DeskStudio({
   wireLoading: boolean;
 }) {
   const story = selected ? storyModel(selected, languages, false) : null;
+  useStudioPresence(desk, selected);
 
   if (desk.showEditorial) {
     if (desk.resultFormat === "carousel" && desk.summary) return <DeskCarousel desk={desk} storyTitle={story?.title ?? null} />;
@@ -58,6 +63,7 @@ export function DeskStudio({
       <div className="enter" style={{ flex: 1, overflowY: "auto", padding: "26px 34px 20px" }}>
         {desk.generateError && <StudioError error={desk.generateError} onRetry={desk.retry} style={NOTICE_STYLE} />}
         <StoryPanel story={story} />
+        <DuplicateWorkNotice itemId={selected?.id ?? ""} headline={story.title} onOpenDraft={desk.openConversation} style={DECK_NOTICE_STYLE} />
         <FormatDeck selected={desk.selectedFormat} approvedRules={desk.approvedRules} onSelect={desk.selectFormat} />
       </div>
       <StudioFooter

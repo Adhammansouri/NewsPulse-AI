@@ -60,6 +60,7 @@ export function MobStory({
   hint,
   action,
   notice,
+  deckNotice,
   onSelect,
   onGenerate,
 }: {
@@ -70,6 +71,8 @@ export function MobStory({
   action: string;
   /** A failed generation (StudioError), above the article. */
   notice?: ReactNode;
+  /** A teammate writing about this story (S15 §4), above «ماذا ننشر؟». */
+  deckNotice?: ReactNode;
   onSelect: (format: NewsStoryFormat) => void;
   onGenerate: () => void;
 }) {
@@ -98,6 +101,7 @@ export function MobStory({
           )}
         </article>
 
+        {deckNotice}
         <section className="m-section">
           <div className="m-section__head">
             <h2 className="t-head">{STUDIO_COPY.whatToPublish}</h2>
