@@ -18,8 +18,8 @@
 
 /* 0 · The legacy content area takes the place of the old MainLayout column inside the new shell
    (desktop: the content `main`; mobile: the `.np.m` frame, above the tab bar): it fills the space
-   left by the shell and scrolls the page. The old tool routes (`--tools`: news, generate,
-   translate) instead pass a fixed-height column down to the page, which scrolls its own panes. */
+   left by the shell and scrolls the page. The legacy news studio (`--tools`, News/studio/LegacyStudio)
+   instead passes a fixed-height column down to its panes, which scroll themselves. */
 .np-legacy {
   flex: 1 1 auto;
   min-width: 0;
@@ -117,16 +117,4 @@
 }
 .newsroom-editor-tabs button:is(button,input,textarea,select):is(.np *) {
   font-size: 12px;
-}
-
-/* modules/Translate/translate.css */
-.translate-intro:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 6px 0 0;
-}
-.translate-footnote:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *),
-.translate-result-meta:is(h1,h2,h3,h4,p,ul,ol,figure):is(.np *) {
-  margin: 0;
-}
-.translate-source-link button:is(button,input,textarea,select,a):is(.np *) {
-  color: var(--nd-text-primary);
 }

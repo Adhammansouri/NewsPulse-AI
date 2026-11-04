@@ -4,6 +4,8 @@ export type DeskHandoffState = {
   source?: string;
   itemId?: string;
   style?: "brief" | "article" | "report";
+  /** An editorial conversation to open in the news studio (generate/translate → «منشور سوشيال»). */
+  conversationId?: string;
 };
 
 export function readDeskHandoff(state: unknown): DeskHandoffState | null {
@@ -15,6 +17,7 @@ export function readDeskHandoff(state: unknown): DeskHandoffState | null {
   const itemId = typeof value.itemId === "string" ? value.itemId : undefined;
   const style =
     value.style === "brief" || value.style === "article" || value.style === "report" ? value.style : undefined;
-  if (!input && !prompt && !source && !itemId && !style) return null;
-  return { input, prompt, source, itemId, style };
+  const conversationId = typeof value.conversationId === "string" ? value.conversationId : undefined;
+  if (!input && !prompt && !source && !itemId && !style && !conversationId) return null;
+  return { input, prompt, source, itemId, style, conversationId };
 }

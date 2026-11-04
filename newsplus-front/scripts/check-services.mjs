@@ -27,6 +27,8 @@ try {
   const http = await vite.ssrLoadModule("/src/services/httpConfig.ts");
   const drafts = await vite.ssrLoadModule("/src/modules/Generate/generateDesk.ts");
   const { default: GeneratePage } = await vite.ssrLoadModule("/src/modules/Generate/pages/GeneratePage.tsx");
+  const { ToastProvider } = await vite.ssrLoadModule("/src/ui/Toast.tsx");
+  const translate = await vite.ssrLoadModule("/src/modules/Translate/translateDesk.ts");
   beforeEach(() => {
     globalThis.localStorage = memoryStorage();
     globalThis.sessionStorage = memoryStorage();
@@ -120,10 +122,49 @@ try {
     sessions.clearSession();
   });
 
+  const draftBody = (title, at) => ({ id: `draft-${at}`, at, title, dek: "dek", body: "body", language: "ar", style: "brief", source: "https://example.com/report" });
+
   await test("corrupted saved drafts are excluded before they can crash the generation page", () => {
-    sessionStorage.setItem("newsplus-generate-drafts", JSON.stringify([null, {}, { id: "bad", title: {} }]));
+    localStorage.setItem("newsplus-generate-drafts", JSON.stringify([null, {}, { id: "bad", title: {} }]));
     assert.deepEqual(drafts.readDrafts(), []);
-    sessionStorage.clear();
+    localStorage.setItem("newsplus-generate-drafts", "{not json");
+    assert.deepEqual(drafts.readDrafts(), []);
+  });
+
+  await test("drafts outlive the tab in local storage, newest first, capped at the last 20", () => {
+    for (let index = 1; index <= drafts.DRAFTS_MAX + 5; index += 1) {
+      drafts.pushDraft({ title: `draft ${index}`, dek: "dek", body: "body", language: "ar", style: "brief", source: "notes" });
+    }
+    const saved = JSON.parse(localStorage.getItem("newsplus-generate-drafts"));
+    assert.equal(saved.length, drafts.DRAFTS_MAX);
+    assert.equal(saved[0].title, `draft ${drafts.DRAFTS_MAX + 5}`);
+    assert.equal(saved.at(-1).title, "draft 6");
+    assert.equal(sessionStorage.getItem("newsplus-generate-drafts"), null);
+    drafts.pushDraft({ title: "draft 10", dek: "new dek", body: "body", language: "ar", style: "article", source: "notes" });
+    const reread = drafts.readDrafts();
+    assert.equal(reread.length, drafts.DRAFTS_MAX);
+    assert.equal(reread[0].dek, "new dek");
+    assert.equal(reread.filter((draft) => draft.title === "draft 10").length, 1);
+    assert.equal(drafts.deleteDraft(reread[0].id).some((draft) => draft.id === reread[0].id), false);
+    assert.equal(drafts.readDrafts().length, drafts.DRAFTS_MAX - 1);
+    assert.deepEqual(drafts.clearDrafts(), []);
+    assert.deepEqual(drafts.readDrafts(), []);
+  });
+
+  await test("tab drafts from session storage move to local storage once, merged newest first", () => {
+    localStorage.setItem("newsplus-generate-drafts", JSON.stringify([draftBody("saved", 20)]));
+    sessionStorage.setItem("newsplus-generate-drafts", JSON.stringify([draftBody("tab newer", 30), draftBody("tab older", 10), { id: "bad" }]));
+    assert.deepEqual(drafts.readDrafts().map((draft) => draft.title), ["tab newer", "saved", "tab older"]);
+    assert.equal(sessionStorage.getItem("newsplus-generate-drafts"), null);
+    drafts.deleteDraft("draft-30");
+    assert.deepEqual(drafts.readDrafts().map((draft) => draft.title), ["saved", "tab older"]);
+
+    globalThis.localStorage = blockedStorage;
+    sessionStorage.setItem("newsplus-generate-drafts", JSON.stringify([draftBody("kept in tab", 40)]));
+    assert.deepEqual(drafts.readDrafts(), []);
+    assert.notEqual(sessionStorage.getItem("newsplus-generate-drafts"), null);
+    globalThis.localStorage = memoryStorage();
+    assert.deepEqual(drafts.readDrafts().map((draft) => draft.title), ["kept in tab"]);
   });
 
   await test("handoff separates a source URL from following assignment notes", () => {
@@ -133,11 +174,21 @@ try {
     assert.equal(drafts.urlLooksBroken("https://example.com/report"), false);
   });
 
+  await test("translation detects the source language by its share of Arabic letters", () => {
+    assert.equal(translate.detectLanguage("وزير المالية يعلن موازنة 2026 الجديدة"), "ar");
+    assert.equal(translate.detectLanguage("The finance minister announced the 2026 budget"), "en");
+    assert.equal(translate.detectLanguage("Reuters: OPEC+ keeps output steady, says مصدر"), "en");
+    assert.equal(translate.detectLanguage("قالت وكالة Reuters إن أوبك+ أبقت الإنتاج"), "ar");
+    assert.equal(translate.detectLanguage("2026 — 15%"), null);
+    assert.equal(translate.otherLanguage("ar"), "en");
+    assert.equal(translate.otherLanguage("en"), "ar");
+  });
+
   await test("generation blocks assignments outside the API limits and accepts URL plus notes", () => {
     for (const [prompt, blocked] of [["ab", true], ["x".repeat(12_001), true], ["https://example.com/report\n\nWrite a short report.", false]]) {
       const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
       try {
-        const html = renderToStaticMarkup(h(QueryClientProvider, { client }, h(MemoryRouter, { initialEntries: [{ pathname: "/generate", state: { prompt } }] }, h(GeneratePage))));
+        const html = renderToStaticMarkup(h(QueryClientProvider, { client }, h(ToastProvider, null, h(MemoryRouter, { initialEntries: [{ pathname: "/generate", state: { prompt } }] }, h(GeneratePage)))));
         const submit = html.match(/<button type="submit"[^>]*>/)?.[0];
         assert.ok(submit);
         assert.equal(submit.includes("disabled"), blocked);

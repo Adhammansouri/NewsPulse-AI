@@ -5,6 +5,7 @@ import { Rail } from "@/components/shell/Rail";
 import { RouteBar } from "@/components/shell/RouteBar";
 import { TabBar } from "@/components/shell/TabBar";
 import { isTabScreen } from "@/components/shell/routeMeta";
+import { useTabBarHidden } from "@/components/shell/tabBarVisibility";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useOnline } from "@/hooks/useOnline";
 
@@ -19,6 +20,7 @@ export default function MainLayout() {
   const { pathname } = useLocation();
   const isMobile = useIsMobile();
   const online = useOnline();
+  const tabBarHidden = useTabBarHidden();
   const screen = (
     <Fragment key={pathname}>
       <Outlet />
@@ -31,7 +33,7 @@ export default function MainLayout() {
         <RouteBar />
         <OfflineBanner />
         {screen}
-        {isTabScreen(pathname) && <TabBar />}
+        {isTabScreen(pathname) && !tabBarHidden && <TabBar />}
       </>
     );
   }

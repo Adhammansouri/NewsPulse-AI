@@ -8,7 +8,6 @@ import { PageSkeleton, type PageSkeletonLayout } from "@/components/shell/PageSk
 // index.css, as when the pages were eager) they keep their place in the cascade that styles/legacy-bridge.css
 // relies on; a lazily loaded stylesheet would land after index.css. Drop each import with its page's rebuild.
 import "@/modules/News/newsroom.css";
-import "@/modules/Translate/translate.css";
 
 const LoginPage = lazy(() => import("@/modules/Login/pages/LoginPage"));
 const HomePage = lazy(() => import("@/modules/Home/pages/HomePage"));
@@ -27,13 +26,12 @@ const DesignGalleryPage = import.meta.env.DEV
 
 /**
  * A lazy page inside the shell: its RouteLoader-shaped skeleton while the chunk loads. `legacy` pages
- * (not yet rebuilt on the Pulse boards) render in the transitional legacy content area; `"tools"` were
- * the Nothing-themed tool routes of the old shell.
+ * (not yet rebuilt on the Pulse boards) render in the transitional legacy content area.
  */
-function page(element: ReactNode, layout: PageSkeletonLayout, legacy?: "page" | "tools") {
+function page(element: ReactNode, layout: PageSkeletonLayout, legacy?: "page") {
   return (
     <Suspense fallback={<PageSkeleton layout={layout} />}>
-      {legacy ? <LegacyContent tools={legacy === "tools"}>{element}</LegacyContent> : element}
+      {legacy ? <LegacyContent>{element}</LegacyContent> : element}
     </Suspense>
   );
 }
@@ -63,8 +61,8 @@ export default function AppRoutes() {
         <Route element={<MainLayout />}>
           <Route path="/" element={page(<HomePage />, "stack", "page")} />
           <Route path="/news" element={page(<NewsPage />, "split")} />
-          <Route path="/generate" element={page(<GeneratePage />, "split", "tools")} />
-          <Route path="/translate" element={page(<TranslatePage />, "stack", "tools")} />
+          <Route path="/generate" element={page(<GeneratePage />, "split")} />
+          <Route path="/translate" element={page(<TranslatePage />, "stack")} />
           <Route path="/notifications" element={page(<NotificationsPage />, "stack")} />
           <Route path="/usage" element={page(<UsagePage />, "stack")} />
           <Route path="/more" element={page(<MorePage />, "stack")} />
