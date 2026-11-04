@@ -19,6 +19,7 @@ export const newsSummarizeBodySchema = z
     input: z.string().trim().max(8_000).optional(),
     itemId: z.string().trim().min(4).max(64).optional(),
     briefing: z.boolean().optional(),
+    itemIds: z.array(z.string().trim().min(1).max(64)).max(8).optional(),
     format: newsStoryFormatSchema.optional(),
     language: z.enum(["ar", "en"]).optional(),
     carousel: carouselOptionsSchema.optional(),

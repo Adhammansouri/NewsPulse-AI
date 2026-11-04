@@ -95,6 +95,8 @@ export type NewsSummarizeRequest = {
   input?: string;
   itemId?: string;
   briefing?: boolean;
+  /** Briefing only (ignored otherwise): up to 8 pinned feed item ids, placed first in this order. */
+  itemIds?: string[];
   format?: NewsStoryFormat;
   language?: NewsLanguage;
   carousel?: CarouselOptions;
