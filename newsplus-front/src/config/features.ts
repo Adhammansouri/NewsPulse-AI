@@ -12,7 +12,7 @@ export const features = {
   /** «قارن» version diff — S14. */
   diff: false,
   /** «فحص ونشر» publish check — S12. */
-  publishCheck: false,
+  publishCheck: true,
 } as const;
 
 export type FeatureFlag = keyof typeof features;

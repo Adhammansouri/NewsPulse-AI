@@ -14,6 +14,8 @@ import { IconButton } from "@/ui/IconButton";
 import { AiCooldownCard } from "@/ui/ErrorSurface";
 import { DeskBreaking } from "../breaking/DeskBreaking";
 import { BREAKING_PARAM, breakingPath, isBreakingMode } from "../breaking/breakingModel";
+import { DeskPublish } from "../publish/DeskPublish";
+import { usePublishFocus } from "../publish/publishLink";
 import { ArchiveDrawer } from "../studio/ArchiveDrawer";
 import { DeskStudio } from "../studio/DeskStudio";
 import { draftRunEstimate, draftRunInfo } from "../studio/draftRuns";
@@ -99,6 +101,8 @@ export default function NewsPage() {
     },
     onShowDesk: () => setMobilePane("desk"),
   });
+  // NewPublish (S12, `?publish={conversationId}`): the social draft's focus view, over the whole content area.
+  const publishData = usePublishFocus(desk, mobile);
 
   useEffect(() => {
     if (!handoff?.input) return;
@@ -256,7 +260,7 @@ export default function NewsPage() {
 
   return (
     <div className="grow" style={{ display: "flex", minHeight: 0, overflow: "hidden" }}>
-      {!carouselDraft && !breakingMode && (
+      {!carouselDraft && !breakingMode && !publishData && (
         <WireColumn wire={wire} selectedId={selectedId} onSelect={openStory} onBriefing={startBriefing} />
       )}
       <div
@@ -269,7 +273,9 @@ export default function NewsPage() {
           background: "var(--bg)",
         }}
       >
-        {breakingMode && selected ? (
+        {publishData ? (
+          <DeskPublish desk={desk} data={publishData} />
+        ) : breakingMode && selected ? (
           <DeskBreaking key={selected.id} item={selected} onExit={() => leaveBreaking(selected)} />
         ) : (
           <DeskStudio desk={desk} selected={selected} languages={wire.languages} wireLoading={wire.loading} />

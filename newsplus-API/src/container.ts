@@ -17,6 +17,7 @@ import { PresenceService, PresenceStore } from "./services/presenceService.js";
 import { EditorialWorkflowService } from "./services/editorialWorkflowService.js";
 import { BreakingService } from "./services/breakingService.js";
 import { DigestService } from "./services/digestService.js";
+import { PublishCheckService } from "./services/publishCheckService.js";
 
 export async function createAuthService(app: FastifyInstance): Promise<AuthService> {
   const hasher = new ScryptPasswordHasher();
@@ -52,6 +53,8 @@ export function createToolServices(app: FastifyInstance) {
   /** S13: breaking mode and «اللي فاتك». */
   const breakingService = new BreakingService({ aggregator, openai, workspace });
   const digestService = new DigestService({ aggregator, openai });
+  /** S12: «فحص قبل النشر». */
+  const publishCheckService = new PublishCheckService({ openai, workspace });
   return {
     aggregator,
     workspace,
@@ -61,6 +64,7 @@ export function createToolServices(app: FastifyInstance) {
     translateService,
     breakingService,
     digestService,
+    publishCheckService,
   };
 }
 

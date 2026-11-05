@@ -3,13 +3,16 @@
 // suggestions and the revise dock. 1024–1279px (GLOBAL-RULES §6): no aside — the thread follows the draft and the
 // dock sits at the bottom of the studio. «قارن» (S14) and «فحص ونشر» (S12) come with their feature flags.
 import { useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import type { EditorialVersion, NewsSummarizeData } from "@newsplus/shared";
 import { Badge } from "@/ui/Badge";
-import { Button } from "@/ui/Button";
+import { Button, buttonClassName } from "@/ui/Button";
 import { Icon } from "@/ui/Icon";
 import { IconButton } from "@/ui/IconButton";
 import { VersionChip } from "@/ui/VersionChip";
 import { formatSummaryClipboard } from "../../newsFormat";
+import { PUBLISH_COPY } from "../../publish/publishCopy";
+import { usePublishEntry } from "../../publish/publishLink";
 import { DeskDraftSkeleton } from "../DraftSkeleton";
 import { formatCopy } from "../formats";
 import type { EditorialDesk } from "../useEditorialDesk";
@@ -97,6 +100,8 @@ function DraftView({ desk, data }: { desk: EditorialDesk; data: NewsSummarizeDat
   const turns = threadTurns(desk.detail, { format, rules: desk.approvedRules, opening: true });
   const memory = (desk.detail?.pendingMemory ?? []).filter((rule) => rule.status === "pending");
   const video = format === "video";
+  /** «فحص ونشر» (S12): the NewPublish focus view of a social draft. */
+  const publish = usePublishEntry(desk);
 
   // The thread follows the latest message.
   const lastTurn = turns.at(-1)?.key;
@@ -145,6 +150,12 @@ function DraftView({ desk, data }: { desk: EditorialDesk; data: NewsSummarizeDat
           <Badge variant="ai">{name}</Badge>
           <VersionChips desk={desk} data={data} />
           <IconButton label={DRAFT_COPY.switchFormat} title={DRAFT_COPY.switchFormat} icon="swap" onClick={desk.closeDraft} />
+          {publish && (
+            <Link className={buttonClassName({ variant: "quiet", size: "sm" })} to={publish.to}>
+              <Icon name="check" size="sm" />
+              {PUBLISH_COPY.entry}
+            </Link>
+          )}
           <IconButton
             label={DRAFT_COPY.download}
             icon="download"

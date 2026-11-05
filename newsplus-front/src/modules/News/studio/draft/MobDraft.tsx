@@ -1,7 +1,7 @@
 // MobDraft (+ -video / -carousel / -briefing / -desk / -facts / -revising / -memory / -error): the draft on its own
 // mobile screen — the m-bar (back, format, versions, «نسخ الكل»), the provenance line, the format's blocks, the
 // revision thread inline, the memory suggestion floating above the dock, and the revise dock. No tab bar.
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { NewsSummarizeData } from "@newsplus/shared";
 import { useHideTabBar } from "@/components/shell/tabBarVisibility";
 import { Badge } from "@/ui/Badge";
@@ -9,6 +9,7 @@ import { Button } from "@/ui/Button";
 import { Icon } from "@/ui/Icon";
 import { IconButton } from "@/ui/IconButton";
 import { formatSummaryClipboard } from "../../newsFormat";
+import { MobDraftSeg, MobPublish, mobPreviewAvailable, type MobDraftView } from "../../publish/MobPublish";
 import { useCarouselPainter } from "../../useCarouselPainter";
 import { slideViews } from "../carousel/carouselModel";
 import { MobCarousel } from "../carousel/MobCarousel";
@@ -52,6 +53,9 @@ export function MobDraft({ desk, onBack }: { desk: EditorialDesk; onBack: () => 
 
 function DraftView({ desk, data, onBack }: { desk: EditorialDesk; data: NewsSummarizeData; onBack: () => void }) {
   const { done, copy } = useDraftCopy();
+  /** MobNewPreview (S12): «المسودة | المعاينة» at the top of a social draft. */
+  const [view, setView] = useState<MobDraftView>("draft");
+  const preview = mobPreviewAvailable(data);
   const scrollRef = useRef<HTMLElement>(null);
   const format = data.format;
   const carousel = format === "carousel";
@@ -90,6 +94,8 @@ function DraftView({ desk, data, onBack }: { desk: EditorialDesk; data: NewsSumm
 
   const versionKey = data.versionId ?? "draft";
 
+  if (preview && view === "preview") return <MobPublish desk={desk} data={data} onDraft={() => setView("draft")} />;
+
   return (
     <>
       <header className="m-bar">
@@ -103,6 +109,7 @@ function DraftView({ desk, data, onBack }: { desk: EditorialDesk; data: NewsSumm
       </header>
 
       <main ref={scrollRef} className="m-scroll col" style={{ padding: "14px 18px 18px", gap: "12px" }}>
+        {preview && <MobDraftSeg value="draft" onChange={setView} />}
         <p className="ai-mark" style={{ color: "var(--ink-3)" }}>
           <Icon name="sparkle" size="sm" />
           {DRAFT_COPY.provenance(data.sources.length, desk.approvedRules)}

@@ -89,3 +89,17 @@ export type {
   TranslateLanguage,
   TranslateRequest,
 } from "./types/translate.js";
+export {
+  INSTAGRAM_VISIBLE_CHARS,
+  PUBLISH_PLATFORM_LIMITS,
+  composePublishCopy,
+  instagramVisibleText,
+  publishTextLength,
+} from "./types/publish.js";
+export type {
+  PublishCheck,
+  PublishCheckData,
+  PublishCheckRequest,
+  PublishCheckStatus,
+  PublishParts,
+} from "./types/publish.js";
