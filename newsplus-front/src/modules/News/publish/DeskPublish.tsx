@@ -8,7 +8,6 @@ import { Link, useLocation } from "react-router-dom";
 import type { NewsSummarizeData } from "@newsplus/shared";
 import { useAiCooldown } from "@/hooks/useAiCooldown";
 import { usePreferences } from "@/hooks/usePreferences";
-import { useSession } from "@/hooks/useSession";
 import { Badge } from "@/ui/Badge";
 import { Button, buttonClassName } from "@/ui/Button";
 import { ErrorSurface } from "@/ui/ErrorSurface";
@@ -61,7 +60,6 @@ export function DeskPublish({ desk, data }: { desk: EditorialDesk; data: NewsSum
 
 function PublishView({ desk, data }: { desk: EditorialDesk; data: NewsSummarizeData }) {
   const location = useLocation();
-  const session = useSession();
   const cooldown = useAiCooldown();
   const { done, copy } = useDraftCopy();
   const frameRef = useRef<HTMLElement>(null);
@@ -114,7 +112,6 @@ function PublishView({ desk, data }: { desk: EditorialDesk; data: NewsSummarizeD
             view={view}
             parts={parts}
             headline={storyHeadline(desk.detail, data)}
-            handle={session?.user.displayName ?? ""}
             dir={draftDir(data)}
             width={FRAME_WIDTH}
           />

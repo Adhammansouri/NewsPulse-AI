@@ -131,6 +131,12 @@ try {
     assert.equal(publish.openingPlatform(["tiktok", "telegram"], "x"), "telegram");
   });
 
+  await test("publish frame: the newsroom's handle per platform (NewPublish / MobNewPreview), never the editor", () => {
+    const parts = { hook: "خطاف", body: "نص", tags: ["#وسم"] };
+    const handles = Object.fromEntries(["x", "instagram", "facebook", "telegram", "tiktok"].map((p) => [p, publish.platformView(p, parts).handle]));
+    assert.deepEqual(handles, { x: "@newsplus", instagram: "newsplus", facebook: "Newsplus", telegram: "t.me/newsplus", tiktok: "@newsplus" });
+  });
+
   await test("wire: the followed sources are the default source filter, and clearing still shows every source", () => {
     const followed = ["alarabiya", "sky-arabia"];
     const base = { time: "all", topic: "all", lang: "all" };

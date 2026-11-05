@@ -23,14 +23,13 @@ type FrameProps = {
   parts: PublishParts;
   /** The picture's line (the story's headline). */
   headline: string;
-  handle: string;
   dir: TextDir;
   /** The article (a refused clipboard selects its text). */
   ref?: Ref<HTMLElement>;
 };
 
 /** NewPublish `article.pf` (width 520px on desktop). */
-export function PlatformFrame({ view, parts, headline, handle, dir, width, ref }: FrameProps & { width?: string }) {
+export function PlatformFrame({ view, parts, headline, dir, width, ref }: FrameProps & { width?: string }) {
   const tags = parts.tags.join(" ");
   return (
     <article ref={ref} className="pf" style={width ? { width } : undefined}>
@@ -39,7 +38,7 @@ export function PlatformFrame({ view, parts, headline, handle, dir, width, ref }
         <span className="col grow">
           <b style={{ fontSize: "14.5px" }}>{PUBLISH_COPY.brand}</b>
           <span className="t-meta" dir="ltr" style={HANDLE_STYLE}>
-            {handle}
+            {view.handle}
           </span>
         </span>
         <span className="badge badge--topic">{view.name}</span>
@@ -66,14 +65,14 @@ export function PlatformFrame({ view, parts, headline, handle, dir, width, ref }
 }
 
 /** MobNewPreview's Instagram frame. */
-export function InstagramFrame({ view, headline, handle, dir, ref }: Omit<FrameProps, "parts">) {
+export function InstagramFrame({ view, headline, dir, ref }: Omit<FrameProps, "parts">) {
   const { visible, more } = instagramPreview(view);
   return (
     <article ref={ref} className="pf">
       <div className="pf__head">
         <img src={LOGO_SRC} alt="" style={MOB_AVATAR} />
         <span className="col grow">
-          <b style={{ fontSize: "14px" }}>{handle}</b>
+          <b style={{ fontSize: "14px" }}>{view.handle}</b>
           <span className="t-meta">{PUBLISH_COPY.postNow}</span>
         </span>
       </div>
@@ -82,7 +81,7 @@ export function InstagramFrame({ view, headline, handle, dir, ref }: Omit<FrameP
       </div>
       <div className="pf__body" style={{ fontSize: "14.5px" }}>
         <p dir={dir}>
-          <b>{handle}</b> {visible}
+          <b>{view.handle}</b> {visible}
           {more && (
             <>
               … <span style={{ color: "var(--ink-3)" }}>{PUBLISH_COPY.more}</span>

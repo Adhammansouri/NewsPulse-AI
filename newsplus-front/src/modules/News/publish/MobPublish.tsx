@@ -7,7 +7,6 @@ import type { NewsSummarizeData } from "@newsplus/shared";
 import { features } from "@/config/features";
 import { useAiCooldown } from "@/hooks/useAiCooldown";
 import { usePreferences } from "@/hooks/usePreferences";
-import { useSession } from "@/hooks/useSession";
 import { Badge } from "@/ui/Badge";
 import { Button } from "@/ui/Button";
 import { Chip } from "@/ui/Chip";
@@ -79,7 +78,6 @@ export function MobPublish({
   /** «المسودة» / back: the draft again. */
   onDraft: () => void;
 }) {
-  const session = useSession();
   const cooldown = useAiCooldown();
   const { done, copy } = useDraftCopy();
   const frameRef = useRef<HTMLElement>(null);
@@ -93,7 +91,6 @@ export function MobPublish({
   const name = MOB_FORMAT_NAME[data.format] ?? formatCopy(data.format, 0).name;
   const parts = publishParts(data);
   const view = platformView(platform, parts, true);
-  const handle = session?.user.displayName ?? "";
   const headline = storyHeadline(desk.detail, data);
   const dir = draftDir(data);
   const versionId = desk.detail?.currentVersionId ?? data.versionId ?? null;
@@ -131,9 +128,9 @@ export function MobPublish({
           ))}
         </div>
         {platform === "instagram" ? (
-          <InstagramFrame ref={frameRef} view={view} headline={headline} handle={handle} dir={dir} />
+          <InstagramFrame ref={frameRef} view={view} headline={headline} dir={dir} />
         ) : (
-          <PlatformFrame ref={frameRef} view={view} parts={parts} headline={headline} handle={handle} dir={dir} />
+          <PlatformFrame ref={frameRef} view={view} parts={parts} headline={headline} dir={dir} />
         )}
         {desk.reviseError && desk.failedInstruction && (
           <ReviseError error={desk.reviseError} instruction={desk.failedInstruction} onRetry={desk.retryRevision} conflict={desk.conflict} />

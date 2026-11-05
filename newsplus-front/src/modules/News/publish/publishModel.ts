@@ -64,9 +64,23 @@ export function ringColor(pct: number): string {
 /** NewPublish `P[k].media`: the platforms whose post carries a picture. */
 const MEDIA: Record<Platform, boolean> = { x: false, instagram: true, facebook: true, telegram: false, tiktok: true };
 
+/**
+ * NewPublish `P[k].handle` / MobNewPreview: the newsroom's account under «Newsplus» in the frame (never the
+ * editor's name). The app has no handle setting yet (S12 «handle from settings»), so the boards' handles stand.
+ */
+const HANDLE: Record<Platform, string> = {
+  x: "@newsplus",
+  instagram: "newsplus",
+  facebook: "Newsplus",
+  telegram: "t.me/newsplus",
+  tiktok: "@newsplus",
+};
+
 export type PlatformView = {
   platform: Platform;
   name: string;
+  /** The newsroom's account on the platform (the frame's second line). */
+  handle: string;
   /** What «نسخ لـ…» copies. */
   copy: string;
   count: number;
@@ -89,6 +103,7 @@ export function platformView(platform: Platform, parts: PublishParts, mobile = f
   return {
     platform,
     name: PLATFORM_NAME[platform],
+    handle: HANDLE[platform],
     copy,
     count,
     pct,
