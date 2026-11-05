@@ -28,9 +28,11 @@ import { revision } from "./draftModel";
 import { DraftError, MemoryFloat, ReviseDock, ReviseError, Thread, type QuickChip } from "./Editor";
 import { MobFormat } from "./MobFormats";
 import { threadTurns } from "./thread";
+import { VoicePanel, voiceSupported, type VoiceResult } from "./VoicePanel";
 
 /** MobDraft's dock: `padding-bottom: 26px; flex: none`, plus the safe area (GLOBAL-RULES §6). */
 const DOCK_STYLE = { ...M_CTA_STYLE, flex: "none" } as const;
+const MAIN_STYLE = { padding: "14px 18px 18px", gap: "12px" } as const;
 
 export function MobDraft({ desk, onBack }: { desk: EditorialDesk; onBack: () => void }) {
   useHideTabBar(true);
@@ -71,6 +73,17 @@ function DraftView({ desk, data, onBack }: { desk: EditorialDesk; data: NewsSumm
   const rule = (desk.detail?.pendingMemory ?? []).find((item) => item.status === "pending");
   const painter = useCarouselPainter(carousel ? data : undefined);
   const views = carousel ? slideViews(painter.slides, painter.painting) : [];
+  /** MobNewVoice (S16): the listening panel replaces the dock; the draft behind it dims and is hidden from AT. */
+  const [canDictate] = useState(voiceSupported);
+  const [listening, setListening] = useState(false);
+
+  function onVoiceDone({ action, text }: VoiceResult) {
+    setListening(false);
+    if (!text || action === "cancel") return;
+    // The heard text is a normal revision; when the editor can't take it now (busy, AI cooldown) it waits in the field.
+    if (action === "edit" || desk.busy || desk.aiCooldown) desk.setInstruction(text);
+    else desk.revise(text);
+  }
 
   // A new message (or the editor starting to answer) shows at the bottom; a failed revision shows its notice at
   // the top. Opening the draft keeps it at the top.
@@ -100,6 +113,8 @@ function DraftView({ desk, data, onBack }: { desk: EditorialDesk; data: NewsSumm
 
   const versionKey = data.versionId ?? "draft";
 
+  // Leaving the draft view (compare, preview) closes the listening panel, and with it the microphone.
+  if (listening && (compare.open || (preview && view === "preview"))) setListening(false);
   if (compare.open) return <MobDiff desk={desk} data={data} onClose={compare.exit} />;
   if (preview && view === "preview") return <MobPublish desk={desk} data={data} onDraft={() => setView("draft")} />;
 
@@ -115,7 +130,13 @@ function DraftView({ desk, data, onBack }: { desk: EditorialDesk; data: NewsSumm
         </Button>
       </header>
 
-      <main ref={scrollRef} className="m-scroll col" style={{ padding: "14px 18px 18px", gap: "12px" }}>
+      <main
+        ref={scrollRef}
+        className="m-scroll col"
+        style={listening ? { ...MAIN_STYLE, opacity: 0.55 } : MAIN_STYLE}
+        aria-hidden={listening || undefined}
+        inert={listening || undefined}
+      >
         {preview && <MobDraftSeg value="draft" onChange={setView} />}
         <p className="ai-mark" style={{ color: "var(--ink-3)" }}>
           <Icon name="sparkle" size="sm" />
@@ -140,17 +161,22 @@ function DraftView({ desk, data, onBack }: { desk: EditorialDesk; data: NewsSumm
         <Thread turns={turns} pending={desk.pendingInstruction} revising={desk.revising} mobile />
       </main>
 
-      {rule && <MemoryFloat key={rule.id} rule={rule} busy={desk.busy} onSave={desk.saveMemory} onDismiss={desk.dismissMemory} />}
+      {rule && !listening && <MemoryFloat key={rule.id} rule={rule} busy={desk.busy} onSave={desk.saveMemory} onDismiss={desk.dismissMemory} />}
 
-      <ReviseDock
-        value={desk.instruction}
-        onChange={desk.setInstruction}
-        onSubmit={desk.submitRevision}
-        chips={chips}
-        busy={desk.busy}
-        mobile
-        style={DOCK_STYLE}
-      />
+      {listening ? (
+        <VoicePanel onDone={onVoiceDone} />
+      ) : (
+        <ReviseDock
+          value={desk.instruction}
+          onChange={desk.setInstruction}
+          onSubmit={desk.submitRevision}
+          chips={chips}
+          busy={desk.busy}
+          mobile
+          style={DOCK_STYLE}
+          onMic={canDictate ? () => setListening(true) : undefined}
+        />
+      )}
       {compare.available && (
         <VersionSheet version={sheetVersion} onClose={() => setSheetVersion(null)} onCompare={compare.enter} onRestore={desk.restore} />
       )}

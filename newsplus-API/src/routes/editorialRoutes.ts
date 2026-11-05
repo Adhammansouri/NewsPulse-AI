@@ -8,6 +8,7 @@ import {
   editorialConversationIdParamsSchema,
   editorialConversationListQuerySchema,
   editorialConversationUpdateBodySchema,
+  editorialMemoryCreateBodySchema,
   editorialMemoryListQuerySchema,
   editorialMemoryUpdateBodySchema,
   editorialRestoreBodySchema,
@@ -58,6 +59,12 @@ export function createEditorialRoutes(
     app.get("/editorial/memory", {
       preHandler: [validateQuery(editorialMemoryListQuerySchema)],
       handler: controller.listMemory,
+    });
+
+    // S16: onboarding's hook style becomes an approved rule by the caller (any team member approves rules, as below).
+    app.post("/editorial/memory", {
+      preHandler: [validateBody(editorialMemoryCreateBodySchema)],
+      handler: controller.createMemory,
     });
 
     app.post("/editorial/memory/:id", {

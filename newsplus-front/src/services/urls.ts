@@ -16,6 +16,10 @@ export const API_URLS = {
     CAROUSEL_RENDER: "/news/carousel/render",
     CAROUSEL_ASSET: (conversationId: string, assetId: string) =>
       `/news/carousel/${conversationId}/${assetId}`,
+    HOOK_STYLES: "/news/hook-styles",
+  },
+  ME: {
+    PREFERENCES: "/me/preferences",
   },
   EDITORIAL: {
     CONVERSATIONS: "/editorial/conversations",

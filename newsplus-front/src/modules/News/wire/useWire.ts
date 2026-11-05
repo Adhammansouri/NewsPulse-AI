@@ -7,6 +7,7 @@ import { useSearchParams } from "react-router-dom";
 import type { NewsFeedItem, NewsSource } from "@newsplus/shared";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useNewsFeed } from "@/hooks/useNewsFeed";
+import { usePreferences } from "@/hooks/usePreferences";
 import { listEditorialConversations } from "@/services/editorialService";
 import { getNewsSources } from "@/services/newsService";
 import { clockAr, countPhrase, relativeTimeAr, type CountForms } from "@/utils/arabic";
@@ -16,6 +17,7 @@ import {
   activeFilterCount,
   applyFilters,
   DEFAULT_FILTERS,
+  defaultSources,
   readFilters,
   sourceLanguages,
   widerTime,
@@ -108,7 +110,6 @@ function useMinuteClock() {
 
 export function useWire({ mobile, initialQuery = "" }: { mobile: boolean; initialQuery?: string }): Wire {
   const [searchParams, setSearchParams] = useSearchParams();
-  const filters = useMemo(() => readFilters(searchParams), [searchParams]);
   /** Mobile, back from a story: the search the list had (listMemory.ts). */
   const [query, setQuery] = useState(initialQuery);
   const debouncedQuery = useDebouncedValue(query.trim(), SEARCH_DEBOUNCE_MS);
@@ -127,6 +128,10 @@ export function useWire({ mobile, initialQuery = "" }: { mobile: boolean; initia
   const items = useMemo(() => data?.items ?? [], [data]);
   const sources = useMemo(() => sourcesQuery.data?.sources ?? [], [sourcesQuery.data]);
   const languages = useMemo(() => sourceLanguages(sources), [sources]);
+  // S16: the sources the editor follows are the default source filter (`src` absent from the URL).
+  const followed = usePreferences().data?.sources;
+  const defaultSrc = useMemo(() => defaultSources(followed, sources), [followed, sources]);
+  const filters = useMemo(() => readFilters(searchParams, defaultSrc), [searchParams, defaultSrc]);
   const drafts = useMemo(
     () => new Set((draftsQuery.data?.items ?? []).flatMap((c) => (c.itemId ? [c.itemId] : []))),
     [draftsQuery.data],
@@ -190,8 +195,8 @@ export function useWire({ mobile, initialQuery = "" }: { mobile: boolean; initia
   }, [refetch, showAll, scrollListTop]);
 
   const setFilters = useCallback(
-    (next: WireFilters) => setSearchParams((prev) => writeFilters(prev, next), { replace: true }),
-    [setSearchParams],
+    (next: WireFilters) => setSearchParams((prev) => writeFilters(prev, next, defaultSrc), { replace: true }),
+    [setSearchParams, defaultSrc],
   );
 
   const clearAll = useCallback(() => {

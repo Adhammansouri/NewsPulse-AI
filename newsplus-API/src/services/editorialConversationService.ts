@@ -15,7 +15,9 @@ import { arcLabel, carouselRevisionInstructions, mergeCarouselSlides } from "../
 import type { OpenAIClient } from "../ai/openaiClient.js";
 import type {
   EditorialConversationDetail,
+  EditorialMemoryCandidate,
   EditorialMemoryListData,
+  EditorialMemoryRule,
   EditorialMemoryStatus,
   EditorialReviseData,
 } from "@newsplus/shared";
@@ -52,6 +54,17 @@ export class EditorialConversationService {
 
   updateMemory(id: string, patch: { status?: EditorialMemoryStatus; instruction?: string }) {
     return this.deps.workspace.updateMemoryRule(id, patch);
+  }
+
+  /**
+   * S16: a rule the editor states (onboarding's hook style), approved at once by them — any team member approves
+   * rules (`updateMemory`). The same text already approved is returned instead of a second copy.
+   */
+  createMemory(input: EditorialMemoryCandidate, userId: string): EditorialMemoryRule {
+    const instruction = input.instruction.trim();
+    const existing = this.deps.workspace.listMemoryRules("approved").find((rule) => rule.instruction === instruction);
+    if (existing) return existing;
+    return this.deps.workspace.createMemoryRule({ instruction, rationale: input.rationale, status: "approved", createdBy: userId });
   }
 
   restore(conversationId: string, versionId: string, userId: string): EditorialReviseData {

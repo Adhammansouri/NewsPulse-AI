@@ -319,6 +319,9 @@ export type EditorialMemoryListData = {
   rules: EditorialMemoryRule[];
 };
 
+/** S16 `POST /editorial/memory`: a rule the editor states (onboarding's hook style), saved as approved. */
+export type EditorialMemoryCreateRequest = EditorialMemoryCandidate;
+
 export type EditorialMemoryUpdateRequest = {
   /** `pending` only undoes an approval (S10 «تراجع»); the API refuses it for rejected / disabled rules. */
   status?: EditorialMemoryStatus;

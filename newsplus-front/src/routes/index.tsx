@@ -1,6 +1,7 @@
 import { lazy, Suspense, type ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "@/components/layouts/MainLayout";
+import OnboardingGate from "@/components/shared/OnboardingGate";
 import RequireAuth from "@/components/shared/RequireAuth";
 import { PageSkeleton, type PageSkeletonLayout } from "@/components/shell/PageSkeleton";
 import { features } from "@/config/features";
@@ -17,6 +18,7 @@ const NotificationsPage = lazy(() => import("@/modules/Notifications/pages/Notif
 const UsagePage = lazy(() => import("@/modules/Usage/pages/UsagePage"));
 const MorePage = lazy(() => import("@/modules/More/pages/MorePage"));
 const BoardPage = lazy(() => import("@/modules/Board/pages/BoardPage"));
+const OnboardingPage = lazy(() => import("@/modules/Onboarding/pages/OnboardingPage"));
 
 // Dev-only UI-kit gallery (S01 §7). `import.meta.env.DEV` is `false` in production builds, so the
 // lazy import is dead code there and the gallery chunk is never emitted.
@@ -51,18 +53,29 @@ export default function AppRoutes() {
         }
       />
       <Route element={<RequireAuth />}>
-        <Route element={<MainLayout />}>
-          <Route path="/" element={page(<HomePage />, "stack")} />
-          <Route path="/news" element={page(<NewsPage />, "split")} />
-          <Route path="/news/:itemId" element={page(<NewsStoryPage />, "split")} />
-          <Route path="/news/:itemId/breaking" element={page(<BreakingPage />, "split")} />
-          <Route path="/archive" element={page(<ArchivePage />, "stack")} />
-          <Route path="/generate" element={page(<GeneratePage />, "split")} />
-          <Route path="/translate" element={page(<TranslatePage />, "stack")} />
-          <Route path="/notifications" element={page(<NotificationsPage />, "stack")} />
-          <Route path="/usage" element={page(<UsagePage />, "stack")} />
-          <Route path="/more" element={page(<MorePage />, "stack")} />
-          {features.workflow && <Route path="/board" element={page(<BoardPage />, "stack")} />}
+        {/* S16: onboarding is full screen (no shell) and outside the gate that sends a new editor to it. */}
+        <Route
+          path="/welcome"
+          element={
+            <Suspense fallback={null}>
+              <OnboardingPage />
+            </Suspense>
+          }
+        />
+        <Route element={<OnboardingGate />}>
+          <Route element={<MainLayout />}>
+            <Route path="/" element={page(<HomePage />, "stack")} />
+            <Route path="/news" element={page(<NewsPage />, "split")} />
+            <Route path="/news/:itemId" element={page(<NewsStoryPage />, "split")} />
+            <Route path="/news/:itemId/breaking" element={page(<BreakingPage />, "split")} />
+            <Route path="/archive" element={page(<ArchivePage />, "stack")} />
+            <Route path="/generate" element={page(<GeneratePage />, "split")} />
+            <Route path="/translate" element={page(<TranslatePage />, "stack")} />
+            <Route path="/notifications" element={page(<NotificationsPage />, "stack")} />
+            <Route path="/usage" element={page(<UsagePage />, "stack")} />
+            <Route path="/more" element={page(<MorePage />, "stack")} />
+            {features.workflow && <Route path="/board" element={page(<BoardPage />, "stack")} />}
+          </Route>
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

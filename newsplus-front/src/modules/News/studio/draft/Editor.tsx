@@ -15,6 +15,7 @@ import { PulseLine } from "@/ui/PulseLine";
 import { RuleEditField } from "../archive/ArchiveParts";
 import { DRAFT_COPY } from "./copy";
 import type { ThreadTurn } from "./thread";
+import { VOICE_COPY } from "./voiceModel";
 
 /** DeskDraft's `msg--sys` glyph: the history arrow without the clock hands. */
 function RestoreGlyph() {
@@ -74,6 +75,7 @@ export function ReviseDock({
   busy,
   mobile,
   style,
+  onMic,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -83,10 +85,13 @@ export function ReviseDock({
   busy: boolean;
   mobile: boolean;
   style?: CSSProperties;
+  /** S16 MobNewVoice: with an empty field the send button is the mic (only where speech recognition exists). */
+  onMic?: () => void;
 }) {
   // S10: during the AI cooldown the dock keeps its text but sends nothing (send + chips disabled).
   const cooldown = useAiCooldown();
   const blocked = busy || cooldown.active;
+  const mic = onMic && !value.trim() ? onMic : null;
 
   function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     // Enter sends; Shift+Enter is a new line.
@@ -138,13 +143,15 @@ export function ReviseDock({
         <button
           className="send"
           type="button"
-          aria-label={DRAFT_COPY.send}
+          aria-label={mic ? VOICE_COPY.mic : DRAFT_COPY.send}
           aria-disabled={blocked || undefined}
           onClick={() => {
-            if (!blocked) onSubmit();
+            if (blocked) return;
+            if (mic) mic();
+            else onSubmit();
           }}
         >
-          <Icon name="send" />
+          <Icon name={mic ? "mic" : "send"} />
         </button>
       </label>
     </form>

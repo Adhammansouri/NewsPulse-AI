@@ -5,6 +5,7 @@ import type {
   EditorialConversationListQuery,
   EditorialConversationSummary,
   EditorialConversationUpdateRequest,
+  EditorialMemoryCreateRequest,
   EditorialMemoryListData,
   EditorialMemoryStatus,
   EditorialMemoryUpdateRequest,
@@ -56,6 +57,16 @@ export async function listEditorialMemory(status?: EditorialMemoryStatus) {
   const response = await apiRequest<ApiSuccessResponse<EditorialMemoryListData>>(API_URLS.EDITORIAL.MEMORY, {
     auth: true,
     params,
+  });
+  return response.data;
+}
+
+/** S16 `POST /editorial/memory`: a rule the editor states (onboarding's hook style), saved as approved. */
+export async function createEditorialMemory(body: EditorialMemoryCreateRequest) {
+  const response = await apiRequest<ApiSuccessResponse<EditorialMemoryListData["rules"][number]>>(API_URLS.EDITORIAL.MEMORY, {
+    method: "POST",
+    auth: true,
+    body: JSON.stringify(body),
   });
   return response.data;
 }

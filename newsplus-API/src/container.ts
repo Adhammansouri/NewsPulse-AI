@@ -20,6 +20,9 @@ import { DigestService } from "./services/digestService.js";
 import { StoryUpdatesStore } from "./services/storyUpdatesStore.js";
 import { StoryTimelineService } from "./services/storyTimelineService.js";
 import { PublishCheckService } from "./services/publishCheckService.js";
+import { UserPreferencesStore } from "./services/userPreferencesStore.js";
+import { UserPreferencesService } from "./services/userPreferencesService.js";
+import { HookStylesService } from "./services/hookStylesService.js";
 
 export async function createAuthService(app: FastifyInstance): Promise<AuthService> {
   const hasher = new ScryptPasswordHasher();
@@ -60,10 +63,17 @@ export function createToolServices(app: FastifyInstance) {
   const timelineService = new StoryTimelineService({ store: storyUpdates, aggregator, openai });
   /** S12: «فحص قبل النشر». */
   const publishCheckService = new PublishCheckService({ openai, workspace });
+  /** S16 onboarding: the editor's preferences (in the editorial store's file, own connection) and the hook styles. */
+  const preferencesStore = new UserPreferencesStore(env.editorialStorePath);
+  const preferencesService = new UserPreferencesService({ store: preferencesStore, aggregator });
+  const hookStylesService = new HookStylesService({ aggregator, openai });
   return {
     aggregator,
     workspace,
     storyUpdates,
+    preferencesStore,
+    preferencesService,
+    hookStylesService,
     newsService,
     editorialService,
     generateService,

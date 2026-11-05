@@ -13,6 +13,7 @@ import { createTeamRoutes } from "./teamRoutes.js";
 import { createBreakingDigestRoutes } from "./breakingDigestRoutes.js";
 import { createTimelineRoutes } from "./timelineRoutes.js";
 import { createPublishCheckRoutes } from "./publishCheckRoutes.js";
+import { createOnboardingRoutes } from "./onboardingRoutes.js";
 import { OpenAIUsageService } from "../services/openaiUsageService.js";
 import type { AuthService } from "../services/authService.js";
 import type { PushService } from "../services/pushService.js";
@@ -27,6 +28,8 @@ import type { BreakingService } from "../services/breakingService.js";
 import type { DigestService } from "../services/digestService.js";
 import type { StoryTimelineService } from "../services/storyTimelineService.js";
 import type { PublishCheckService } from "../services/publishCheckService.js";
+import type { UserPreferencesService } from "../services/userPreferencesService.js";
+import type { HookStylesService } from "../services/hookStylesService.js";
 
 type ApiServices = {
   authService: AuthService;
@@ -42,6 +45,8 @@ type ApiServices = {
   digestService: DigestService;
   timelineService: StoryTimelineService;
   publishCheckService: PublishCheckService;
+  preferencesService: UserPreferencesService;
+  hookStylesService: HookStylesService;
 };
 
 export function createApiRoutes(services: ApiServices): FastifyPluginAsync {
@@ -55,6 +60,7 @@ export function createApiRoutes(services: ApiServices): FastifyPluginAsync {
     await app.register(createTimelineRoutes(services.timelineService));
     await app.register(createEditorialRoutes(services.editorialService, services.workflowService));
     await app.register(createPublishCheckRoutes(services.publishCheckService));
+    await app.register(createOnboardingRoutes(services.preferencesService, services.hookStylesService));
     await app.register(createPresenceRoutes(services.presenceService));
     await app.register(createTeamRoutes(services.teamService));
     await app.register(createGenerateRoutes(services.generateService));

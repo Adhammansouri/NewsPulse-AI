@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import type { NewsSummarizeData } from "@newsplus/shared";
 import { features } from "@/config/features";
 import { useAiCooldown } from "@/hooks/useAiCooldown";
+import { usePreferences } from "@/hooks/usePreferences";
 import { useSession } from "@/hooks/useSession";
 import { Badge } from "@/ui/Badge";
 import { Button } from "@/ui/Button";
@@ -27,7 +28,16 @@ import type { EditorialDesk } from "../studio/useEditorialDesk";
 import { CheckRows, CheckRowsSkeleton } from "./CheckRows";
 import { InstagramFrame, PlatformFrame } from "./PlatformFrame";
 import { PLATFORM_NAME, PUBLISH_COPY } from "./publishCopy";
-import { arabicCount, PLATFORMS, platformView, publishable, publishParts, storyHeadline, type Platform } from "./publishModel";
+import {
+  arabicCount,
+  openingPlatform,
+  orderedPlatforms,
+  platformView,
+  publishable,
+  publishParts,
+  storyHeadline,
+  type Platform,
+} from "./publishModel";
 import { usePublishCheck } from "./usePublishCheck";
 
 export type MobDraftView = "draft" | "preview";
@@ -73,7 +83,10 @@ export function MobPublish({
   const cooldown = useAiCooldown();
   const { done, copy } = useDraftCopy();
   const frameRef = useRef<HTMLElement>(null);
-  const [platform, setPlatform] = useState<Platform>(MOB_DEFAULT_PLATFORM);
+  // S16: the editor's platforms first (onboarding); the chip picked here wins over the opening one.
+  const preferred = usePreferences().data?.platforms;
+  const [picked, setPlatform] = useState<Platform | null>(null);
+  const platform = picked ?? openingPlatform(preferred, MOB_DEFAULT_PLATFORM);
   const [sheetOpen, setSheetOpen] = useState(false);
   const check = usePublishCheck(desk, platform);
 
@@ -111,7 +124,7 @@ export function MobPublish({
       <main className="m-scroll col" style={SCROLL_STYLE}>
         <MobDraftSeg value="preview" onChange={(next) => next === "draft" && onDraft()} />
         <div className="scroll-x" role="tablist" style={CHIPS_STYLE}>
-          {PLATFORMS.map((item) => (
+          {orderedPlatforms(preferred).map((item) => (
             <Chip key={item} pressed={item === platform} onClick={() => setPlatform(item)}>
               {PLATFORM_NAME[item]}
             </Chip>

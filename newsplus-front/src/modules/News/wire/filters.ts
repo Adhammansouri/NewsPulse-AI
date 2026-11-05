@@ -31,8 +31,31 @@ function oneOf<T extends string>(value: string | null, allowed: readonly T[], fa
   return value !== null && (allowed as readonly string[]).includes(value) ? (value as T) : fallback;
 }
 
-export function readFilters(params: URLSearchParams): WireFilters {
-  const src = (params.get(KEYS.src) ?? "")
+/**
+ * S16: the sources the editor follows (onboarding step 2) are the default source filter. Ids the source list no
+ * longer has are dropped once it has loaded.
+ */
+export function defaultSources(followed: readonly string[] | undefined, sources: readonly NewsSource[]): readonly string[] {
+  if (!followed || followed.length === 0) return NO_SOURCES;
+  if (sources.length === 0) return followed;
+  const known = new Set(sources.map((source) => source.id));
+  const kept = followed.filter((id) => known.has(id));
+  return kept.length === followed.length ? followed : kept;
+}
+
+const NO_SOURCES: readonly string[] = [];
+
+function sameSources(a: readonly string[], b: readonly string[]) {
+  return a.length === b.length && a.every((id) => b.includes(id));
+}
+
+/**
+ * `src` absent from the URL reads as `defaultSrc` (S16: the followed sources); `src=` (empty) is every source, so
+ * clearing the filter still works when there is a default.
+ */
+export function readFilters(params: URLSearchParams, defaultSrc: readonly string[] = NO_SOURCES): WireFilters {
+  const raw = params.get(KEYS.src);
+  const src = (raw ?? defaultSrc.join(","))
     .split(",")
     .map((id) => id.trim())
     .filter(Boolean);
@@ -44,8 +67,8 @@ export function readFilters(params: URLSearchParams): WireFilters {
   };
 }
 
-/** A copy of `params` with the filters written in; defaults are left out of the URL. */
-export function writeFilters(params: URLSearchParams, filters: WireFilters): URLSearchParams {
+/** A copy of `params` with the filters written in; defaults (and the default sources) are left out of the URL. */
+export function writeFilters(params: URLSearchParams, filters: WireFilters, defaultSrc: readonly string[] = NO_SOURCES): URLSearchParams {
   const next = new URLSearchParams(params);
   const set = (key: string, value: string, fallback: string) => {
     if (value === fallback) next.delete(key);
@@ -54,7 +77,8 @@ export function writeFilters(params: URLSearchParams, filters: WireFilters): URL
   set(KEYS.time, filters.time, "all");
   set(KEYS.topic, filters.topic, "all");
   set(KEYS.lang, filters.lang, "all");
-  set(KEYS.src, filters.src.join(","), "");
+  if (sameSources(filters.src, defaultSrc)) next.delete(KEYS.src);
+  else next.set(KEYS.src, filters.src.join(","));
   return next;
 }
 

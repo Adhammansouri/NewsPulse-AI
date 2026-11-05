@@ -25,6 +25,20 @@ export const PLATFORMS: readonly Platform[] = EDITORIAL_PUBLISH_PLATFORMS;
 /** The board opens on X. */
 export const DEFAULT_PLATFORM: Platform = "x";
 
+/**
+ * S16: the platforms the editor publishes on (onboarding step 1) come first, in the board's order, then the others;
+ * without a choice the board's order stays.
+ */
+export function orderedPlatforms(preferred: readonly Platform[] | undefined): readonly Platform[] {
+  if (!preferred || preferred.length === 0) return PLATFORMS;
+  return [...PLATFORMS.filter((platform) => preferred.includes(platform)), ...PLATFORMS.filter((platform) => !preferred.includes(platform))];
+}
+
+/** The tab a publish screen opens on: the first platform the editor publishes on, else the board's default. */
+export function openingPlatform(preferred: readonly Platform[] | undefined, fallback: Platform): Platform {
+  return preferred?.length ? orderedPlatforms(preferred)[0] : fallback;
+}
+
 /** The publish check and preview exist for the social post (hook / body / hashtags). */
 export function publishable(data: NewsSummarizeData | undefined): data is NewsSummarizeData {
   return data?.format === "social";

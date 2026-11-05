@@ -52,6 +52,9 @@ async function mockApi(page, { session = true, theme = "light" } = {}) {
     if (p === "/generate") return route.fulfill(ok(F.generate));
     if (p === "/translate") return route.fulfill(ok({ original: "", translated: "The central bank held interest rates steady for a third consecutive time.", sourceLanguage: "ar", targetLanguage: "en" }));
     if (p === "/push/vapid-key") return route.fulfill(ok({ publicKey: "", configured: true }));
+    // S16: an onboarded editor (otherwise every route redirects to /welcome); /welcome itself still renders.
+    if (p === "/me/preferences") return route.fulfill(ok({ platforms: [], sources: [], onboardedAt: new Date().toISOString() }));
+    if (p === "/news/hook-styles") return route.fulfill(ok({ direct: "المركزي يثبّت الفائدة للمرة الثالثة على التوالي", question: "هل انتهى زمن خفض الفائدة؟ المركزي يثبّتها للمرة الثالثة", number: "٣ مرات ورا بعض: المركزي ما بيتحركش قبل التضخم" }));
     return route.fulfill(ok({}));
   });
 }

@@ -37,11 +37,20 @@ export const editorialMemoryListQuerySchema = z.object({
   status: z.enum(["pending", "approved", "rejected", "disabled"]).optional(),
 });
 
+/** A team-memory rule's text: 18–280 characters (as `isReusableStyleRule`). */
+const memoryInstructionSchema = z.string().trim().min(18).max(280);
+
+/** S16 `POST /editorial/memory`: a rule the editor states (onboarding's hook style), saved as approved. */
+export const editorialMemoryCreateBodySchema = z.object({
+  instruction: memoryInstructionSchema,
+  rationale: z.string().trim().min(1).max(280),
+});
+
 export const editorialMemoryUpdateBodySchema = z
   .object({
     // "pending" only undoes an approval (S10 «تراجع» on «القاعدة اتحفظت لذاكرة الفريق»); the store enforces it.
     status: z.enum(["pending", "approved", "rejected", "disabled"]).optional(),
-    instruction: z.string().trim().min(18).max(280).optional(),
+    instruction: memoryInstructionSchema.optional(),
   })
   .refine((value) => Boolean(value.status || value.instruction), {
     message: "invalid-request",
@@ -54,3 +63,4 @@ export type EditorialReviseBody = z.infer<typeof editorialReviseBodySchema>;
 export type EditorialRestoreBody = z.infer<typeof editorialRestoreBodySchema>;
 export type EditorialMemoryListQuery = z.infer<typeof editorialMemoryListQuerySchema>;
 export type EditorialMemoryUpdateBody = z.infer<typeof editorialMemoryUpdateBodySchema>;
+export type EditorialMemoryCreateBody = z.infer<typeof editorialMemoryCreateBodySchema>;

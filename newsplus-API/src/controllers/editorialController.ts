@@ -6,6 +6,7 @@ import type {
   EditorialConversationIdParams,
   EditorialConversationListQuery,
   EditorialConversationUpdateBody,
+  EditorialMemoryCreateBody,
   EditorialMemoryListQuery,
   EditorialMemoryUpdateBody,
   EditorialRestoreBody,
@@ -55,6 +56,10 @@ export function createEditorialController(service: EditorialConversationService,
       _reply: FastifyReply,
     ) {
       return successResponse(service.listMemory(request.query.status));
+    },
+
+    async createMemory(request: FastifyRequest<{ Body: EditorialMemoryCreateBody }>, _reply: FastifyReply) {
+      return successResponse(service.createMemory(request.body, request.user.sub));
     },
 
     async updateMemory(

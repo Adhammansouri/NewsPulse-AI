@@ -38,6 +38,7 @@ export type {
   EditorialConversationSummary,
   EditorialConversationUpdateRequest,
   EditorialMemoryCandidate,
+  EditorialMemoryCreateRequest,
   EditorialMemoryListData,
   EditorialMemoryRule,
   EditorialMemoryStatus,
@@ -107,3 +108,11 @@ export type {
   PublishCheckStatus,
   PublishParts,
 } from "./types/publish.js";
+export { HOOK_STYLES } from "./types/preferences.js";
+export type {
+  HookStyle,
+  HookStylesData,
+  HookStylesRequest,
+  UserPreferences,
+  UserPreferencesUpdateRequest,
+} from "./types/preferences.js";

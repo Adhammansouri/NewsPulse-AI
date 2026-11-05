@@ -7,6 +7,7 @@ import { useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import type { NewsSummarizeData } from "@newsplus/shared";
 import { useAiCooldown } from "@/hooks/useAiCooldown";
+import { usePreferences } from "@/hooks/usePreferences";
 import { useSession } from "@/hooks/useSession";
 import { Badge } from "@/ui/Badge";
 import { Button, buttonClassName } from "@/ui/Button";
@@ -29,7 +30,8 @@ import {
   arabicCount,
   currentVersionNumber,
   DEFAULT_PLATFORM,
-  PLATFORMS,
+  openingPlatform,
+  orderedPlatforms,
   platformView,
   publishParts,
   storyHeadline,
@@ -63,7 +65,10 @@ function PublishView({ desk, data }: { desk: EditorialDesk; data: NewsSummarizeD
   const cooldown = useAiCooldown();
   const { done, copy } = useDraftCopy();
   const frameRef = useRef<HTMLElement>(null);
-  const [platform, setPlatform] = useState<Platform>(DEFAULT_PLATFORM);
+  // S16: the editor's platforms first (onboarding); the tab picked here wins over the opening one.
+  const preferred = usePreferences().data?.platforms;
+  const [picked, setPlatform] = useState<Platform | null>(null);
+  const platform = picked ?? openingPlatform(preferred, DEFAULT_PLATFORM);
   const check = usePublishCheck(desk, platform);
 
   const name = formatCopy(data.format, 0).name;
@@ -91,7 +96,7 @@ function PublishView({ desk, data }: { desk: EditorialDesk; data: NewsSummarizeD
       <div className="grow" style={BODY_STYLE}>
         <section className="col grow" style={PREVIEW_STYLE} aria-label={PUBLISH_COPY.previewLabel}>
           <div className="seg" role="tablist" aria-label={PUBLISH_COPY.platformLabel}>
-            {PLATFORMS.map((item) => (
+            {orderedPlatforms(preferred).map((item) => (
               <button
                 key={item}
                 type="button"
