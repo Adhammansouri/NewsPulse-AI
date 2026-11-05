@@ -7,6 +7,7 @@ import { cx } from "@/ui/cx";
 import { AvatarMenu } from "./AvatarMenu";
 import { isSectionActive } from "./routeMeta";
 import { useRoutePending } from "./routePending";
+import { openShortcuts } from "./shellOverlay";
 import { useNotificationNudge } from "./useNotificationNudge";
 
 type RailItem = { to: string; label: string; icon: IconName; visible: boolean };
@@ -59,7 +60,7 @@ export function Rail() {
         })}
       <div style={{ flex: 1 }} />
       {features.shortcuts && (
-        <button className="rail__btn" type="button" aria-label="اختصارات الكيبورد">
+        <button className="rail__btn" type="button" aria-label="اختصارات الكيبورد" onClick={openShortcuts}>
           <Icon name="keyboard" />
         </button>
       )}

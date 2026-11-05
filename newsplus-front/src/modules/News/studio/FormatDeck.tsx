@@ -1,9 +1,10 @@
 // Main · «ماذا ننشر؟»: the team-memory chip, the three social tiles (`tile`, platform shapes) and the four
 // web tiles (`tile tile--row`). Inline styles are the board's own.
 import type { NewsStoryFormat, NewsSummaryFormat } from "@newsplus/shared";
+import { useHotkeyActions } from "@/hooks/hotkeyActions";
 import { Icon } from "@/ui/Icon";
 import { DESK_SHAPES } from "./FormatShapes";
-import { SOCIAL_FORMATS, STUDIO_COPY, TILE_COPY, WEB_FORMATS } from "./formats";
+import { SOCIAL_FORMATS, STORY_FORMAT_IDS, STUDIO_COPY, TILE_COPY, WEB_FORMATS } from "./formats";
 
 export function FormatDeck({
   selected,
@@ -15,6 +16,13 @@ export function FormatDeck({
   approvedRules: number;
   onSelect: (format: NewsStoryFormat) => void;
 }) {
+  // S11 `F` then 1–7: the tiles in deck order.
+  useHotkeyActions({
+    format: (index) => {
+      const format = STORY_FORMAT_IDS[index - 1];
+      if (format) onSelect(format);
+    },
+  });
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", margin: "24px 2px 12px" }}>

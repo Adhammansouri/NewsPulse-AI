@@ -1,10 +1,12 @@
 import { Fragment } from "react";
 import { Outlet, useLocation } from "react-router-dom";
+import { Hotkeys } from "@/components/shell/Hotkeys";
 import { OfflineBanner } from "@/components/shell/OfflineBanner";
 import { Rail } from "@/components/shell/Rail";
 import { RouteBar } from "@/components/shell/RouteBar";
 import { TabBar } from "@/components/shell/TabBar";
 import { isTabScreen } from "@/components/shell/routeMeta";
+import { features } from "@/config/features";
 import { useTabBarHidden } from "@/components/shell/tabBarVisibility";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useOnline } from "@/hooks/useOnline";
@@ -54,6 +56,8 @@ export default function MainLayout() {
         )}
         {screen}
       </main>
+      {/* S11: keyboard shortcuts, the command palette and the shortcuts sheet (desktop only). */}
+      {features.shortcuts && <Hotkeys />}
     </div>
   );
 }

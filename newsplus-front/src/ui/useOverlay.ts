@@ -24,6 +24,11 @@ export function getTabbables(root: HTMLElement): HTMLElement[] {
 /** Open overlays, innermost last: only the top one reacts to Esc / Tab / outside focus. */
 const stack: symbol[] = [];
 
+/** S11: the global keyboard shortcuts stand down while any dialog, sheet, drawer or popover is open. */
+export function isOverlayOpen(): boolean {
+  return stack.length > 0;
+}
+
 export type OverlayOptions = {
   open: boolean;
   /** Called on Esc and on outside interaction. When omitted the overlay can only be closed by its own actions. */

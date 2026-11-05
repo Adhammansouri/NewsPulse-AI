@@ -322,10 +322,15 @@ export function useEditorialDesk({
 
   /** Swipe «اكتب منشور»: the story with «منشور سوشيال» selected, generating at once. */
   function startSocial(item: NewsFeedItem) {
+    startStoryFormat(item, "social");
+  }
+
+  /** S11 palette: «اكتب منشور سوشيال عن …» / «سكريبت فيديو عن …» — the story in that format, generating at once. */
+  function startStoryFormat(item: NewsFeedItem, format: "social" | "video") {
     if (cooldown.active) return;
     resetStory();
-    setSelectedFormat("social");
-    start({ itemId: item.id, language: "ar", format: "social", ...constraintsFor(item.id) });
+    setSelectedFormat(format);
+    start({ itemId: item.id, language: "ar", format, ...constraintsFor(item.id) });
   }
 
   /** «إلغاء» (Main-generating, MobGenerating): abort the request and go back to the formats. */
@@ -523,6 +528,7 @@ export function useEditorialDesk({
     openStory,
     startBriefing,
     startSocial,
+    startStoryFormat,
   };
 }
 

@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { CarouselOptions, CarouselSlide, NewsSummarizeData } from "@newsplus/shared";
+import { useHotkeyActions } from "@/hooks/hotkeyActions";
 import { Badge } from "@/ui/Badge";
 import { Button } from "@/ui/Button";
 import { cx } from "@/ui/cx";
@@ -51,6 +52,8 @@ function CarouselView({ desk, storyTitle }: { desk: EditorialDesk; storyTitle: s
   function copyTexts() {
     copy("all", formatSummaryClipboard(data), DRAFT_COPY.copiedAll(formatNoun("carousel")), () => selectText(document.getElementById("carousel-texts")));
   }
+  // S11 `C`: the carousel's «نسخ الكل» is «انسخ النصوص».
+  useHotkeyActions({ copyAll: copyTexts });
 
   async function downloadImages() {
     if (!conversationId) return;

@@ -3,6 +3,7 @@
 // inline styles are the board's own. The board's `<main>` is a `<div>` here: the shell owns `<main>`.
 import { useRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { useHotkeyActions } from "@/hooks/hotkeyActions";
 import { AiPanel } from "@/ui/AiPanel";
 import { AiSteps } from "@/ui/AiSteps";
 import { Badge } from "@/ui/Badge";
@@ -334,6 +335,8 @@ function Writing({ desk }: { desk: GenerateDesk }) {
 
 function Done({ desk, draft }: { desk: GenerateDesk; draft: GenerateDraft }) {
   const dir = draft.language === "en" ? "ltr" : "rtl";
+  // S11 `C`: «نسخ الكل».
+  useHotkeyActions({ copyAll: () => void desk.copyAll(draft) });
   return (
     <>
       <div className="row" style={{ padding: "12px 28px", background: "var(--surface)", borderBottom: "1px solid var(--line)", flexWrap: "wrap" }}>

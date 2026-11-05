@@ -5,6 +5,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import type { EditorialVersion, NewsSummarizeData } from "@newsplus/shared";
+import { useHotkeyActions } from "@/hooks/hotkeyActions";
 import { Badge } from "@/ui/Badge";
 import { Button, buttonClassName } from "@/ui/Button";
 import { Icon } from "@/ui/Icon";
@@ -135,6 +136,8 @@ function DraftView({ desk, data }: { desk: EditorialDesk; data: NewsSummarizeDat
   function copyAll() {
     copy("all", formatSummaryClipboard(data), DRAFT_COPY.copiedAll(formatNoun(format)), () => selectText(draftRef.current));
   }
+  // S11: `C` is «نسخ الكل», `P` «فحص ونشر» (when the draft has it).
+  useHotkeyActions({ copyAll, publish: publish?.open });
 
   const thread = (
     <>

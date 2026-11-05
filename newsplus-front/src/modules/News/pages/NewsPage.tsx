@@ -33,6 +33,7 @@ import { forgetList, peekListMemory, rememberList } from "../wire/listMemory";
 import { MobWire } from "../wire/MobWire";
 import { useWire } from "../wire/useWire";
 import { WireColumn } from "../wire/WireColumn";
+import { useNewsroomHotkeys } from "./useNewsroomHotkeys";
 
 const ITEM_PARAM = "item";
 
@@ -109,6 +110,8 @@ export default function NewsPage() {
   // shows MobNewDiff itself on mobile.
   useCompareFocus(desk);
   const compare = useCompare(desk);
+  // S11: the command palette and `B` reach the studio through this (desktop).
+  useNewsroomHotkeys({ desk, selected, mobile, openStory, startBriefing });
 
   useEffect(() => {
     if (!handoff?.input) return;

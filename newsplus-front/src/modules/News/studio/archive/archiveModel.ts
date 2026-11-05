@@ -82,7 +82,7 @@ export function ruleCounter(length: number): string {
  * name video, social, carousel, briefing, desk and facts; bulletin and context are not drawn there and take the
  * names the home (homeModel) gives them — their studio tile names.
  */
-const FORMAT_LABEL: Record<NewsSummaryFormat, { kind: string; name: string }> = {
+export const FORMAT_LABEL: Record<NewsSummaryFormat, { kind: string; name: string }> = {
   video: { kind: "فيديو", name: "سكريبت فيديو" },
   social: { kind: "سوشيال", name: "منشور سوشيال" },
   carousel: { kind: "شرائح", name: "كاروسيل" },
