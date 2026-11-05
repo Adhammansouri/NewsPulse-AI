@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus موبايل — استهلاك AI</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+<link rel="stylesheet" href="/_blob/210170dd5a2fa534503e7d6a475c3fc9">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np m" data-theme="{{theme}}">
+  <header class="m-head" style="gap: 12px"><div class="m-head__row"><a class="icon-btn" href="MobMore.dc.html" aria-label="رجوع" style="margin-inline-start: -10px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a><span class="m-title" style="font-size: 24px">استهلاك AI</span><button class="icon-btn" type="button" aria-label="تحديث"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"></path></svg></button></div>
+    <div class="seg seg--block"><button type="button" aria-pressed="false">اليوم</button><button type="button" aria-pressed="true">٧ أيام</button><button type="button" aria-pressed="false">٣٠ يوم</button><button type="button" aria-pressed="false">الشهر</button></div>
+  </header>
+  <main class="m-scroll col" style="padding: 8px 16px 24px; gap: 14px">
+    <sc-if value="{{isLoading}}" hint-placeholder-val="{{ false }}">
+      <div class="sk" style="height: 150px; border-radius: 20px"></div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px"><div class="sk" style="height: 72px; border-radius: 16px"></div><div class="sk" style="height: 72px; border-radius: 16px"></div><div class="sk" style="height: 72px; border-radius: 16px"></div><div class="sk" style="height: 72px; border-radius: 16px"></div></div>
+      <div class="sk" style="height: 170px; border-radius: 20px"></div>
+      <p class="live" style="justify-content: center">بنجيب الأرقام من حساب OpenAI…</p>
+    </sc-if>
+    <sc-if value="{{isReady}}" hint-placeholder-val="{{ true }}">
+    <section class="ai-panel col" style="padding: 18px; gap: 10px; box-shadow: none">
+      <span class="t-meta">تكلفة آخر ٧ أيام</span>
+      <strong class="t-num" dir="ltr" style="font-size: 38px; line-height: 1.1; text-align: right">$18.42</strong>
+      <div class="meter"><span style="width: 37%"></span></div>
+      <span class="t-meta num">٣٧٪ من حد الشهر ($100) · متاح $63.10</span>
+    </section>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+      <div class="panel col" style="padding: 14px; gap: 2px"><span class="t-meta">طلبات المحرّر</span><b class="t-num" style="font-size: 22px">١٬٢٤٨</b></div>
+      <div class="panel col" style="padding: 14px; gap: 2px"><span class="t-meta">التوكنز</span><b class="t-num" style="font-size: 22px" dir="ltr">3.9M</b></div>
+      <div class="panel col" style="padding: 14px; gap: 2px"><span class="t-meta">شرائح مرسومة</span><b class="t-num" style="font-size: 22px">٨٦</b></div>
+      <div class="panel col" style="padding: 14px; gap: 2px"><span class="t-meta">من الذاكرة المؤقتة</span><b class="t-num" style="font-size: 22px">٤١٪</b></div>
+    </div>
+    <section class="panel col" style="padding: 16px; gap: 12px">
+      <div class="row" style="justify-content: space-between"><h2 class="t-head">يوماً بيوم</h2><span class="t-meta num" dir="ltr">max $4.10</span></div>
+      <div dir="ltr" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; align-items: end; height: 130px">
+        <sc-for list="{{days}}" as="d" hint-placeholder-count="7"><div class="col" style="align-items: center; gap: 6px; height: 100%; justify-content: flex-end"><div style="width: 100%; border-radius: 8px 8px 3px 3px; background: {{d.bg}}; height: {{d.h}}"></div><span class="t-meta" style="font-size: 10.5px">{{d.day}}</span></div></sc-for>
+      </div>
+    </section>
+    <section class="m-list">
+      <div class="m-item"><span class="m-item__label">النصوص</span><span class="t-num" dir="ltr">$11.20</span></div>
+      <div class="m-item"><span class="m-item__label">صور الشرائح</span><span class="t-num" dir="ltr">$6.02</span></div>
+      <div class="m-item"><span class="m-item__label">البحث على الويب</span><span class="t-num" dir="ltr">$1.20</span></div>
+    </section>
+    <p class="t-meta" style="text-align: center">الأرقام من حساب OpenAI وقد تشمل استخداماً خارج Newsplus</p>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["ready","loading"],"default":"ready"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var raw = [['أر', 1.9], ['خ', 2.4], ['ج', 1.1], ['س', 2.2], ['أح', 3.6], ['ن', 4.1], ['اليوم', 3.1]];
+    return { theme: this.props.theme ?? 'light', isLoading: this.props.state === 'loading', isReady: this.props.state !== 'loading', days: raw.map(function (r, i) { return { day: r[0], h: Math.round(r[1] / 4.1 * 100) + 'px', bg: i === raw.length - 1 ? 'var(--ai)' : 'var(--line-strong)' }; }) };
+  }
+}
+</script>
+</body>
+</html>

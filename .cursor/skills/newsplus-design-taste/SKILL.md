@@ -1,36 +1,22 @@
 ---
 name: newsplus-design-taste
 description: >-
-  Newsplus HYBRID design — brand/marketing surfaces use navy/teal tokens and
-  components/brand/. Tool routes use Nothing dashboard style inside .theme-tools.
-  Read design-system/HYBRID.md first.
+  Newsplus Pulse redesign — every screen follows docs/redesign (GLOBAL-RULES.md, the boards in design/screens and the
+  design CSS). Read docs/redesign/GLOBAL-RULES.md first.
 ---
 
-# Newsplus Hybrid Design
+# Newsplus Pulse design
 
 ## Read first
 
-`design-system/HYBRID.md` — official split between brand and tools.
+`docs/redesign/GLOBAL-RULES.md` — the mandatory rules (source of truth, copy, Arabic numerals, RTL, sizes, "done").
 
-## Marketing (Home, shell)
+## Where things are
 
-- Tokens: `design-system/tokens.css`
-- Components: `newsplus-front/src/components/brand/`
-- Classes: `brand-btn`, `brand-panel`, `brand-badge-*`
-- Taste Skill anti-slop rules apply
-- Original logo PNGs only
+- Boards to match exactly: `docs/redesign/design/screens/` (+ `design/reference/` for structure, copy and states).
+- Board → sprint / component / state: `docs/redesign/design/BOARD-INDEX.md`.
+- Design CSS: `newsplus-front/src/styles/design/` (ported as-is from `docs/redesign/design/css`).
+- UI kit: `newsplus-front/src/ui/`.
+- Visual QA: `docs/redesign/qa-tools/`.
 
-## Tools (/news, /generate, /translate)
-
-- Wrapper: `.theme-tools` on `<main>` (set in `MainLayout`)
-- Skill: `.cursor/skills/nothing-design/SKILL.md`
-- Components: `ToolPage`, `nd-*` utilities
-- OLED dark always on tool main area
-
-## Default design read (marketing)
-
-> Arabic-first editorial product for journalists — trust-first navy/teal — asymmetric home — Geist + Noto Arabic.
-
-## Default design read (tools)
-
-> Instrument-panel data UI — monochrome — typographic hierarchy — Space Grotesk/Mono — density 6.
+The earlier hybrid design (navy/teal brand shell + Nothing tools, `tokens.css`, Tailwind) is superseded; do not use it.

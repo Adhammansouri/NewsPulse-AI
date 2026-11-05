@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — قارن النسخ</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+<link rel="stylesheet" href="/_blob/210170dd5a2fa534503e7d6a475c3fc9">
+<link rel="stylesheet" href="/_blob/a7940d8c65f26d316bd1f2cee73fd657">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np m" data-theme="{{theme}}">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+<header class="m-bar"><a class="icon-btn" href="MobDraft.dc.html" aria-label="رجوع"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a><span class="m-bar__title">قارن النسخ</span><span class="badge badge--ai">سكريبت فيديو</span></header>
+<main class="m-scroll col" style="padding:14px 16px;gap:14px">
+  <div class="row" style="gap:8px;justify-content:center"><div class="seg"><button type="button" aria-pressed="true">ن١</button><button type="button" aria-pressed="false">ن٢</button></div><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--ink-3)"><path d="M7 7h13l-4-4M17 17H4l4 4"></path></svg><div class="seg"><button type="button" aria-pressed="false">ن٢</button><button type="button" aria-pressed="true">ن٣</button></div></div>
+  <div class="row" style="gap:8px;justify-content:center"><span class="badge badge--breaking">٢ حذف</span><span class="badge badge--ok">٢ إضافة</span></div>
+  <article class="doc col" style="padding:18px;gap:16px">
+    <div class="col" style="gap:4px"><span class="t-meta" style="font-weight:600">الهوك</span><p style="font-size:16.5px;line-height:1.9;font-weight:600">المركزي قال «لا» للمرة الثالثة.. <del class="d">والسبب رقم واحد</del> <ins class="d">فما الذي ينتظره بالضبط؟</ins></p></div>
+    <div class="col" style="gap:4px"><span class="t-meta" style="font-weight:600">النص</span><p class="t-body" style="color:var(--ink);font-size:15px">الرسالة للأسواق<del class="d"> واضحة جداً</del>: لا خفض قبل أن تؤكد البيانات الاتجاه.<ins class="d"> فماذا يعني ذلك لقروضك ومدخراتك؟</ins></p></div>
+  </article>
+  <div class="panel col" style="padding:14px;gap:8px"><b style="font-weight:600;font-size:14px">التعديلات اللي اتطلبت</b><p class="msg msg--me" style="max-width:100%">قوِّ الهوك</p><p class="msg msg--me" style="max-width:100%">اجعل النهاية سؤالاً يخص المشاهد</p></div>
+</main>
+<div class="m-cta"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn btn--quiet" type="button">رجّع ن١</button><button class="btn btn--ink" type="button">اعتمد ن٣</button></div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var s = this.props.state ?? '';
+    return { theme: this.props.theme ?? 'light', s: s };
+  }
+}
+</script>
+</body>
+</html>

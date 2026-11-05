@@ -1,70 +1,70 @@
-import { NotificationsActions } from "@/modules/Notifications/components/NotificationsActions";
-import { NotificationsStatus } from "@/modules/Notifications/components/NotificationsStatus";
+// Notifications (S09 §A): `usePushNotifications` mapped to DeskNotifications / MobNotif and their states.
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useNow } from "@/hooks/useNow";
+import { getNewsFeed } from "@/services/newsService";
+import { isStandaloneDisplay } from "@/services/pwaDetect";
+import { ToastGlyph, useToast } from "@/ui/Toast";
+import { DeskNotifications } from "../components/DeskNotifications";
+import { MobNotifications } from "../components/MobNotifications";
+import type { NotifAction, NotificationsScreenProps } from "../components/screenProps";
+import { detectDevice } from "../device";
+import { activeCallout, deviceLine, mobileOnLine, notifView, previewHeadline, testResultLine } from "../notificationsModel";
+
+const TEST_DELIVERED = "وصل إشعار التجربة";
+/** States toast glyph: the bell without its clapper. */
+const BELL_GLYPH = "M6 16V11a6 6 0 0 1 12 0v5l2 2H4z";
+
+/** The unfiltered wire query (`useNewsFeed()`'s key), read here for the preview headline without polling. */
+const FEED_KEY = ["news-feed", "all", ""] as const;
 
 export default function NotificationsPage() {
-  const { status, permission, vapidConfigured, hasSubscription, lastTestSent, error, enable, disable, sendTest } =
-    usePushNotifications();
+  const isMobile = useIsMobile();
+  const push = usePushNotifications();
+  const now = useNow();
+  const feed = useQuery({ queryKey: FEED_KEY, queryFn: () => getNewsFeed("all"), staleTime: 60_000 });
+  const device = useMemo(detectDevice, []);
+  const [action, setAction] = useState<NotifAction | null>(null);
+  const toast = useToast();
 
-  return (
-    <div className="notifications-page">
-      <header className="desk-masthead">
-        <p className="desk-masthead__date">إعدادات الجهاز</p>
-        <h1 className="desk-masthead__hello">الإشعارات</h1>
-        <p className="desk-masthead__line">
-          إدارة تنبيهات المتصفح لهذا الجهاز. لا يوجد صندوق وارد بعد — ما يظهر هنا هو الاشتراك الفعلي فقط.
-        </p>
-      </header>
+  // States toast «وصل إشعار التجربة»: a test push the server delivered to at least one device.
+  const lastTestAt = push.lastTestAt;
+  const seenTestAt = useRef(lastTestAt);
+  useEffect(() => {
+    if (lastTestAt === seenTestAt.current) return;
+    seenTestAt.current = lastTestAt;
+    if (lastTestAt !== null && push.lastTestSent) {
+      toast.show(TEST_DELIVERED, { icon: <ToastGlyph path={BELL_GLYPH} /> });
+    }
+  }, [lastTestAt, push.lastTestSent, toast]);
 
-      {status === "ios_needs_install" ? (
-        <aside className="notifications-callout" role="note">
-          <p className="notifications-callout__title">يلزم التثبيت على iOS</p>
-          <p className="notifications-callout__text">
-            شارك ← إضافة إلى الشاشة الرئيسية. الإشعارات تعمل بعد فتح التطبيق من الأيقونة، وليس من Safari.
-          </p>
-        </aside>
-      ) : null}
+  function run(name: NotifAction, task: () => Promise<unknown>) {
+    setAction(name);
+    void task().finally(() => setAction(null));
+  }
 
-      {status === "blocked" ? (
-        <aside className="notifications-callout notifications-callout--warn" role="note">
-          <p className="notifications-callout__title">الإذن محظور في المتصفح</p>
-          <p className="notifications-callout__text">
-            افتح إعدادات الموقع لهذا النطاق وامسح حظر الإشعارات، ثم أعد تحميل الصفحة.
-          </p>
-        </aside>
-      ) : null}
+  const view = notifView(push);
+  const status = push.status;
+  const props: NotificationsScreenProps = {
+    push,
+    checked: push.checked,
+    view,
+    callout: activeCallout(status),
+    heroSub: deviceLine(push, view, device, now),
+    mobileOnLine: mobileOnLine(device, isStandaloneDisplay()),
+    testLine: testResultLine(push.lastTestAt, push.lastTestSent, now),
+    previewText: previewHeadline(feed.data?.items),
+    action,
+    canToggle: status === "idle" || status === "subscribed",
+    canEnable: status === "idle",
+    onToggle: (next) => run(next ? "enable" : "disable", next ? push.enable : push.disable),
+    onEnable: () => run("enable", push.enable),
+    onDisable: () => run("disable", push.disable),
+    onTest: () => run("test", push.sendTest),
+    onCheck: () => run("check", push.refresh),
+  };
 
-      {status === "unsupported" ? (
-        <aside className="notifications-callout notifications-callout--warn" role="note">
-          <p className="notifications-callout__title">المتصفح لا يدعم الدفع</p>
-          <p className="notifications-callout__text">
-            هذا الجهاز أو هذا المتصفح لا يوفّر Service Worker وPush وNotification معاً.
-          </p>
-        </aside>
-      ) : null}
-
-      {status === "vapid_off" ? (
-        <aside className="notifications-callout notifications-callout--warn" role="note">
-          <p className="notifications-callout__title">الخادم غير مُعدّ للإرسال</p>
-          <p className="notifications-callout__text">مفتاح VAPID غير مُعدّ على الواجهة الخلفية حالياً.</p>
-        </aside>
-      ) : null}
-
-      <NotificationsStatus
-        status={status}
-        permission={permission}
-        vapidConfigured={vapidConfigured}
-        hasSubscription={hasSubscription}
-      />
-
-      <NotificationsActions
-        status={status}
-        lastTestSent={lastTestSent}
-        error={error}
-        onEnable={() => void enable()}
-        onDisable={() => void disable()}
-        onSendTest={() => void sendTest()}
-      />
-    </div>
-  );
+  return isMobile ? <MobNotifications {...props} /> : <DeskNotifications {...props} />;
 }

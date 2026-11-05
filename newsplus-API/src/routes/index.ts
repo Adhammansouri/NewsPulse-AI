@@ -8,6 +8,12 @@ import { createEditorialRoutes } from "./editorialRoutes.js";
 import { createGenerateRoutes } from "./generateRoutes.js";
 import { createTranslateRoutes } from "./translateRoutes.js";
 import { createOpenAIUsageRoutes } from "./openaiUsageRoutes.js";
+import { createPresenceRoutes } from "./presenceRoutes.js";
+import { createTeamRoutes } from "./teamRoutes.js";
+import { createBreakingDigestRoutes } from "./breakingDigestRoutes.js";
+import { createTimelineRoutes } from "./timelineRoutes.js";
+import { createPublishCheckRoutes } from "./publishCheckRoutes.js";
+import { createOnboardingRoutes } from "./onboardingRoutes.js";
 import { OpenAIUsageService } from "../services/openaiUsageService.js";
 import type { AuthService } from "../services/authService.js";
 import type { PushService } from "../services/pushService.js";
@@ -15,6 +21,15 @@ import type { NewsService } from "../services/newsService.js";
 import type { EditorialConversationService } from "../services/editorialConversationService.js";
 import type { GenerateService } from "../services/generateService.js";
 import type { TranslateService } from "../services/translateService.js";
+import type { EditorialWorkflowService } from "../services/editorialWorkflowService.js";
+import type { PresenceService } from "../services/presenceService.js";
+import type { TeamService } from "../services/teamService.js";
+import type { BreakingService } from "../services/breakingService.js";
+import type { DigestService } from "../services/digestService.js";
+import type { StoryTimelineService } from "../services/storyTimelineService.js";
+import type { PublishCheckService } from "../services/publishCheckService.js";
+import type { UserPreferencesService } from "../services/userPreferencesService.js";
+import type { HookStylesService } from "../services/hookStylesService.js";
 
 type ApiServices = {
   authService: AuthService;
@@ -23,6 +38,15 @@ type ApiServices = {
   editorialService: EditorialConversationService;
   generateService: GenerateService;
   translateService: TranslateService;
+  workflowService: EditorialWorkflowService;
+  presenceService: PresenceService;
+  teamService: TeamService;
+  breakingService: BreakingService;
+  digestService: DigestService;
+  timelineService: StoryTimelineService;
+  publishCheckService: PublishCheckService;
+  preferencesService: UserPreferencesService;
+  hookStylesService: HookStylesService;
 };
 
 export function createApiRoutes(services: ApiServices): FastifyPluginAsync {
@@ -32,7 +56,13 @@ export function createApiRoutes(services: ApiServices): FastifyPluginAsync {
     await app.register(createAuthRoutes(services.authService));
     await app.register(createPushRoutes(services.pushService));
     await app.register(createNewsRoutes(services.newsService));
-    await app.register(createEditorialRoutes(services.editorialService));
+    await app.register(createBreakingDigestRoutes(services.breakingService, services.digestService));
+    await app.register(createTimelineRoutes(services.timelineService));
+    await app.register(createEditorialRoutes(services.editorialService, services.workflowService));
+    await app.register(createPublishCheckRoutes(services.publishCheckService));
+    await app.register(createOnboardingRoutes(services.preferencesService, services.hookStylesService));
+    await app.register(createPresenceRoutes(services.presenceService));
+    await app.register(createTeamRoutes(services.teamService));
     await app.register(createGenerateRoutes(services.generateService));
     await app.register(createTranslateRoutes(services.translateService));
     await app.register(createOpenAIUsageRoutes(new OpenAIUsageService(), services.authService));

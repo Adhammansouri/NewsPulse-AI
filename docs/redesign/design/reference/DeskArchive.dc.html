@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — الأرشيف وذاكرة الفريق</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np" data-theme="{{theme}}" style="position: relative; display: flex; width: 100%; height: 900px; overflow: hidden">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+  <div aria-hidden="true" style="display: flex; width: 100%">
+    <div class="rail"><img class="rail__logo" src="/_blob/c65b65ef75087372ddc981be3cc41199" alt=""></div>
+    <div style="width: 420px; background: var(--surface); border-inline-start: 1px solid var(--line); padding: 20px; display: flex; flex-direction: column; gap: 14px">
+      <div class="sk" style="height: 28px; width: 40%"></div><div class="sk" style="height: 44px"></div>
+      <div class="wire-row is-breaking" style="margin-inline: -20px"><span class="tick"></span><span class="wire-row__title">البنك المركزي يثبت أسعار الفائدة للمرة الثالثة</span></div>
+      <div class="wire-row is-now" style="margin-inline: -20px"><span class="tick"></span><span class="wire-row__title">اجتماع طارئ لوزراء الخارجية العرب</span></div>
+    </div>
+    <div class="grow" style="padding: 30px"><div class="panel" style="height: 260px"></div></div>
+  </div>
+  <a class="scrim" href="Main.dc.html" aria-label="إغلاق الأرشيف"></a>
+
+  <section class="drawer" role="dialog" aria-modal="true" aria-labelledby="ar-title" style="width: 500px; display: flex; flex-direction: column">
+    <header class="col" style="gap: 14px; padding: 22px 24px 16px; border-bottom: 1px solid var(--line)">
+      <div class="row" style="justify-content: space-between">
+        <div class="col"><h2 id="ar-title" class="t-title">الأرشيف</h2><p class="t-meta">كل مسودة محفوظة بنسخها، ترجعلها وتكمّل منين ما وقفت</p></div>
+        <a class="icon-btn" href="Main.dc.html" aria-label="إغلاق"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+      </div>
+      <label class="field field--sunken"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"></path></svg><span class="sr">بحث في الأرشيف</span><input type="search" placeholder="ابحث بعنوان المسودة…"></label>
+      <div class="seg seg--block" role="tablist"><button type="button" role="tab" aria-pressed="true" aria-selected="true">المسودات · ١٢</button><button type="button" role="tab" aria-pressed="false" aria-selected="false">ذاكرة الفريق · ٤</button></div>
+    </header>
+    <div class="col" style="flex: 1; overflow-y: auto; padding: 8px 12px 20px">
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+        <h3 class="t-meta" style="padding: 14px 12px 6px; font-weight: 600">{{g.label}}</h3>
+        <ul class="col" style="gap: 2px">
+          <sc-for list="{{g.items}}" as="d" hint-placeholder-count="3">
+            <li><a href="Main.dc.html" class="row" style="gap: 14px; padding: 12px; border-radius: 14px; color: var(--ink); background: {{d.bg}}">
+              <span class="ic-wrap {{d.ic}}" style="width: 42px; height: 42px; border-radius: 12px; font-size: 11px; font-weight: 700">{{d.kind}}</span>
+              <span class="col grow"><span class="ellipsis" style="font-weight: 600">{{d.title}}</span><span class="row t-meta" style="gap: 6px"><span>{{d.fmt}}</span><span>·</span><span class="num">{{d.ver}}</span><span>·</span><span class="num">{{d.time}}</span></span></span>
+              <svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--ink-3)"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+            </a></li>
+          </sc-for>
+        </ul>
+      </sc-for>
+
+      <div class="ai-panel" style="margin: 18px 4px 0; padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: none">
+        <div class="row"><span class="ic-wrap ic-wrap--ai"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 1 6 6c0 2.2-1.2 3.6-2.5 4.7-.7.6-1 1.3-1 2.1V17h-5v-1.2c0-.8-.3-1.5-1-2.1C7.2 12.6 6 11.2 6 9a6 6 0 0 1 6-6zM10 21h4"></path></svg></span><div class="col"><h3 class="t-head">ذاكرة الفريق</h3><p class="t-meta">قواعد تعلّمها المحرّر من تعديلاتكم، وتُطبَّق على كل مسودة جديدة</p></div></div>
+        <sc-for list="{{rules}}" as="r" hint-placeholder-count="3">
+          <div class="row" style="align-items: flex-start; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line)">
+            <span class="col grow" style="gap: 2px"><span style="font-size: 14px; line-height: 1.7">{{r.text}}</span><span class="t-meta">{{r.meta}}</span></span>
+            <button class="switch" type="button" role="switch" aria-checked="{{r.on}}" aria-label="تفعيل القاعدة"></button>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      theme: this.props.theme ?? 'light',
+      groups: [
+        { label: 'اليوم', items: [
+          { kind: 'فيديو', ic: 'ic-wrap--ai', title: 'لماذا لم يخفض المركزي الفائدة؟', fmt: 'سكريبت فيديو', ver: '٣ نسخ', time: 'قبل ٤ دقائق', bg: 'var(--teal-soft)' },
+          { kind: 'سوشيال', ic: 'ic-wrap--teal', title: 'اجتماع طارئ لوزراء الخارجية العرب الليلة', fmt: 'منشور سوشيال', ver: 'نسخة واحدة', time: 'قبل ٢٠ دقيقة', bg: 'transparent' },
+          { kind: 'شرائح', ic: 'ic-wrap--teal', title: 'أسعار النفط ترتفع بعد إشارات أوبك+', fmt: 'كاروسيل', ver: 'نسختان', time: 'قبل ساعة', bg: 'transparent' },
+          { kind: 'موجز', ic: 'ic-wrap--teal', title: 'موجز ١٢:٠٠ م', fmt: 'موجز الساعة', ver: 'نسخة واحدة', time: 'قبل ٣ ساعات', bg: 'transparent' }
+        ] },
+        { label: 'أمس', items: [
+          { kind: 'خبر', ic: '', title: 'إطلاق أول قمر صناعي عربي لرصد جودة الهواء', fmt: 'خبر مكتبي', ver: '٤ نسخ', time: 'أمس ٨:١٠ م', bg: 'transparent' },
+          { kind: 'حقائق', ic: '', title: 'مهرجان القاهرة السينمائي: أفلام المسابقة', fmt: 'ملف حقائق', ver: 'نسخة واحدة', time: 'أمس ٥:٤٠ م', bg: 'transparent' }
+        ] }
+      ],
+      rules: [
+        { text: 'اختم سكريبتات الفيديو الاقتصادية بسؤال مباشر عن أثر الخبر على المشاهد.', meta: 'أُضيفت اليوم · من تعديلات سارة', on: 'true' },
+        { text: 'انسب كل ادعاء لصاحبه بصيغة «قال» أو «بحسب»، ولا تتبنَّ الرواية.', meta: 'تُطبَّق منذ أسبوعين', on: 'true' },
+        { text: 'الوسوم بالعربية أولاً، ولا تزيد عن أربعة.', meta: 'تُطبَّق منذ شهر', on: 'true' },
+        { text: 'تجنب كلمة «صادم» في الخطافات.', meta: 'موقوفة', on: 'false' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

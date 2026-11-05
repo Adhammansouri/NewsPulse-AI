@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — سكريبت فيديو والمحرّر</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np" data-theme="{{theme}}" style="display: flex; width: 100%; height: 900px; overflow: hidden">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+  <nav class="rail" aria-label="التنقل الرئيسي">
+    <img class="rail__logo" src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="Newsplus">
+    <a class="rail__item" href="DeskHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>الرئيسية</a>
+    <a class="rail__item" href="Main.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H5a1 1 0 0 1-1-1zM17 9h3v9a1 1 0 0 1-2 0M7 9h7M7 13h7M7 16h4"></path></svg>الأخبار</a>
+    <a class="rail__item" href="NewBoard.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v10h-4zM16 4h4v13h-4z"></path></svg>سير العمل</a>
+    <a class="rail__item" href="DeskGenerate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"></path></svg>توليد</a>
+    <a class="rail__item" href="DeskTranslate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg>ترجمة</a>
+    <a class="rail__item" href="DeskUsage.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"></path></svg>الاستهلاك</a>
+    <div style="flex: 1"></div>
+    <a class="rail__btn" href="DeskNotifications.dc.html" aria-label="الإشعارات"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"></path></svg></a>
+    <button class="avatar" type="button" aria-label="حساب سارة" style="margin-top: 8px">س</button>
+  </nav>
+
+  <section aria-label="العناوين" style="width: 330px; flex: none; display: flex; flex-direction: column; background: var(--surface); border-inline-start: 1px solid var(--line)">
+    <header class="row" style="justify-content: space-between; padding: 18px 18px 14px; border-bottom: 1px solid var(--line)">
+      <div class="col"><h1 class="t-title">الأخبار</h1><p class="live">مباشر · ٨ عناوين</p></div>
+      <button class="icon-btn icon-btn--line" type="button" aria-label="بحث وتصفية"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"></path></svg></button>
+    </header>
+    <div style="flex: 1; overflow: hidden">
+      <sc-for list="{{rows}}" as="row" hint-placeholder-count="6">
+        <a href="Main.dc.html" class="wire-row {{row.cls}}" aria-pressed="{{row.pressed}}">
+          <span class="tick" aria-hidden="true"></span>
+          <span class="wire-row__meta"><span style="font-weight: 600; color: var(--ink-2)">{{row.source}}</span><span class="grow"></span><span class="num">{{row.time}}</span></span>
+          <span class="wire-row__title" style="font-size: 14.5px">{{row.title}}</span>
+        </a>
+      </sc-for>
+    </div>
+  </section>
+
+  <main class="grow" style="display: flex; background: var(--bg)">
+    <div class="grow col">
+      <div class="row" style="padding: 12px 22px; background: var(--surface); border-bottom: 1px solid var(--line)">
+        <a class="btn btn--ghost btn--sm" href="Main.dc.html"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>الخبر</a>
+        <span class="badge badge--ai">سكريبت فيديو</span>
+        <div class="row" style="gap: 4px" role="list" aria-label="النسخ">
+          <button class="vchip" type="button" aria-label="استعادة النسخة ١">ن١</button><button class="vchip" type="button" aria-label="استعادة النسخة ٢">ن٢</button><button class="vchip" type="button" aria-current="true" aria-label="النسخة ٣ الحالية">ن٣</button>
+        </div>
+        <a class="btn btn--ghost btn--sm" href="NewDiff.dc.html">قارن</a>
+        <span class="grow"></span>
+        <button class="icon-btn" type="button" aria-label="تحويل الصيغة" title="تحويل الصيغة"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h13l-4-4M17 17H4l4 4"></path></svg></button>
+        <button class="icon-btn" type="button" aria-label="تنزيل"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"></path></svg></button>
+        <button class="btn btn--ink btn--sm" type="button"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9zM5 15H4V4h11v1"></path></svg>نسخ</button>
+      </div>
+      <div style="flex: 1; overflow-y: auto; padding: 22px 34px">
+        <p class="ai-mark" style="margin-bottom: 16px; color: var(--ink-3)"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>كتبه المحرّر من ٣ مصادر وطبّق ٤ قواعد من ذاكرة الفريق · راجعه قبل النشر</p>
+        <div class="row" style="align-items: flex-start; gap: 30px">
+          <div style="width: 224px; height: 398px; flex: none; border-radius: 28px; background: radial-gradient(circle at 70% 20%, #1d6f8f, #0c2340 70%); color: #fff; padding: 18px 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow-3)">
+            <div class="row" style="justify-content: space-between"><img src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="" style="width: 28px; height: 28px; border-radius: 8px"><span class="num" style="font-size: 11px; opacity: .8">٠:٤٥</span></div>
+            <div class="col" style="gap: 8px"><span style="align-self: flex-start; font-size: 11px; font-weight: 600; background: #ef6c57; padding: 2px 8px; border-radius: 6px">الكوفر</span><p style="font-family: var(--f-display); font-size: 24px; line-height: 1.4; font-weight: 700">لماذا قال المركزي «لا» للمرة الثالثة؟</p></div>
+          </div>
+          <div class="col grow" style="gap: 4px; max-width: 520px">
+            <div class="block"><div class="block__label">عنوان النشر<button class="block__copy" type="button">نسخ</button></div><p class="t-title">لماذا لم يخفض المركزي الفائدة؟</p></div>
+            <div class="block is-changed"><div class="block__label">الهوك · ٠–٣ ثوانٍ · عُدّل في ن٣<button class="block__copy is-done" type="button">تم النسخ</button></div><p class="t-head" style="font-size: 17px">المركزي قال «لا» للمرة الثالثة.. فما الذي ينتظره بالضبط؟</p></div>
+            <div class="block"><div class="block__label">النص · ٤٥ ثانية تقريباً<button class="block__copy" type="button">نسخ</button></div><p class="t-body" style="color: var(--ink)">اللجنة أبقت الفائدة كما هي، لأن التضخم رغم تراجعه ما زال فوق المستهدف. الرسالة للأسواق واضحة: لا خفض قبل أن تؤكد البيانات الاتجاه. فماذا يعني ذلك لقروضك ومدخراتك؟</p></div>
+            <div class="block"><div class="block__label">لقطات / CG</div>
+              <ol class="col" style="gap: 8px">
+                <li class="row" style="font-size: 14px; align-items: flex-start"><span class="vchip num">١</span><span style="padding-top: 3px">لقطة لمقر البنك المركزي</span></li>
+                <li class="row" style="font-size: 14px; align-items: flex-start"><span class="vchip num">٢</span><span style="padding-top: 3px">CG: ثالث تثبيت على التوالي</span></li>
+                <li class="row" style="font-size: 14px; align-items: flex-start"><span class="vchip num">٣</span><span style="padding-top: 3px">رسم: التضخم مقابل المستهدف</span></li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside aria-label="المحرّر" style="width: 360px; flex: none; display: flex; flex-direction: column; background: var(--surface); border-inline-end: 1px solid var(--line)">
+      <div class="row" style="justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--line)">
+        <div class="row"><span class="ic-wrap ic-wrap--ai" style="width: 32px; height: 32px; border-radius: 10px"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span><h3 class="t-head">المحرّر</h3></div>
+        <span class="t-meta">٣ نسخ محفوظة</span>
+      </div>
+      <div class="col" style="flex: 1; overflow-y: auto; padding: 16px 18px; gap: 10px">
+        <p class="msg msg--ai">جهّزت سكريبت فيديو من ٣ مصادر وطبّقت ٤ قواعد من ذاكرة الفريق.</p>
+        <p class="msg msg--me">قوِّ الهوك</p>
+        <p class="msg msg--ai">بدأت الهوك بالقرار ثم السؤال. النسخة ٢ محفوظة.</p>
+        <p class="msg--sys msg"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"></path></svg>رجعت للنسخة ١ ثم عدت للنسخة ٢</p>
+        <p class="msg msg--me">اجعل النهاية سؤالاً يخص المشاهد</p>
+        <p class="msg msg--ai">أضفت سؤالاً عن القروض والمدخرات في آخر النص. النسخة ٣ محفوظة.</p>
+        <div class="ai-panel fade-in" style="padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: none">
+          <div class="row"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--cyan)"><path d="M12 3a6 6 0 0 1 6 6c0 2.2-1.2 3.6-2.5 4.7-.7.6-1 1.3-1 2.1V17h-5v-1.2c0-.8-.3-1.5-1-2.1C7.2 12.6 6 11.2 6 9a6 6 0 0 1 6-6zM10 21h4"></path></svg><span class="t-label t-ai">المحرّر تعلّم قاعدة جديدة</span></div>
+          <p style="font-size: 14px; line-height: 1.7">اختم سكريبتات الفيديو الاقتصادية بسؤال مباشر عن أثر الخبر على المشاهد.</p>
+          <p class="t-meta">لاحظتها من تعديلين متشابهين. احفظها لتُطبَّق على كل مسودات الفريق.</p>
+          <div class="row" style="gap: 6px"><button class="btn btn--ai btn--sm" type="button">احفظ للفريق</button><button class="btn btn--ghost btn--sm" type="button">عدّل</button><button class="btn btn--ghost btn--sm" type="button">تجاهل</button></div>
+        </div>
+      </div>
+      <form class="dock">
+        <div class="row" style="flex-wrap: wrap; gap: 6px"><button class="chip chip--sm chip--ai" type="button">اختصر لـ٣٠ ثانية</button><button class="chip chip--sm chip--ai" type="button">اجعل الانتقال سؤالاً</button></div>
+        <label class="dock__input"><span class="sr">اطلب تعديلاً</span><textarea rows="1" placeholder="اطلب تعديلاً…"></textarea><button class="send" type="button" aria-label="إرسال"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"></path></svg></button></label>
+      </form>
+    </aside>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      theme: this.props.theme ?? 'light',
+      rows: [
+        { cls: 'is-breaking', pressed: 'true', source: 'العربية +٢', time: 'قبل ٣ د', title: 'البنك المركزي يثبت أسعار الفائدة للمرة الثالثة على التوالي وسط ترقب لبيانات التضخم' },
+        { cls: 'is-now has-draft', pressed: 'false', source: 'الجزيرة نت +١', time: 'قبل ١١ د', title: 'اجتماع طارئ لوزراء الخارجية العرب لبحث تطورات الأوضاع الإقليمية' },
+        { cls: 'is-hour', pressed: 'false', source: 'Reuters +١', time: 'قبل ٢٦ د', title: 'Global oil prices climb after OPEC+ signals extended output cuts' },
+        { cls: 'is-hour', pressed: 'false', source: 'العين الإخبارية', time: 'قبل ٤٨ د', title: 'منتخب مصر يعلن قائمة المعسكر المقبل استعداداً لتصفيات كأس العالم' },
+        { cls: '', pressed: 'false', source: 'BBC عربي', time: 'قبل ساعة', title: 'دراسة: الذكاء الاصطناعي يختصر زمن تشخيص بعض أمراض القلب إلى النصف' },
+        { cls: '', pressed: 'false', source: 'سكاي نيوز عربية +١', time: 'قبل ٣ س', title: 'إطلاق أول قمر صناعي عربي لرصد جودة الهواء من محطة فضائية' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

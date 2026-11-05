@@ -4,6 +4,10 @@ export type DeskHandoffState = {
   source?: string;
   itemId?: string;
   style?: "brief" | "article" | "report";
+  /** An editorial conversation to open in the news studio (generate/translate → «منشور سوشيال»). */
+  conversationId?: string;
+  /** Home «حوّله لموجز صباحي» (S13): start the briefing on arrival; the digest's items are already pinned. */
+  briefing?: boolean;
 };
 
 export function readDeskHandoff(state: unknown): DeskHandoffState | null {
@@ -15,6 +19,8 @@ export function readDeskHandoff(state: unknown): DeskHandoffState | null {
   const itemId = typeof value.itemId === "string" ? value.itemId : undefined;
   const style =
     value.style === "brief" || value.style === "article" || value.style === "report" ? value.style : undefined;
-  if (!input && !prompt && !source && !itemId && !style) return null;
-  return { input, prompt, source, itemId, style };
+  const conversationId = typeof value.conversationId === "string" ? value.conversationId : undefined;
+  const briefing = value.briefing === true ? true : undefined;
+  if (!input && !prompt && !source && !itemId && !style && !conversationId && !briefing) return null;
+  return { input, prompt, source, itemId, style, conversationId, ...(briefing ? { briefing } : {}) };
 }

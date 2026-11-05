@@ -3,9 +3,29 @@ import { mock, test } from "node:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import Fastify from "fastify";
 import { env } from "./config/index.js";
-import { buildApp } from "./app.js";
+import { buildApp, TRUSTED_PROXIES } from "./app.js";
 import { NewsAggregator } from "./services/newsAggregator.js";
+
+test("client address: the reverse proxy's X-Forwarded-For is trusted, a client-supplied one is not", async () => {
+  const app = Fastify({ trustProxy: TRUSTED_PROXIES });
+  app.get("/ip", async (request) => request.ip);
+  const ipFrom = async (remoteAddress: string, forwardedFor: string) =>
+    (await app.inject({ url: "/ip", remoteAddress, headers: { "x-forwarded-for": forwardedFor } })).body;
+  try {
+    // nginx on the Docker network, Caddy, or a proxy on the same host: the client it appended.
+    assert.equal(await ipFrom("172.18.0.5", "203.0.113.7"), "203.0.113.7");
+    assert.equal(await ipFrom("10.0.0.2", "203.0.113.7"), "203.0.113.7");
+    assert.equal(await ipFrom("127.0.0.1", "203.0.113.7"), "203.0.113.7");
+    // A client that sends its own X-Forwarded-For through nginx keeps its real address (one rate-limit bucket each).
+    assert.equal(await ipFrom("172.18.0.5", "198.51.100.1, 203.0.113.7"), "203.0.113.7");
+    // A client reaching the API directly can't pick its address.
+    assert.equal(await ipFrom("203.0.113.9", "198.51.100.1"), "203.0.113.9");
+  } finally {
+    await app.close();
+  }
+});
 
 test("assembled API preserves authentication, CORS, validation and tool error contracts", async () => {
   const directory = await mkdtemp(join(tmpdir(), "newsplus-api-test-"));

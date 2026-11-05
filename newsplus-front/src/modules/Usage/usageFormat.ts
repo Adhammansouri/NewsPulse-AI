@@ -35,3 +35,45 @@ export const metricLabels: Record<string, string> = {
   input_audio_tokens: "إدخال صوتي", output_audio_tokens: "إخراج صوتي", input_text_tokens: "إدخال نصي", output_text_tokens: "إخراج نصي", input_image_tokens: "إدخال صور", output_image_tokens: "إخراج صور",
   input_cached_text_tokens: "نص مخزّن مؤقتاً", input_cached_image_tokens: "صور مخزّنة مؤقتاً", input_cached_audio_tokens: "صوت مخزّن مؤقتاً", images: "الصور", characters: "الأحرف", seconds: "ثوانٍ صوتية", usage_bytes: "حجم التخزين (بايت)", num_sessions: "الجلسات", num_calls: "استدعاءات البحث",
 };
+
+// ---- Pulse usage screen (S09 §B). Pure helpers: this file is transpiled standalone by scripts/check-openai-usage.mjs.
+
+/** Longest custom period, in days, inclusive (`days < 90` between start and end, as the API schema checks). */
+export const MAX_RANGE_DAYS = 90;
+const DAY_MS = 86_400_000;
+
+/** `$18.42` — the screen shows dollars with cents. */
+export const usd = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+/** `$100` for a round spend limit, `$62.50` otherwise. */
+export const usdLimit = (value: number) => Number.isInteger(value) ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value) : usd(value);
+/** Tokens in millions with one decimal as on the boards (`3.9M`, `0.6M`); below 0.1M (and from 1B) compact: `45K`, `850`, `1.2B`. */
+export const compactTokens = (value: number) => value >= 100_000 && value < 1e9 ? `${(value / 1e6).toFixed(1)}M` : new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(value);
+/** `1٬248` — Western digits with the Arabic thousands separator, ready for `toArabicDigits`. */
+export const groupedInteger = (value: number) => integer(Math.round(value)).replace(/,/g, "٬");
+
+/** Days in `start…end`, both included (UTC dates). */
+export const rangeDays = (start: string, end: string) => Math.round((Date.parse(end) - Date.parse(start)) / DAY_MS) + 1;
+
+/**
+ * The custom period rule (same as the API schema): the end is not before the start, the span stays under
+ * `MAX_RANGE_DAYS` and the end is not after today (UTC). `order` = end before start, `span` = anything else.
+ */
+export function rangeError(start: string, end: string, today = new Date().toISOString().slice(0, 10)): "order" | "span" | null {
+  const days = (Date.parse(end) - Date.parse(start)) / DAY_MS;
+  if (!Number.isFinite(days) || days < 0) return "order";
+  if (days >= MAX_RANGE_DAYS || end > today) return "span";
+  return null;
+}
+
+/** «أين يذهب الإنفاق؟» buckets of an OpenAI cost line item. */
+export type SpendBucket = "text" | "images" | "webSearch";
+export function spendBucket(lineItem: string): SpendBucket {
+  if (/web[ _-]?search/i.test(lineItem)) return "webSearch";
+  if (/image|dall-?e/i.test(lineItem)) return "images";
+  return "text";
+}
+export function spendBuckets(rows: OpenAICostRow[]): Record<SpendBucket, number> {
+  const totals: Record<SpendBucket, number> = { text: 0, images: 0, webSearch: 0 };
+  for (const row of rows) totals[spendBucket(row.lineItem)] += row.amount;
+  return totals;
+}

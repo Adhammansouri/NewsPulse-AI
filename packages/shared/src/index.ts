@@ -17,11 +17,28 @@ export type {
   PushVapidKeyData,
 } from "./types/push.js";
 export { NEWS_TOPICS } from "./types/news.js";
+export { EDITORIAL_PUBLISH_PLATFORMS, EDITORIAL_WORKFLOW_STATUSES } from "./types/workflow.js";
+export type {
+  EditorialConversationScope,
+  EditorialPublishPlatform,
+  EditorialWorkflowStatus,
+  PresenceActivity,
+  PresenceData,
+  PresenceEntry,
+  PresenceHeartbeatData,
+  PresenceHeartbeatRequest,
+  TeamData,
+  TeamMember,
+  TeamMemberRef,
+} from "./types/workflow.js";
 export type {
   EditorialConversationDetail,
   EditorialConversationListData,
+  EditorialConversationListQuery,
   EditorialConversationSummary,
+  EditorialConversationUpdateRequest,
   EditorialMemoryCandidate,
+  EditorialMemoryCreateRequest,
   EditorialMemoryListData,
   EditorialMemoryRule,
   EditorialMemoryStatus,
@@ -41,6 +58,11 @@ export type {
   CarouselSlideRole,
   CarouselSlideStatus,
   CarouselStyle,
+  NewsBreakingData,
+  NewsBreakingRequest,
+  NewsDigestData,
+  NewsDigestItem,
+  NewsDigestRequest,
   NewsFeedData,
   NewsFeedItem,
   NewsFeedSourceLink,
@@ -53,6 +75,10 @@ export type {
   NewsSummaryFormat,
   NewsSummarySource,
   NewsTopic,
+  SourceConflict,
+  TimelineData,
+  TimelineEntry,
+  TimelineTag,
 } from "./types/news.js";
 export type {
   GenerateData,
@@ -68,3 +94,25 @@ export type {
   TranslateLanguage,
   TranslateRequest,
 } from "./types/translate.js";
+export {
+  INSTAGRAM_VISIBLE_CHARS,
+  PUBLISH_PLATFORM_LIMITS,
+  composePublishCopy,
+  instagramVisibleText,
+  publishTextLength,
+} from "./types/publish.js";
+export type {
+  PublishCheck,
+  PublishCheckData,
+  PublishCheckRequest,
+  PublishCheckStatus,
+  PublishParts,
+} from "./types/publish.js";
+export { HOOK_STYLES } from "./types/preferences.js";
+export type {
+  HookStyle,
+  HookStylesData,
+  HookStylesRequest,
+  UserPreferences,
+  UserPreferencesUpdateRequest,
+} from "./types/preferences.js";

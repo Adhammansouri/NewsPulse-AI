@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus موبايل — حالات النظام</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+<link rel="stylesheet" href="/_blob/210170dd5a2fa534503e7d6a475c3fc9">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np m" data-theme="{{theme}}">
+  <sc-if value="{{is.offline}}" hint-placeholder-val="{{ true }}">
+    <div class="m-banner" role="status" style="background: var(--navy); color: #fff"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: #fbbf24"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18"></path></svg><span class="grow">مفيش اتصال · العناوين من ٢:٤٠ م</span><button class="btn btn--sm" type="button" style="background: rgb(255 255 255 / .14); color: #fff; min-height: 30px">حاول</button></div>
+  </sc-if>
+  <header class="m-head" style="border-bottom: 1px solid var(--line)"><div class="m-head__row"><span class="m-title">الأخبار</span><span class="live">{{live}}</span></div></header>
+  <main class="m-scroll" style="background: var(--surface); opacity: {{bgOpacity}}">
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="5"><div class="m-row {{r.cls}}"><span class="tick" aria-hidden="true"></span><span class="m-row__meta"><b style="font-weight: 600; color: var(--ink-2)">{{r.s}}</b><span class="grow"></span><span class="num">{{r.t}}</span></span><span class="m-row__title">{{r.title}}</span></div></sc-for>
+  </main>
+  <nav class="m-tabbar" aria-label="التنقل">
+    <a class="m-tab" href="MobHome.dc.html"><span class="m-tab__ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg></span>الرئيسية</a>
+    <a class="m-tab" href="MobWire.dc.html" aria-current="page"><span class="m-tab__ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H5a1 1 0 0 1-1-1zM17 9h3v9a1 1 0 0 1-2 0M7 9h7M7 13h7M7 16h4"></path></svg></span>الأخبار</a>
+    <a class="m-tab m-tab--ai" href="MobGenerate.dc.html"><span class="m-tab__ic"><svg class="ic ic--lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span>توليد</a>
+    <a class="m-tab" href="MobTranslate.dc.html"><span class="m-tab__ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg></span>ترجمة</a>
+    <a class="m-tab" href="MobMore.dc.html"><span class="m-tab__ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width: 3"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></span>المزيد</a>
+  </nav>
+
+  <sc-if value="{{is.quota}}" hint-placeholder-val="{{ false }}">
+    <div class="scrim" aria-hidden="true"></div>
+    <section class="sheet col" role="alertdialog" aria-labelledby="q-t" style="padding: 0 20px 28px; gap: 12px; align-items: center; text-align: center">
+      <div class="grabber" aria-hidden="true"></div>
+      <span class="empty__art" style="background: var(--warn-soft); color: var(--warn); margin: 8px 0 0"><svg class="ic ic--xl" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v10H3zM3 11h18M7 15h3"></path></svg></span>
+      <h2 id="q-t" class="t-title">رصيد OpenAI خلص</h2>
+      <p class="t-small" style="max-width: 300px">المحرّر متوقف لحد ما يتشحن الرصيد. العناوين والمسودات المحفوظة شغالة عادي.</p>
+      <a class="btn btn--ink btn--block btn--lg" href="https://platform.openai.com/settings/organization/billing/overview">اشحن الرصيد</a>
+      <button class="btn btn--ghost btn--block" type="button">تمام</button>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{is.ratelimit}}" hint-placeholder-val="{{ false }}">
+    <div class="m-float row" role="status" style="gap: 14px; align-items: center">
+      <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true" style="flex: none"><circle cx="26" cy="26" r="22" fill="none" stroke="var(--line)" stroke-width="4"></circle><circle cx="26" cy="26" r="22" fill="none" stroke="url(#np-ai-grad)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="40" transform="rotate(-90 26 26)"></circle><text x="26" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">٤:٠٠</text></svg>
+      <svg width="0" height="0" style="position: absolute"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+      <span class="col grow"><b style="font-weight: 600">استراحة قصيرة للمحرّر</b><span class="t-small">استخدمت ٢٤ طلب في ربع ساعة. تقدر تكمّل بعد ٤ دقائق، والتصفّح شغال.</span></span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{is.session}}" hint-placeholder-val="{{ false }}">
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="m-dialog" role="alertdialog" aria-labelledby="s-t">
+      <span class="ic-wrap" style="width: 52px; height: 52px; border-radius: 16px; align-self: center"><svg class="ic ic--lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3"></path></svg></span>
+      <h2 id="s-t" class="t-title">الجلسة انتهت</h2>
+      <p class="t-small">سجّل الدخول تاني عشان تكمّل. المسودة اللي كنت شغال عليها محفوظة.</p>
+      <a class="btn btn--ink btn--block btn--lg" href="MobLogin.dc.html" style="margin-top: 6px">سجّل الدخول</a>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{is.install}}" hint-placeholder-val="{{ false }}">
+    <div class="scrim" aria-hidden="true"></div>
+    <section class="sheet col" role="dialog" aria-labelledby="i-t" style="padding: 0 20px 28px; gap: 14px">
+      <div class="grabber" aria-hidden="true"></div>
+      <div class="row" style="gap: 14px; margin-top: 6px"><img src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="" style="width: 60px; height: 60px; border-radius: 16px; box-shadow: var(--shadow-2)"><span class="col"><h2 id="i-t" class="t-title">ثبّت Newsplus</h2><span class="t-meta">على الشاشة الرئيسية</span></span></div>
+      <ul class="m-list">
+        <li class="m-item"><span class="ic-wrap ic-wrap--breaking"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"></path></svg></span><span class="m-item__label">إشعارات العاجل<small>توصلك حتى والتطبيق مقفول</small></span></li>
+        <li class="m-item"><span class="ic-wrap ic-wrap--teal"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"></path></svg></span><span class="m-item__label">يفتح أسرع<small>شاشة كاملة من غير شريط المتصفح</small></span></li>
+      </ul>
+      <div class="notice notice--info" style="font-size: 13.5px; align-items: flex-start"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--cyan); margin-top: 4px"><path d="M12 4v12M7 9l5-5 5 5M5 20h14"></path></svg><span>على الآيفون: اضغط <b>مشاركة</b> في Safari، ثم <b>إضافة إلى الشاشة الرئيسية</b>.</span></div>
+      <button class="btn btn--ink btn--block btn--lg" type="button">تثبيت</button>
+      <button class="btn btn--ghost btn--block" type="button">لاحقاً</button>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{is.update}}" hint-placeholder-val="{{ false }}">
+    <div class="m-float" role="status"><div class="row" style="gap: 12px"><span class="ic-wrap ic-wrap--ai"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"></path></svg></span><span class="col grow"><b style="font-weight: 600">إصدار جديد جاهز</b><span class="t-meta">حدّث عشان تاخد آخر التحسينات</span></span></div><div class="row"><button class="btn btn--ai btn--sm grow" type="button">حدّث الآن</button><button class="btn btn--ghost btn--sm" type="button">بعدين</button></div></div>
+  </sc-if>
+
+  <sc-if value="{{is.logout}}" hint-placeholder-val="{{ false }}">
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="m-dialog" role="alertdialog" aria-labelledby="l-t">
+      <span class="ic-wrap ic-wrap--breaking" style="width: 52px; height: 52px; border-radius: 16px; align-self: center"><svg class="ic ic--lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l-5-5 5-5M5 12h11"></path></svg></span>
+      <h2 id="l-t" class="t-title">تسجيل الخروج؟</h2>
+      <p class="t-small">هتحتاج تدخل تاني على الجهاز ده. مسوداتك وذاكرة الفريق محفوظة.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px"><a class="btn btn--quiet" href="MobMore.dc.html">إلغاء</a><a class="btn btn--danger" href="MobLogin.dc.html">خروج</a></div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["offline","quota","ratelimit","session","install","update","logout"],"default":"offline"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var s = this.props.state ?? 'offline';
+    var is = {}; ['offline', 'quota', 'ratelimit', 'session', 'install', 'update', 'logout'].forEach(function (k) { is[k] = s === k; });
+    return {
+      theme: this.props.theme ?? 'light', is: is,
+      live: s === 'offline' ? 'غير متصل' : 'مباشر', bgOpacity: s === 'offline' ? '.7' : '1',
+      rows: [
+        { cls: 'is-breaking', s: 'العربية +٢', t: 'قبل ٣ د', title: 'البنك المركزي يثبت أسعار الفائدة للمرة الثالثة على التوالي' },
+        { cls: 'is-now', s: 'الجزيرة نت +١', t: 'قبل ١١ د', title: 'اجتماع طارئ لوزراء الخارجية العرب لبحث تطورات الأوضاع' },
+        { cls: 'is-hour', s: 'Reuters +١', t: 'قبل ٢٦ د', title: 'Global oil prices climb after OPEC+ signals extended cuts' },
+        { cls: 'is-hour', s: 'العين الإخبارية', t: 'قبل ٤٨ د', title: 'منتخب مصر يعلن قائمة المعسكر المقبل' },
+        { cls: '', s: 'BBC عربي', t: 'قبل ساعة', title: 'الذكاء الاصطناعي يختصر زمن تشخيص بعض أمراض القلب' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

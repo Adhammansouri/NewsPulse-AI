@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus موبايل — الأرشيف</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+<link rel="stylesheet" href="/_blob/210170dd5a2fa534503e7d6a475c3fc9">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np m" data-theme="{{theme}}">
+  <header class="m-head" style="gap: 12px; border-bottom: 1px solid var(--line)">
+    <div class="m-head__row"><a class="icon-btn" href="MobStory.dc.html" aria-label="رجوع" style="margin-inline-start: -10px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a><span class="m-title">الأرشيف</span></div>
+    <label class="field field--sunken"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"></path></svg><span class="sr">بحث</span><input type="search" placeholder="ابحث بعنوان المسودة…"></label>
+    <div class="seg seg--block" role="tablist"><button type="button" role="tab" aria-pressed="{{tabDrafts}}" aria-selected="{{tabDrafts}}">المسودات · ١٢</button><button type="button" role="tab" aria-pressed="{{tabMemory}}" aria-selected="{{tabMemory}}">ذاكرة الفريق · ٤</button></div>
+  </header>
+  <main class="m-scroll col" style="padding: 8px 16px 24px; gap: 6px">
+    <sc-if value="{{isMemory}}" hint-placeholder-val="{{ false }}">
+      <div class="ai-panel col" style="padding: 14px 16px; gap: 6px; box-shadow: none; margin-top: 8px"><span class="ai-mark t-ai">المحرّر بيتعلّم من تعديلاتكم</span><p class="t-small">القواعد المفعّلة بتتطبّق على كل مسودة جديدة للفريق كله.</p></div>
+      <h2 class="t-meta" style="padding: 12px 4px 4px; font-weight: 600">مقترحة · محتاجة موافقتك</h2>
+      <div class="panel col" style="padding: 14px; gap: 10px; border-color: var(--cyan-dot)">
+        <label class="t-label" for="mr-edit">حرّر القاعدة قبل الحفظ</label>
+        <label class="field field--area is-focus" style="min-height: 76px"><textarea id="mr-edit" rows="3" value="ابدأ خطافات الأخبار الاقتصادية بسؤال مباشر عن أثرها على القارئ." readOnly="{{ true }}"></textarea></label>
+        <div class="row" style="justify-content: space-between"><span class="t-meta num">٥٨ / ٢٤٠</span><span class="row" style="gap: 6px"><button class="btn btn--ghost btn--sm" type="button">إلغاء</button><button class="btn btn--ai btn--sm" type="button">احفظ للفريق</button></span></div>
+      </div>
+      <h2 class="t-meta" style="padding: 14px 4px 4px; font-weight: 600">القواعد الحالية</h2>
+      <div class="m-list">
+        <sc-for list="{{rules}}" as="r" hint-placeholder-count="4"><div class="m-item" style="min-height: 84px; align-items: flex-start; padding-top: 14px; padding-bottom: 14px"><span class="m-item__label" style="font-weight: 500; font-size: 14px; line-height: 1.7">{{r.text}}<small>{{r.meta}}</small></span><button class="switch" type="button" role="switch" aria-checked="{{r.on}}" aria-label="تفعيل القاعدة"></button></div></sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{isDrafts}}" hint-placeholder-val="{{ true }}">
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+      <h2 class="t-meta" style="padding: 12px 4px 4px; font-weight: 600">{{g.label}}</h2>
+      <div class="m-list">
+        <sc-for list="{{g.items}}" as="d" hint-placeholder-count="3">
+          <a class="m-item" href="MobDraft.dc.html" style="min-height: 72px"><span class="ic-wrap {{d.ic}}" style="width: 42px; height: 42px; border-radius: 12px; font-size: 10.5px; font-weight: 700">{{d.kind}}</span><span class="m-item__label"><span class="ellipsis">{{d.title}}</span><small>{{d.meta}}</small></span><svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></a>
+        </sc-for>
+      </div>
+    </sc-for>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["drafts","memory"],"default":"drafts"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      theme: this.props.theme ?? 'light',
+      isMemory: this.props.state === 'memory', isDrafts: this.props.state !== 'memory', tabDrafts: String(this.props.state !== 'memory'), tabMemory: String(this.props.state === 'memory'),
+      rules: [
+        { text: 'اختم سكريبتات الفيديو الاقتصادية بسؤال عن أثر الخبر على المشاهد.', meta: 'أُضيفت اليوم · من تعديلات سارة', on: 'true' },
+        { text: 'انسب كل ادعاء لصاحبه بصيغة «قال» أو «بحسب».', meta: 'تُطبّق منذ أسبوعين', on: 'true' },
+        { text: 'الوسوم بالعربية أولاً، ولا تزيد عن أربعة.', meta: 'تُطبّق منذ شهر', on: 'true' },
+        { text: 'تجنب كلمة «صادم» في الخطافات.', meta: 'موقوفة', on: 'false' }
+      ],
+      groups: [
+        { label: 'اليوم', items: [
+          { kind: 'فيديو', ic: 'ic-wrap--ai', title: 'لماذا لم يخفض المركزي الفائدة؟', meta: 'سكريبت فيديو · ٣ نسخ · قبل ٤ د' },
+          { kind: 'سوشيال', ic: 'ic-wrap--teal', title: 'اجتماع طارئ لوزراء الخارجية العرب', meta: 'منشور سوشيال · نسخة · قبل ٢٠ د' },
+          { kind: 'شرائح', ic: 'ic-wrap--teal', title: 'أسعار النفط ترتفع بعد إشارات أوبك+', meta: 'كاروسيل · نسختان · قبل ساعة' },
+          { kind: 'موجز', ic: 'ic-wrap--teal', title: 'موجز ١٢:٠٠ م', meta: 'موجز الساعة · قبل ٣ ساعات' }
+        ] },
+        { label: 'أمس', items: [
+          { kind: 'خبر', ic: '', title: 'إطلاق أول قمر صناعي عربي لرصد جودة الهواء', meta: 'خبر مكتبي · ٤ نسخ · ٨:١٠ م' },
+          { kind: 'حقائق', ic: '', title: 'مهرجان القاهرة السينمائي: أفلام المسابقة', meta: 'ملف حقائق · ٥:٤٠ م' }
+        ] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

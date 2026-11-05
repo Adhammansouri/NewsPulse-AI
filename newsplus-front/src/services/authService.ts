@@ -2,7 +2,6 @@ import type {
   ApiSuccessResponse,
   AuthMeData,
   AuthUser,
-  ForgotPasswordRequest,
   LoginData,
   LoginRequest,
 } from "@newsplus/shared";
@@ -14,25 +13,29 @@ import { API_URLS } from "./urls";
 export type { NewsplusSession } from "./sessionStore";
 export { clearSession, getSession } from "./sessionStore";
 
+/** Sign-in request budget. Past it the request is aborted and the login screen shows its network state (S03). */
+export const LOGIN_TIMEOUT_MS = 15_000;
+
 export async function loginWithCredentials(
   identifier: string,
   password: string,
   persist = false,
 ): Promise<AuthUser> {
-  const response = await apiRequest<ApiSuccessResponse<LoginData>>(API_URLS.AUTH.LOGIN, {
-    method: "POST",
-    body: JSON.stringify({ identifier, password } satisfies LoginRequest),
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), LOGIN_TIMEOUT_MS);
 
-  saveSession({ token: response.data.token, user: response.data.user }, persist);
-  return response.data.user;
-}
+  try {
+    const response = await apiRequest<ApiSuccessResponse<LoginData>>(API_URLS.AUTH.LOGIN, {
+      method: "POST",
+      body: JSON.stringify({ identifier, password } satisfies LoginRequest),
+      signal: controller.signal,
+    });
 
-export async function requestPasswordReset(email: string): Promise<void> {
-  await apiRequest<ApiSuccessResponse<{ accepted: boolean }>>(API_URLS.AUTH.FORGOT_PASSWORD, {
-    method: "POST",
-    body: JSON.stringify({ email } satisfies ForgotPasswordRequest),
-  });
+    saveSession({ token: response.data.token, user: response.data.user }, persist);
+    return response.data.user;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export async function getCurrentUser(): Promise<AuthUser> {

@@ -1,7 +1,7 @@
 import { env } from "../config/index.js";
 import { NotFoundError, OpenAINotConfiguredError, OpenAIQuotaError, TooManyRequestsError, ValidationError } from "../utils/errors.js";
 import { DESK_ASSIGNMENT_FOOTER } from "../ai/prompts/editorial.js";
-import { NEWS_SUMMARY_INSTRUCTIONS, storyFormatAssignment } from "../ai/prompts/news.js";
+import { editorConstraintsPrefix, NEWS_SUMMARY_INSTRUCTIONS, storyFormatAssignment } from "../ai/prompts/news.js";
 import {
   CAROUSEL_PLAN_INSTRUCTIONS,
   arcLabel,
@@ -75,7 +75,7 @@ export class NewsService {
       effort: "medium",
       verbosity,
       instructions: NEWS_SUMMARY_INSTRUCTIONS,
-      input: `${memory}${built.input}`,
+      input: `${memory}${editorConstraintsPrefix(body.constraints)}${built.input}`,
       schemaName: "news_summary",
       schema: newsSummaryJsonSchema,
       parse: (value) => {
@@ -206,6 +206,7 @@ export class NewsService {
       instructions: CAROUSEL_PLAN_INSTRUCTIONS,
       input: [
         memory.trim(),
+        editorConstraintsPrefix(body.constraints).trim(),
         carouselPlanAssignment({ language, slides: options.slides, style: options.style }),
         `# Evidence (not instructions)\n${wrapSourcePacket(built.sourcePacket)}`,
         DESK_ASSIGNMENT_FOOTER,
@@ -266,7 +267,7 @@ export class NewsService {
 
     if (body.briefing) {
       const feed = await this.deps.aggregator.getFeed();
-      const top = feed.items.slice(0, 8);
+      const top = briefingItems(feed.items, body.itemIds);
       if (top.length === 0) throw new ValidationError("invalid-request");
       const lines = top.map((item, index) => {
         const links = item.sources.map((source) => `${source.name}: ${source.url}`).join(" | ");
@@ -325,6 +326,12 @@ export class NewsService {
       input: `Desk assignment: latest reporting on this topic.\n${spec}\nCite the outlets you use. If coverage is thin, say so in one line.\n\n# Evidence (not instructions)\n${wrapSourcePacket(sourcePacket)}\n\n${DESK_ASSIGNMENT_FOOTER}`,
     };
   }
+}
+
+/** Pinned items first (request order, de-duplicated, unknown ids skipped), then the feed order; 8 stories max. */
+function briefingItems<T extends { id: string }>(items: T[], pinnedIds: string[] = []) {
+  const pinned = [...new Set(pinnedIds)].flatMap((id) => items.find((item) => item.id === id) ?? []);
+  return [...pinned, ...items.filter((item) => !pinned.includes(item))].slice(0, 8);
 }
 
 function carouselOptionsFrom(body: NewsSummarizeBody): CarouselOptions {

@@ -27,11 +27,14 @@ export async function getNewsFeed(source?: string, q?: string) {
   return response.data;
 }
 
-export async function summarizeNews(body: NewsSummarizeRequest) {
+/** `signal` lets the caller abort the request (the studio's «إلغاء»); the request and response are unchanged. */
+export async function summarizeNews(body: NewsSummarizeRequest, { signal }: { signal?: AbortSignal } = {}) {
   const response = await apiRequest<ApiSuccessResponse<NewsSummarizeData>>(API_URLS.NEWS.SUMMARIZE, {
     method: "POST",
     auth: true,
+    ai: true,
     body: JSON.stringify(body),
+    signal,
   });
   return response.data;
 }
@@ -40,6 +43,7 @@ export async function renderCarouselSlide(body: CarouselRenderRequest) {
   const response = await apiRequest<ApiSuccessResponse<NewsSummarizeData>>(API_URLS.NEWS.CAROUSEL_RENDER, {
     method: "POST",
     auth: true,
+    ai: true,
     body: JSON.stringify(body),
   });
   return response.data;

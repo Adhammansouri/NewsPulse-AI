@@ -7,6 +7,8 @@ export interface IUserRepository {
   findByLoginIdentifier(identifier: string): Promise<UserRecord | null>;
   findById(id: string): Promise<UserRecord | null>;
   findByEmail(email: string): Promise<UserRecord | null>;
+  /** Every account (the team, S15 `GET /team`). */
+  listAll(): Promise<UserRecord[]>;
 }
 
 type SeedUser = {
@@ -49,5 +51,9 @@ export class InMemoryUserRepository implements IUserRepository {
   async findByEmail(email: string): Promise<UserRecord | null> {
     const key = normalizeEmail(email);
     return this.users.find((user) => user.email === key) ?? null;
+  }
+
+  async listAll(): Promise<UserRecord[]> {
+    return [...this.users];
   }
 }

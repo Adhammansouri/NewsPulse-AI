@@ -51,9 +51,9 @@
   --accent-alert: var(--color-coral-500);
 
   /* Typography */
-  --font-sans: 'IBM Plex Sans', 'Geist Variable', 'Geist', system-ui, sans-serif;
-  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, monospace;
-  --font-arabic: 'IBM Plex Sans Arabic', 'IBM Plex Sans', 'Noto Sans Arabic', sans-serif;
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Sans', 'IBM Plex Sans Arabic', ui-monospace, monospace;
+  --font-arabic: 'IBM Plex Sans Arabic', 'IBM Plex Sans', sans-serif;
 
   /* Radius */
   --radius-sm: 6px;

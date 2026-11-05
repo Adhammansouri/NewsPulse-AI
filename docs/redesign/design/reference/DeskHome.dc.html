@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — الرئيسية</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np" data-theme="{{theme}}" style="display: flex; width: 100%; min-height: 900px">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+  <nav class="rail" aria-label="التنقل الرئيسي">
+    <img class="rail__logo" src="/_blob/c65b65ef75087372ddc981be3cc41199" alt="Newsplus">
+    <a class="rail__item" href="DeskHome.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>الرئيسية</a>
+    <a class="rail__item" href="Main.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H5a1 1 0 0 1-1-1zM17 9h3v9a1 1 0 0 1-2 0M7 9h7M7 13h7M7 16h4"></path></svg>الأخبار</a>
+    <a class="rail__item" href="NewBoard.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v10h-4zM16 4h4v13h-4z"></path></svg>سير العمل</a>
+    <a class="rail__item" href="DeskGenerate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"></path></svg>توليد</a>
+    <a class="rail__item" href="DeskTranslate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg>ترجمة</a>
+    <a class="rail__item" href="DeskUsage.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"></path></svg>الاستهلاك</a>
+    <div style="flex: 1"></div>
+    <a class="rail__btn" href="DeskNotifications.dc.html" aria-label="الإشعارات"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"></path></svg></a>
+    <button class="avatar" type="button" aria-label="حساب سارة" style="margin-top: 8px">س</button>
+  </nav>
+
+  <main class="grow" style="padding: 34px 48px 48px">
+    <div class="col" style="max-width: 1200px; margin: 0 auto; gap: 24px">
+      <sc-if value="{{isOffline}}" hint-placeholder-val="{{ false }}">
+        <div class="row" role="status" style="gap: 12px; padding: 12px 18px; border-radius: 14px; background: var(--navy); color: #fff"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color: #fbbf24"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18"></path></svg><span class="grow" style="font-size: 14px">مفيش اتصال. بتشوف آخر نسخة محفوظة (٢:٤٠ م)، والمحرّر هيرجع مع رجوع الشبكة.</span><button class="btn btn--sm" type="button" style="background: rgb(255 255 255 / .14); color: #fff">حاول تاني</button></div>
+      </sc-if>
+      <header class="row" style="justify-content: space-between; align-items: flex-end; flex-wrap: wrap">
+        <div class="col"><p class="t-meta">الثلاثاء ٣ نوفمبر · ٣:٠٤ م</p><h1 class="t-hero">صباح الخير، سارة</h1></div>
+        <p class="live">٨ عناوين جديدة منذ آخر زيارة</p>
+      </header>
+
+      <section class="ai-panel" aria-labelledby="cmd-title" style="padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+        <div class="row" style="justify-content: space-between"><h2 id="cmd-title" class="t-head row"><span class="ic-wrap ic-wrap--ai" style="width: 30px; height: 30px; border-radius: 9px"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span>ابدأ من رابط أو فكرة</h2><span class="t-meta">المحرّر يتعرّف على الرابط تلقائياً</span></div>
+        <label class="field field--area is-focus" style="min-height: 84px"><span class="sr">رابط أو موضوع</span><textarea rows="2" dir="ltr" style="text-align: right; font-size: 16px">https://www.alarabiya.net/aswaq/economy/2026/11/03/central-bank-rates</textarea></label>
+        <div class="row" style="flex-wrap: wrap">
+          <span class="badge badge--teal"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>رابط من alarabiya.net</span>
+          <span class="grow"></span>
+          <a class="btn btn--ghost" href="DeskTranslate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg>ترجم</a>
+          <a class="btn btn--quiet" href="DeskGenerate.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"></path></svg>اكتب مقالاً</a>
+          <a class="btn btn--ai" href="Main.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>منشور سوشيال من الرابط</a>
+        </div>
+      </section>
+
+      <sc-if value="{{isLoading}}" hint-placeholder-val="{{ false }}">
+        <div class="sk" style="height: 82px; border-radius: 20px"></div>
+        <div style="display: grid; grid-template-columns: 1.15fr 1fr 0.85fr; gap: 18px"><div class="panel col" style="padding: 18px 20px; gap: 16px"><div class="sk" style="height: 18px; width: 35%"></div><div class="row"><div class="sk" style="width: 42px; height: 42px; border-radius: 12px"></div><div class="col grow" style="gap: 8px"><div class="sk" style="height: 13px; width: 80%"></div><div class="sk" style="height: 10px; width: 45%"></div></div></div><div class="row"><div class="sk" style="width: 42px; height: 42px; border-radius: 12px"></div><div class="col grow" style="gap: 8px"><div class="sk" style="height: 13px; width: 70%"></div><div class="sk" style="height: 10px; width: 40%"></div></div></div><div class="row"><div class="sk" style="width: 42px; height: 42px; border-radius: 12px"></div><div class="col grow" style="gap: 8px"><div class="sk" style="height: 13px; width: 75%"></div><div class="sk" style="height: 10px; width: 50%"></div></div></div></div><div class="panel col" style="padding: 18px 20px; gap: 16px"><div class="sk" style="height: 18px; width: 45%"></div><div class="sk" style="height: 14px"></div><div class="sk" style="height: 14px; width: 80%"></div><div class="sk" style="height: 14px; width: 90%"></div><div class="sk" style="height: 14px; width: 70%"></div></div><div class="sk" style="height: 240px; border-radius: 20px"></div></div>
+      </sc-if>
+      <sc-if value="{{isContent}}" hint-placeholder-val="{{ true }}">
+      <a href="Main.dc.html" class="panel row" style="gap: 16px; padding: 16px 20px; color: var(--ink); background: var(--breaking-soft); border-color: transparent; box-shadow: none">
+        <span class="ic-wrap ic-wrap--breaking" style="background: var(--surface)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"></path></svg></span>
+        <span class="col grow"><span class="row"><span class="badge badge--breaking" style="background: var(--surface)">عاجل الآن</span><span class="t-meta num">قبل ٣ دقائق · ٣ مصادر</span></span><span style="font-weight: 700; font-size: 16.5px; margin-top: 4px">البنك المركزي يثبت أسعار الفائدة للمرة الثالثة على التوالي وسط ترقب لبيانات التضخم</span></span>
+        <span class="btn btn--ink btn--sm">اكتب عنه</span>
+      </a>
+
+      <div style="display: grid; grid-template-columns: 1.15fr 1fr 0.85fr; gap: 18px">
+        <section class="panel" aria-labelledby="resume-title" style="padding-bottom: 6px">
+          <div class="row" style="justify-content: space-between; padding: 16px 20px 10px"><h2 id="resume-title" class="t-head">كمّل شغلك</h2><a href="DeskArchive.dc.html" style="font-size: 13.5px; font-weight: 600">الأرشيف</a></div>
+          <ul>
+            <sc-for list="{{drafts}}" as="d" hint-placeholder-count="4">
+              <li><a href="DeskDraft.dc.html" class="row" style="gap: 14px; padding: 12px 20px; color: var(--ink); border-top: 1px solid var(--line)">
+                <span class="ic-wrap {{d.ic}}" style="width: 42px; height: 42px; border-radius: 12px; font-size: 11px; font-weight: 700">{{d.kind}}</span>
+                <span class="col grow"><span class="ellipsis" style="font-weight: 600">{{d.title}}</span><span class="t-meta">{{d.meta}}</span></span>
+                <svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--ink-3)"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+              </a></li>
+            </sc-for>
+          </ul>
+        </section>
+
+        <section class="panel" aria-labelledby="top-title" style="overflow: hidden">
+          <div class="row" style="justify-content: space-between; padding: 16px 20px 10px"><h2 id="top-title" class="t-head">أهم العناوين الآن</h2><a href="Main.dc.html" style="font-size: 13.5px; font-weight: 600">غرفة الأخبار</a></div>
+          <div style="border-top: 1px solid var(--line)">
+            <sc-for list="{{rows}}" as="row" hint-placeholder-count="4">
+              <a href="Main.dc.html" class="wire-row {{row.cls}}"><span class="tick" aria-hidden="true"></span><span class="wire-row__meta"><span style="font-weight: 600; color: var(--ink-2)">{{row.source}}</span><span class="grow"></span><span class="num">{{row.time}}</span></span><span class="wire-row__title" style="font-size: 14.5px">{{row.title}}</span></a>
+            </sc-for>
+          </div>
+        </section>
+
+        <section class="col" style="gap: 18px">
+          <div class="panel col" style="padding: 18px 20px; gap: 12px">
+            <h2 class="t-head">شغلك النهارده</h2>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+              <div class="col"><span class="t-num" style="font-size: 28px">٦</span><span class="t-meta">مسودات</span></div>
+              <div class="col"><span class="t-num" style="font-size: 28px">١١</span><span class="t-meta">تعديل بالمحرّر</span></div>
+              <div class="col"><span class="t-num" style="font-size: 28px">٢</span><span class="t-meta">ترجمات</span></div>
+              <div class="col"><span class="t-num" style="font-size: 28px">٨</span><span class="t-meta">شرائح مرسومة</span></div>
+            </div>
+          </div>
+          <a href="DeskArchive.dc.html" class="ai-panel col" style="padding: 18px 20px; gap: 8px; color: var(--ink); box-shadow: none">
+            <span class="row"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--cyan)"><path d="M12 3a6 6 0 0 1 6 6c0 2.2-1.2 3.6-2.5 4.7-.7.6-1 1.3-1 2.1V17h-5v-1.2c0-.8-.3-1.5-1-2.1C7.2 12.6 6 11.2 6 9a6 6 0 0 1 6-6zM10 21h4"></path></svg><span class="t-label t-ai">المحرّر تعلّم قاعدة جديدة</span></span>
+            <p style="font-size: 14px; line-height: 1.7">اختم سكريبتات الفيديو الاقتصادية بسؤال مباشر عن أثر الخبر على المشاهد.</p>
+            <span class="t-meta">ذاكرة الفريق · ٤ قواعد مفعّلة</span>
+          </a>
+        </section>
+      </div>
+      </sc-if>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["ready","loading","offline"],"default":"ready"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      theme: this.props.theme ?? 'light',
+      isLoading: this.props.state === 'loading', isOffline: this.props.state === 'offline', isContent: this.props.state !== 'loading',
+      drafts: [
+        { kind: 'فيديو', ic: 'ic-wrap--ai', title: 'لماذا لم يخفض المركزي الفائدة؟', meta: 'سكريبت فيديو · ن٣ · قبل ٤ دقائق' },
+        { kind: 'سوشيال', ic: 'ic-wrap--teal', title: 'اجتماع طارئ لوزراء الخارجية العرب الليلة', meta: 'منشور سوشيال · ن١ · قبل ٢٠ دقيقة' },
+        { kind: 'شرائح', ic: 'ic-wrap--teal', title: 'أسعار النفط ترتفع بعد إشارات أوبك+', meta: 'كاروسيل · ن٢ · قبل ساعة' },
+        { kind: 'مقال', ic: '', title: 'التثبيت الثالث: لماذا يتمسك المركزي بالحذر؟', meta: 'مقال · توليد · قبل ساعتين' }
+      ],
+      rows: [
+        { cls: 'is-now', source: 'الجزيرة نت +١', time: 'قبل ١١ د', title: 'اجتماع طارئ لوزراء الخارجية العرب لبحث تطورات الأوضاع الإقليمية' },
+        { cls: 'is-hour', source: 'Reuters +١', time: 'قبل ٢٦ د', title: 'Global oil prices climb after OPEC+ signals extended output cuts' },
+        { cls: 'is-hour', source: 'العين الإخبارية', time: 'قبل ٤٨ د', title: 'منتخب مصر يعلن قائمة المعسكر المقبل لتصفيات كأس العالم' },
+        { cls: '', source: 'BBC عربي', time: 'قبل ساعة', title: 'دراسة: الذكاء الاصطناعي يختصر زمن تشخيص بعض أمراض القلب' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

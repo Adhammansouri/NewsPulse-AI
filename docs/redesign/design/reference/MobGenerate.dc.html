@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus موبايل — توليد</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+<link rel="stylesheet" href="/_blob/210170dd5a2fa534503e7d6a475c3fc9">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np m" data-theme="{{theme}}">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+
+  <sc-if value="{{isForm}}" hint-placeholder-val="{{ true }}">
+    <header class="m-head"><div class="m-head__row"><span class="m-title">توليد</span><a class="btn btn--ghost btn--sm" href="MobArchive.dc.html"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2"></path></svg>مسوداتي · ٥</a></div><p class="t-meta">مقال أو تقرير أو ملخص من رابط أو موضوع</p></header>
+    <main class="m-scroll col" style="padding: 8px 16px 20px; gap: 20px">
+      <div class="col" style="gap: 8px">
+        <label class="t-label" for="mg-src">رابط أو موضوع</label>
+        <label class="field field--area {{srcCls}}" style="min-height: 96px"><textarea id="mg-src" rows="3" dir="{{srcDir}}" placeholder="الصق رابط الخبر، أو اكتب الموضوع وما يهمك فيه…" style="text-align: right" value="{{srcVal}}" readOnly="{{ true }}"></textarea></label>
+        <sc-if value="{{isError}}" hint-placeholder-val="{{ false }}"><p class="hint hint--error"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5M12 16.5v.5M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z"></path></svg>الموقع رفض الوصول للصفحة</p></sc-if>
+        <sc-if value="{{isEmpty}}" hint-placeholder-val="{{ true }}"><div class="row" style="gap: 6px; flex-wrap: wrap"><span class="chip chip--sm chip--soft"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9zM5 15H4V4h11v1"></path></svg>الصق من الحافظة</span><span class="chip chip--sm chip--soft">آخر عاجل: المركزي يثبت الفائدة</span></div></sc-if>
+      </div>
+      <sc-if value="{{isError}}" hint-placeholder-val="{{ false }}">
+        <div class="ai-panel col arrive" style="padding: 16px; gap: 10px; box-shadow: none">
+          <span class="ai-mark t-ai">المحرّر يقدر يكمّل بطريقة تانية</span>
+          <p class="t-small">يدوّر على نفس الخبر في مصادر تانية، أو تلصق نص المقال بنفسك.</p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px"><button class="btn btn--ai btn--sm" type="button">ابحث عن الخبر</button><button class="btn btn--quiet btn--sm" type="button">الصق النص</button></div>
+        </div>
+      </sc-if>
+      <fieldset class="col" style="border: 0; padding: 0; margin: 0; gap: 8px">
+        <legend class="t-label" style="margin-bottom: 8px">ماذا تكتب؟</legend>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+          <button class="tile" type="button" aria-pressed="false" style="padding: 10px; align-items: center; text-align: center; gap: 4px"><span class="tile__name">ملخص</span><span class="tile__hint num" style="font-size: 11.5px">١٢٠–١٧٠</span></button>
+          <button class="tile" type="button" aria-pressed="true" style="padding: 10px; align-items: center; text-align: center; gap: 4px"><span class="tile__name">مقال</span><span class="tile__hint num" style="font-size: 11.5px">٤٥٠–٧٠٠</span></button>
+          <button class="tile" type="button" aria-pressed="false" style="padding: 10px; align-items: center; text-align: center; gap: 4px"><span class="tile__name">تقرير</span><span class="tile__hint num" style="font-size: 11.5px">٦٥٠–٩٠٠</span></button>
+        </div>
+      </fieldset>
+      <button class="m-list" type="button" style="padding: 0; text-align: start"><span class="m-item" style="border: 0"><span class="ic-wrap"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M14 5v4M8 15v4"></path></svg></span><span class="m-item__label">الضبط<small>عربي · قياسي · مكتبية · اقتصادي</small></span><span style="font-size: 13px; font-weight: 600; color: var(--teal)">تعديل</span></span></button>
+    </main>
+    <div class="m-cta" style="padding-bottom: 12px">
+      <sc-if value="{{isEmpty}}" hint-placeholder-val="{{ true }}"><p class="m-cta__hint">الصق رابط أو اكتب موضوع عشان تبدأ</p></sc-if>
+      <button class="btn btn--ai btn--block btn--lg" type="button" disabled="{{ctaDisabled}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>اكتب المقال</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isWriting}}" hint-placeholder-val="{{ false }}">
+    <header class="m-bar"><span class="m-bar__title" style="padding-inline-start: 8px">مقال من skynewsarabia.com</span><span class="badge badge--ai">يكتب…</span></header>
+    <main class="m-scroll col" style="padding: 20px 16px; gap: 16px">
+      <section class="ai-panel ai-glow col" style="padding: 22px 20px; gap: 18px" aria-live="polite">
+        <span class="ai-mark t-ai" style="font-size: 14px">المحرّر يكتب المقال</span>
+        <svg class="pulse-line" width="100%" height="44" viewBox="0 0 320 44" preserveAspectRatio="none" aria-hidden="true"><path class="base" d="M0 22h96l12-16 16 32 14-26 10 10h172"></path><path d="M0 22h96l12-16 16 32 14-26 10 10h172"></path></svg>
+        <ol class="steps"><li class="step is-done"><span class="step__dot"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>فتح الرابط</li><li class="step is-active"><span class="step__dot"></span>قراءة المقال (٨٢٠ كلمة)</li><li class="step"><span class="step__dot"></span>كتابة المقال بزاوية اقتصادية</li></ol>
+      </section>
+      <div class="doc col" style="padding: 20px; gap: 12px"><div class="sk" style="height: 24px; width: 90%"></div><div class="sk" style="height: 14px; width: 55%"></div><div class="sk" style="height: 13px; width: 100%; margin-top: 8px"></div><div class="sk" style="height: 13px; width: 96%"></div><div class="sk" style="height: 13px; width: 88%"></div><div class="sk" style="height: 13px; width: 60%"></div></div>
+    </main>
+    <div class="m-cta"><button class="btn btn--ghost btn--block" type="button" style="color: var(--breaking)">إلغاء</button></div>
+  </sc-if>
+
+  <sc-if value="{{isDone}}" hint-placeholder-val="{{ false }}">
+    <header class="m-bar">
+      <a class="icon-btn" href="MobGenerate.dc.html" aria-label="رجوع للتعيين"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+      <span class="badge badge--ai">مقال</span><span class="badge badge--teal">من الصفحة</span><span class="grow"></span>
+      <button class="icon-btn" type="button" aria-label="تنزيل"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"></path></svg></button>
+    </header>
+    <main class="m-scroll" style="padding: 16px">
+      <article class="doc typeset col" style="padding: 0 0 18px; gap: 2px">
+        <div class="ai-strip"></div>
+        <div class="col" style="padding: 14px 20px 0; gap: 2px">
+          <p class="t-meta num" style="margin-bottom: 4px">٥١٠ كلمة · ٣ دقائق قراءة</p>
+          <div class="block" style="margin-inline: -12px; padding: 10px 12px"><div class="block__label">العنوان<button class="block__copy" type="button">نسخ</button></div><h1 class="t-display" style="font-size: 22px">التثبيت الثالث: لماذا يتمسك المركزي بالحذر؟</h1></div>
+          <div class="block" style="margin-inline: -12px; padding: 10px 12px"><div class="block__label">المقدمة</div><p style="font-weight: 500; font-size: 16px; line-height: 1.7; color: var(--ink-2)">قرار متوقع، لكن رسائله للأسواق أهم من الرقم نفسه.</p></div>
+          <div class="block" style="margin-inline: -12px; padding: 10px 12px"><div class="block__label">النص</div><div class="t-body col" style="color: var(--ink); gap: 12px; font-size: 16px"><p>أبقى البنك المركزي على أسعار الفائدة دون تغيير للمرة الثالثة على التوالي، في قرار جاء متسقاً مع توقعات معظم المحللين.</p><p>ويأتي القرار في وقت تراجعت فيه معدلات التضخم، لكنها لا تزال أعلى من النطاق المستهدف.</p></div></div>
+        </div>
+      </article>
+    </main>
+    <div class="m-cta">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px"><a class="btn btn--quiet btn--sm" href="MobTranslate.dc.html" style="min-height: 42px">ترجم</a><a class="btn btn--ai btn--sm" href="MobDraft.dc.html" style="min-height: 42px">حوّله لمنشور</a></div>
+      <button class="btn btn--ink btn--block btn--lg" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9zM5 15H4V4h11v1"></path></svg>نسخ المقال كاملاً</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{showTabs}}" hint-placeholder-val="{{ true }}">
+    <nav class="m-tabbar" aria-label="التنقل">
+      <a class="m-tab" href="MobHome.dc.html"><span class="m-tab__ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg></span>الرئيسية</a>
+      <a class="m-tab" href="MobWire.dc.html"><span class="m-tab__ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H5a1 1 0 0 1-1-1zM17 9h3v9a1 1 0 0 1-2 0M7 9h7M7 13h7M7 16h4"></path></svg></span>الأخبار</a>
+      <a class="m-tab m-tab--ai" href="MobGenerate.dc.html" aria-current="page"><span class="m-tab__ic"><svg class="ic ic--lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span>توليد</a>
+      <a class="m-tab" href="MobTranslate.dc.html"><span class="m-tab__ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M11 5c-1 4-4 7-7 8M6 9c1.5 2 3.5 3.5 6 4M13 21l4-10 4 10M14.5 17.5h5"></path></svg></span>ترجمة</a>
+      <a class="m-tab" href="MobMore.dc.html"><span class="m-tab__ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width: 3"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></span>المزيد</a>
+    </nav>
+  </sc-if>
+  <sc-if value="{{isDrafts}}" hint-placeholder-val="{{ false }}">
+    <div class="scrim" aria-hidden="true"></div>
+    <section class="sheet col" role="dialog" aria-modal="true" aria-labelledby="md-t" style="max-height: 640px; padding-bottom: 24px">
+      <div class="grabber" aria-hidden="true"></div>
+      <header class="row" style="justify-content: space-between; padding: 6px 20px 12px"><div class="col"><h2 id="md-t" class="t-title">مسوداتي</h2><span class="t-meta">محفوظة على الجهاز ده · آخر ٢٠</span></div><button class="btn btn--ghost btn--sm" type="button" style="color: var(--breaking)">امسح الكل</button></header>
+      <div class="m-scroll" style="padding: 0 16px">
+        <div class="m-list">
+          <sc-for list="{{drafts}}" as="d" hint-placeholder-count="4"><div class="m-item" style="min-height: 70px"><span class="badge {{d.badge}}">{{d.kind}}</span><span class="m-item__label"><span class="ellipsis">{{d.title}}</span><small>{{d.meta}}</small></span><button class="icon-btn" type="button" aria-label="حذف المسودة"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></button></div></sc-for>
+        </div>
+      </div>
+    </section>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["empty","writing","done","error","drafts"],"default":"empty"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var s = this.props.state ?? 'empty';
+    return {
+      theme: this.props.theme ?? 'light',
+      isForm: s === 'empty' || s === 'error' || s === 'drafts', isEmpty: s === 'empty' || s === 'drafts', isError: s === 'error', isWriting: s === 'writing', isDone: s === 'done', isDrafts: s === 'drafts',
+      drafts: [
+        { kind: 'مقال', badge: 'badge--ai', title: 'التثبيت الثالث: لماذا يتمسك المركزي بالحذر؟', meta: 'من الصفحة · الآن' },
+        { kind: 'تقرير', badge: 'badge--topic', title: 'أسعار النفط بعد قرار أوبك+', meta: 'بالبحث · أمس' },
+        { kind: 'ملخص', badge: 'badge--topic', title: 'اجتماع وزراء الخارجية العرب', meta: 'من التعيين · أمس' },
+        { kind: 'مقال', badge: 'badge--topic', title: 'الذكاء الاصطناعي وتشخيص أمراض القلب', meta: 'من الصفحة · ١ نوفمبر' }
+      ],
+      showTabs: s === 'empty' || s === 'error' || s === 'drafts',
+      srcVal: s === 'error' ? 'https://www.example-news.com/members/central-bank' : '', srcDir: s === 'error' ? 'ltr' : 'rtl', srcCls: s === 'error' ? 'is-error' : '',
+      ctaDisabled: s === 'empty'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -51,6 +51,16 @@ export function storyFormatAssignment(format: NewsStoryFormat, language: "ar" | 
   return `Output language: ${language}.\n${FORMAT_SPECS[format]}`;
 }
 
+/**
+ * S14: the slot editor's standing decisions for this story (e.g. which of two conflicting figures to use, or to
+ * attribute both), as a block before the assignment. They are the editor's instructions, not evidence; empty → "".
+ */
+export function editorConstraintsPrefix(constraints: readonly string[] | undefined) {
+  const lines = (constraints ?? []).map((line) => line.replace(/\s+/g, " ").trim()).filter(Boolean);
+  if (lines.length === 0) return "";
+  return `# Editor constraints (the slot editor's decisions for this story; apply every one, they settle what the sources disagree on)\n${lines.map((line) => `- ${line}`).join("\n")}\n\n`;
+}
+
 export const NEWS_SUMMARY_INSTRUCTIONS = `${EDITORIAL_VOICE}
 
 # Task

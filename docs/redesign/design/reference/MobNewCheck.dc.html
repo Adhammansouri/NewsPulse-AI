@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus — فحص قبل النشر</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+<link rel="stylesheet" href="/_blob/210170dd5a2fa534503e7d6a475c3fc9">
+<link rel="stylesheet" href="/_blob/a7940d8c65f26d316bd1f2cee73fd657">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np m" data-theme="{{theme}}">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+<header class="m-bar"><a class="icon-btn" href="MobDraft.dc.html" aria-label="رجوع"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a><span class="m-bar__title">منشور سوشيال</span></header>
+<main class="m-scroll col" aria-hidden="true" style="padding:14px 18px;gap:10px"><p class="t-display" style="font-size:20px">هل انتهى زمن خفض الفائدة؟ المركزي يثبّتها للمرة الثالثة</p><p class="t-body">قررت لجنة السياسة النقدية الإبقاء على أسعار الفائدة دون تغيير…</p></main>
+<div class="scrim" aria-hidden="true"></div>
+<section class="sheet col" role="dialog" aria-modal="true" aria-labelledby="pc-t" style="padding-bottom:24px">
+  <div class="grabber" aria-hidden="true"></div>
+  <div class="ai-strip" style="margin:6px 20px 0;border-radius:3px"></div>
+  <header class="row" style="justify-content:space-between;padding:12px 20px 4px"><h2 id="pc-t" class="t-title">فحص قبل النشر</h2><span class="badge badge--warn">ملاحظتين · ٤ تمام</span></header>
+  <p class="t-meta" style="padding:0 20px">المحرّر راجع المسودة على المصادر وقواعد الفريق</p>
+  <div class="col" style="padding:4px 20px 12px"><div class="check-row"><span class="check-ic ok"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span><span class="col grow" style="gap:2px"><b style="font-weight:600;font-size:14px">الإسناد</b><span class="t-meta">كل ادعاء منسوب لمصدر</span></span></div><div class="check-row"><span class="check-ic ok"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span><span class="col grow" style="gap:2px"><b style="font-weight:600;font-size:14px">الأرقام مطابقة للمصادر</b><span class="t-meta">رقمين اتراجعوا على ٣ مصادر</span></span></div><div class="check-row"><span class="check-ic warn"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5M12 16.5v.5"></path></svg></span><span class="col grow" style="gap:2px"><b style="font-weight:600;font-size:14px">الخطاف طويل على إنستجرام</b><span class="t-meta">هيتقص قبل «المزيد»</span></span><button class="btn btn--quiet btn--sm" type="button">قصّره</button></div><div class="check-row"><span class="check-ic warn"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5M12 16.5v.5"></path></svg></span><span class="col grow" style="gap:2px"><b style="font-weight:600;font-size:14px">كلمة الفريق بيتجنبها: «صادم»</b><span class="t-meta">قاعدة في ذاكرة الفريق</span></span><button class="btn btn--quiet btn--sm" type="button">استبدلها</button></div><div class="check-row"><span class="check-ic ok"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span><span class="col grow" style="gap:2px"><b style="font-weight:600;font-size:14px">٣ وسوم بالعربي</b><span class="t-meta">جوه حد الفريق</span></span></div></div>
+  <div class="col" style="padding:0 20px;gap:8px"><button class="btn btn--ai btn--block btn--lg" type="button"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>صلّح الملاحظات تلقائياً</button><button class="btn btn--ghost btn--block" type="button">انسخ زي ما هو</button></div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var s = this.props.state ?? '';
+    return { theme: this.props.theme ?? 'light', s: s };
+  }
+}
+</script>
+</body>
+</html>

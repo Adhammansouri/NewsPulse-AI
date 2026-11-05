@@ -1,3 +1,10 @@
+import type {
+  EditorialConversationScope,
+  EditorialPublishPlatform,
+  EditorialWorkflowStatus,
+  TeamMemberRef,
+} from "./workflow.js";
+
 export type NewsLanguage = "ar" | "en";
 
 export const NEWS_TOPICS = [
@@ -95,9 +102,85 @@ export type NewsSummarizeRequest = {
   input?: string;
   itemId?: string;
   briefing?: boolean;
+  /** Briefing only (ignored otherwise): up to 8 pinned feed item ids, placed first in this order. */
+  itemIds?: string[];
   format?: NewsStoryFormat;
   language?: NewsLanguage;
   carousel?: CarouselOptions;
+  /**
+   * S14: the editor's standing choices for this story (a source conflict settled: «اعتمد ٢٫٩٪», or «اذكر الرقمين
+   * بالإسناد»), injected into the prompt as editor constraints. At most 6, each at most 300 characters.
+   */
+  constraints?: string[];
+};
+
+/** S14 `GET /news/items/:id/timeline` — what each snapshot of the story added. */
+export type TimelineTag = "first" | "number" | "quote" | "reaction" | "update";
+
+/** One snapshot of the story: a source joined it, or a source's headline / excerpt changed. */
+export type TimelineEntry = {
+  sourceId: string;
+  /** ISO time the source published (or changed) it. */
+  at: string;
+  headline: string;
+  tag: TimelineTag;
+  /** Arrived in the last few minutes (the teal dot). */
+  isNew: boolean;
+};
+
+/** Two or more sources disagree on a figure; `safeWording` is what the editor writes until one is chosen. */
+export type SourceConflict = {
+  field: string;
+  values: { sourceId: string; value: string }[];
+  safeWording: string;
+};
+
+export type TimelineData = {
+  /** Oldest first. */
+  entries: TimelineEntry[];
+  conflicts: SourceConflict[];
+  /** «اللي متفق عليه»: a fact and how many sources carry it. */
+  agreed: { text: string; sourceCount: number }[];
+  /** How many sources carry the story («مؤكد من ٤ مصادر»). */
+  confirmedBy: number;
+};
+
+/** S13 `POST /news/breaking`: three short breaking-news outputs for one feed item. */
+export type NewsBreakingRequest = {
+  itemId: string;
+};
+
+export type NewsBreakingData = {
+  /** X post: starts with «عاجل |», at most 280 characters (hashtags included). */
+  post: string;
+  /** News ticker: one line starting with «عاجل:». */
+  ticker: string;
+  /** Follower push alert: at most 80 characters. */
+  alert: string;
+  /** How long the editor took to write the three outputs. */
+  ms: number;
+};
+
+/** S13 `POST /news/digest`: «اللي فاتك» since the editor's previous visit (cached 10 minutes per `since` hour). */
+export type NewsDigestRequest = {
+  /** ISO 8601 time of the previous visit. */
+  since: string;
+};
+
+export type NewsDigestItem = {
+  itemId: string;
+  title: string;
+  /** Short label: «الأهم اقتصادياً», «الأكثر تحديثاً», «متوقع يتفاعل عليه الجمهور». */
+  reason: string;
+};
+
+export type NewsDigestData = {
+  /** The top three stories (fewer when fewer arrived), most important first. */
+  items: NewsDigestItem[];
+  /** Plain-text summary of those stories, ready to paste. */
+  summaryText: string;
+  /** Headlines published since the `since` hour that the digest was written from. */
+  sourceCount: number;
 };
 
 export type CarouselRenderRequest = {
@@ -174,6 +257,15 @@ export type EditorialConversationSummary = {
   updatedAt: string;
   createdBy: string;
   versionCount: number;
+  /** S15 workflow column. Rows created before S15 are migrated to `draft`. */
+  status: EditorialWorkflowStatus;
+  /** Defaults to the creator. */
+  assigneeId: string;
+  publishedPlatforms: EditorialPublishPlatform[];
+  /** Always 0 until comments exist. */
+  commentCount: number;
+  /** The assignee as a team member — set by the list and update endpoints; absent when the user is unknown. */
+  assignee?: TeamMemberRef;
 };
 
 export type EditorialConversationDetail = EditorialConversationSummary & {
@@ -187,6 +279,25 @@ export type EditorialConversationDetail = EditorialConversationSummary & {
 
 export type EditorialConversationListData = {
   items: EditorialConversationSummary[];
+  /**
+   * Totals per workflow status for the same `q` + `scope` (ignoring `status` and the 50-item page).
+   * Present only when the request passed `scope` or `status`.
+   */
+  counts?: Record<EditorialWorkflowStatus, number>;
+};
+
+/** `GET /editorial/conversations` query. Without `scope`/`status` the result is the pre-S15 list. */
+export type EditorialConversationListQuery = {
+  q?: string;
+  scope?: EditorialConversationScope;
+  status?: EditorialWorkflowStatus;
+};
+
+/** `PATCH /editorial/conversations/:id` — any team member; at least one field. Responds with the summary. */
+export type EditorialConversationUpdateRequest = {
+  status?: EditorialWorkflowStatus;
+  assigneeId?: string;
+  publishedPlatforms?: EditorialPublishPlatform[];
 };
 
 export type EditorialReviseRequest = {
@@ -208,7 +319,11 @@ export type EditorialMemoryListData = {
   rules: EditorialMemoryRule[];
 };
 
+/** S16 `POST /editorial/memory`: a rule the editor states (onboarding's hook style), saved as approved. */
+export type EditorialMemoryCreateRequest = EditorialMemoryCandidate;
+
 export type EditorialMemoryUpdateRequest = {
-  status?: Exclude<EditorialMemoryStatus, "pending">;
+  /** `pending` only undoes an approval (S10 «تراجع»); the API refuses it for rejected / disabled rules. */
+  status?: EditorialMemoryStatus;
   instruction?: string;
 };

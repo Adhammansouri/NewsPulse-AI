@@ -147,6 +147,30 @@ test("approved memory is listed separately from rejected rules", () => {
   assert.equal(store.listMemoryRules().length, 2);
 });
 
+test("an approval can be undone back to pending, with the instruction it was suggested with", () => {
+  const store = openStore();
+  const rule = store.createMemoryRule({
+    instruction: "ابدأ المنشور بالرقم الأهم في الخبر قبل أي تمهيد.",
+    rationale: "يختصر الطريق للقارئ.",
+    createdBy: "editor-1",
+    sourceConversationId: "conv-1",
+  });
+  store.updateMemoryRule(rule.id, { status: "approved", instruction: "ابدأ المنشور بالرقم الأهم في الخبر مباشرة." });
+
+  const undone = store.updateMemoryRule(rule.id, { status: "pending", instruction: rule.instruction });
+  assert.equal(undone.status, "pending");
+  assert.equal(undone.instruction, rule.instruction);
+  assert.equal(store.listMemoryRules("approved").length, 0);
+
+  // Rejected and disabled rules never turn back into suggestions.
+  store.updateMemoryRule(rule.id, { status: "rejected" });
+  assert.throws(() => store.updateMemoryRule(rule.id, { status: "pending" }), /invalid-request/);
+  store.updateMemoryRule(rule.id, { status: "approved" });
+  store.updateMemoryRule(rule.id, { status: "disabled" });
+  assert.throws(() => store.updateMemoryRule(rule.id, { status: "pending" }), /invalid-request/);
+  assert.equal(store.getMemoryRule(rule.id).status, "disabled");
+});
+
 test("restore and patch keep carousel slide files", () => {
   const store = openStore();
   const carouselCopy = {

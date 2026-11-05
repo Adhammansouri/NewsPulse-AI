@@ -3,6 +3,10 @@ import Parser from "rss-parser";
 import type { FastifyBaseLogger } from "fastify";
 import { NEWS_SOURCES, type NewsSourceConfig } from "../config/newsSources.js";
 import { classifyNewsTopic, type NewsTopic } from "./newsTopics.js";
+import type { StoryObservation } from "./storyUpdatesStore.js";
+
+/** S14: receives every refresh's stories with each source's own headline, excerpt and link (StoryUpdatesStore). */
+export type StoryRecorder = { record(stories: StoryObservation[]): unknown };
 
 const REFRESH_MS = 2 * 60 * 1000;
 const WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
@@ -143,7 +147,8 @@ function dedupeSourceLinks(links: AggregatedSourceLink[]) {
   });
 }
 
-function cluster(items: RawItem[]): AggregatedItem[] {
+/** `articles` (S14), when given, receives each story's clustered articles by story id. */
+function cluster(items: RawItem[], articles?: Map<string, RawItem[]>): AggregatedItem[] {
   const used = new Set<number>();
   const groups: AggregatedItem[] = [];
 
@@ -168,6 +173,7 @@ function cluster(items: RawItem[]): AggregatedItem[] {
     members.sort((a, b) => b.publishedAt - a.publishedAt);
     const primary = members[0];
     const publishedAt = new Date(primary.publishedAt).toISOString();
+    articles?.set(clusterId(oldest.title), members);
 
     groups.push({
       id: clusterId(oldest.title),
@@ -228,7 +234,11 @@ export class NewsAggregator {
   private inflight: Promise<AggregatedFeed> | null = null;
   private timer: NodeJS.Timeout | null = null;
 
-  constructor(private readonly log: FastifyBaseLogger) {}
+  constructor(
+    private readonly log: FastifyBaseLogger,
+    /** S14: snapshots for «تطور القصة», written after every refresh. */
+    private readonly storyRecorder?: StoryRecorder,
+  ) {}
 
   listSources() {
     return NEWS_SOURCES.map(({ id, name, language }) => ({ id, name, language }));
@@ -320,12 +330,35 @@ export class NewsAggregator {
     }
 
     items.sort((a, b) => b.publishedAt - a.publishedAt);
+    const articles = new Map<string, RawItem[]>();
     const feed: AggregatedFeed = {
       fetchedAt: new Date().toISOString(),
-      items: diversifyClusters(cluster(items)),
+      items: diversifyClusters(cluster(items, articles)),
     };
     this.cache = feed;
+    this.recordStories(feed.items, articles);
     return feed;
+  }
+
+  /** S14: each story's articles, per source, to the snapshot store. A failure there never fails the feed. */
+  private recordStories(stories: AggregatedItem[], articles: Map<string, RawItem[]>) {
+    if (!this.storyRecorder) return;
+    try {
+      this.storyRecorder.record(
+        stories.map((story) => ({
+          itemId: story.id,
+          sources: (articles.get(story.id) ?? []).map((article) => ({
+            sourceId: article.source.id,
+            headline: article.title,
+            excerpt: article.excerpt,
+            url: article.link,
+            publishedAt: article.publishedAt,
+          })),
+        })),
+      );
+    } catch (error) {
+      this.log.warn({ err: error }, "story updates not recorded");
+    }
   }
 
   private async fetchSource(source: NewsSourceConfig, cutoff: number): Promise<RawItem[]> {

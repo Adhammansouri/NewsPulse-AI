@@ -5,101 +5,292 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0C2340" />
     <title>بدون اتصال — Newsplus</title>
+    <script>
+      // Same stored theme as the app (src/services/themeStore.ts, index.html).
+      (function () {
+        try {
+          var stored = localStorage.getItem("newsplus-theme");
+          var legacy = localStorage.getItem("newsplus-login-theme");
+          if (stored === "dark" || (stored !== "light" && legacy === "dark")) {
+            document.documentElement.setAttribute("data-theme", "dark");
+          }
+        } catch (e) {
+          /* private mode */
+        }
+      })();
+    </script>
     <style>
+      /* Splash-offline / MobSplash-offline — self-contained subset of src/styles/design/np4.css + npm2.css.
+         Served by the service worker while offline: no external requests, system fonts as fallback. */
       :root {
-        --navy: #0c2340;
-        --teal: #0d9b8a;
-        --paper: #f8fafc;
-        --muted: #475569;
+        --bg: #f3f5f8;
+        --ink: #0c2340;
+        --ink-2: #41546a;
+        --ink-3: #64768a;
+        --on-ink: #fff;
+        --line: #e1e7ee;
+        --teal-dot: #0d9b8a;
+        --cyan-dot: #0ea5e9;
+        --warn: #8a5a00;
+        --warn-soft: #fff4da;
+        --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+        --f-ui: "IBM Plex Sans Arabic", "IBM Plex Sans", system-ui, sans-serif;
+        --f-display: "Alexandria", "IBM Plex Sans Arabic", system-ui, sans-serif;
+        color-scheme: light;
       }
-      * {
+      :root[data-theme="dark"] {
+        --bg: #07111c;
+        --ink: #e8eef5;
+        --ink-2: #a9b8c9;
+        --ink-3: #8296ab;
+        --on-ink: #07111c;
+        --line: #1a2b3f;
+        --teal-dot: #2dd4bf;
+        --cyan-dot: #38bdf8;
+        --warn: #f6c65b;
+        --warn-soft: rgb(246 198 91 / 0.12);
+        color-scheme: dark;
+      }
+      *,
+      *::before,
+      *::after {
         box-sizing: border-box;
-        margin: 0;
-        padding: 0;
       }
       body {
+        margin: 0;
+      }
+      h1,
+      p {
+        margin: 0;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+      }
+      :focus-visible {
+        outline: 2px solid var(--cyan-dot);
+        outline-offset: 2px;
+      }
+      .np {
+        position: relative;
+        width: 100%;
+        min-height: 100vh;
         min-height: 100dvh;
         display: grid;
         place-items: center;
-        padding: 1.5rem;
-        background: var(--paper);
-        color: var(--navy);
-        font-family: "IBM Plex Sans Arabic", "Noto Sans Arabic", system-ui, sans-serif;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--ink);
+        direction: rtl;
+        font-family: var(--f-ui);
+        font-size: 15px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
       }
-      main {
-        width: min(28rem, 100%);
-        text-align: center;
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
-      .mark {
-        width: 4.5rem;
-        height: 4.5rem;
-        margin-inline: auto 0;
-        margin-bottom: 1.25rem;
-        border-radius: 1.15rem;
-        object-fit: cover;
+      .ic {
+        width: 20px;
+        height: 20px;
+        flex: none;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.75;
+        stroke-linecap: round;
+        stroke-linejoin: round;
       }
-      h1 {
-        font-size: 1.5rem;
+      .t-hero {
+        font-family: var(--f-display);
+        font-size: 34px;
+        line-height: 1.35;
         font-weight: 700;
-        letter-spacing: -0.02em;
-        margin-bottom: 0.5rem;
+        letter-spacing: -0.01em;
       }
-      p {
-        color: var(--muted);
+      .t-display {
+        font-family: var(--f-display);
+        font-size: 26px;
+        line-height: 1.45;
+        font-weight: 700;
+      }
+      .t-body {
+        font-size: 16px;
+        line-height: 1.85;
+        color: var(--ink-2);
+      }
+      .t-small {
+        font-size: 14px;
         line-height: 1.7;
-        margin-bottom: 1.5rem;
+        color: var(--ink-2);
       }
-      button {
+      .btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
         min-height: 44px;
-        padding: 0.625rem 1.25rem;
-        border: 0;
-        border-radius: 999px;
-        background: var(--teal);
-        color: #fff;
-        font: inherit;
+        padding: 0 18px;
+        border-radius: 11px;
+        border: 1px solid transparent;
         font-weight: 600;
-        cursor: pointer;
+        font-size: 15px;
+        white-space: nowrap;
+        overflow: hidden;
+        isolation: isolate;
+        transition:
+          transform 0.16s var(--ease-out),
+          background 0.2s,
+          box-shadow 0.25s,
+          border-color 0.2s;
       }
-      button:disabled {
-        opacity: 0.6;
+      .btn:active {
+        transform: scale(0.97);
       }
-      .status {
-        margin-top: 1rem;
-        font-size: 0.875rem;
-        color: var(--muted);
+      .btn--ink {
+        background: var(--ink);
+        color: var(--on-ink);
+      }
+      .btn--lg {
+        min-height: 52px;
+        padding: 0 24px;
+        font-size: 16px;
+        border-radius: 14px;
+      }
+      .live {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12.5px;
+        color: var(--ink-3);
+      }
+      .live::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--teal-dot);
+        animation: np-ping 2.2s var(--ease-out) infinite;
+      }
+      .empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 10px;
+        padding: 32px 24px;
+      }
+      .empty__art {
+        display: grid;
+        place-items: center;
+        width: 84px;
+        height: 84px;
+        border-radius: 26px;
+        margin-bottom: 6px;
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+      .fade-in {
+        animation: np-fade 0.4s ease both;
+      }
+      /* Splash-offline (≥ 1024px) / MobSplash-offline (< 1024px). */
+      .mob {
+        display: none;
+      }
+      @media (max-width: 1023.98px) {
+        .desk {
+          display: none;
+        }
+        .mob {
+          display: flex;
+        }
+      }
+      @keyframes np-ping {
+        0% {
+          box-shadow: 0 0 0 0 rgb(13 155 138 / 0.6);
+        }
+        70%,
+        100% {
+          box-shadow: 0 0 0 8px transparent;
+        }
+      }
+      @keyframes np-fade {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
       }
     </style>
   </head>
   <body>
-    <main>
-      <img class="mark" src="/pwa/apple-touch-icon.png" alt="" width="72" height="72" />
-      <h1>لا يوجد اتصال</h1>
-      <p>واجهة Newsplus متاحة كتطبيق، لكن الأخبار والتوليد والترجمة تحتاج إنترنت. أعد المحاولة بعد عودة الشبكة.</p>
-      <button type="button" id="retry">إعادة المحاولة</button>
-      <p class="status" id="status">بانتظار الاتصال…</p>
-    </main>
+    <div class="np">
+      <div class="empty fade-in desk" style="max-width: 460px; padding: 40px">
+        <span
+          class="empty__art"
+          style="width: 104px; height: 104px; border-radius: 32px; background: var(--warn-soft); color: var(--warn)"
+          ><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width: 44px; height: 44px; stroke-width: 1.5">
+            <path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18"></path></svg
+        ></span>
+        <h1 class="t-hero" style="font-size: 32px">لا يوجد اتصال</h1>
+        <p class="t-body">الأخبار والتوليد والترجمة محتاجين إنترنت. هنحاول نفتح Newsplus تاني أول ما الشبكة ترجع.</p>
+        <div class="row" style="gap: 10px; margin-top: 8px">
+          <button class="btn btn--ink btn--lg" type="button" data-retry>
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"></path></svg
+            >حاول تاني
+          </button>
+        </div>
+        <p class="live" style="margin-top: 6px">بنحاول تلقائياً كل ١٥ ثانية</p>
+      </div>
+      <div class="empty fade-in mob" style="padding: 32px">
+        <span
+          class="empty__art"
+          style="width: 96px; height: 96px; border-radius: 30px; background: var(--warn-soft); color: var(--warn)"
+          ><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width: 40px; height: 40px; stroke-width: 1.5">
+            <path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18"></path></svg
+        ></span>
+        <h1 class="t-display">لا يوجد اتصال</h1>
+        <p class="t-small" style="max-width: 280px">الأخبار والتوليد والترجمة محتاجين إنترنت. هنفتح Newsplus أول ما الشبكة ترجع.</p>
+        <button class="btn btn--ink btn--lg" type="button" style="margin-top: 8px; min-width: 200px" data-retry>حاول تاني</button>
+        <p class="live">بنحاول تلقائياً كل ١٥ ثانية</p>
+      </div>
+    </div>
     <script>
-      const statusEl = document.getElementById("status");
-      const retryBtn = document.getElementById("retry");
+      (function () {
+        var RETRY_MS = 15000;
 
-      function retry() {
-        retryBtn.disabled = true;
-        statusEl.textContent = "جاري التحقق…";
-        fetch("/", { method: "HEAD", cache: "no-store" })
-          .then(function () {
-            window.location.href = "/";
-          })
-          .catch(function () {
-            retryBtn.disabled = false;
-            statusEl.textContent = "ما زال بدون اتصال.";
-          });
-      }
+        function reload() {
+          window.location.reload();
+        }
 
-      retryBtn.addEventListener("click", retry);
-      window.addEventListener("online", function () {
-        statusEl.textContent = "عاد الاتصال. جاري التحميل…";
-        window.location.href = "/";
-      });
+        // Auto-retry: reload once the server answers again (HEAD is never served from the precache).
+        function probe() {
+          fetch("/", { method: "HEAD", cache: "no-store" })
+            .then(function (response) {
+              if (response.ok) reload();
+            })
+            .catch(function () {
+              /* still offline */
+            });
+        }
+
+        var buttons = document.querySelectorAll("[data-retry]");
+        for (var i = 0; i < buttons.length; i += 1) buttons[i].addEventListener("click", reload);
+        window.setInterval(probe, RETRY_MS);
+        window.addEventListener("online", probe);
+      })();
     </script>
   </body>
 </html>

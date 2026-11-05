@@ -12,6 +12,17 @@ import { EditorialWorkspaceStore } from "./services/editorialWorkspaceStore.js";
 import { EditorialConversationService } from "./services/editorialConversationService.js";
 import { GenerateService } from "./services/generateService.js";
 import { TranslateService } from "./services/translateService.js";
+import { TeamService } from "./services/teamService.js";
+import { PresenceService, PresenceStore } from "./services/presenceService.js";
+import { EditorialWorkflowService } from "./services/editorialWorkflowService.js";
+import { BreakingService } from "./services/breakingService.js";
+import { DigestService } from "./services/digestService.js";
+import { StoryUpdatesStore } from "./services/storyUpdatesStore.js";
+import { StoryTimelineService } from "./services/storyTimelineService.js";
+import { PublishCheckService } from "./services/publishCheckService.js";
+import { UserPreferencesStore } from "./services/userPreferencesStore.js";
+import { UserPreferencesService } from "./services/userPreferencesService.js";
+import { HookStylesService } from "./services/hookStylesService.js";
 
 export async function createAuthService(app: FastifyInstance): Promise<AuthService> {
   const hasher = new ScryptPasswordHasher();
@@ -34,7 +45,9 @@ export async function createAuthService(app: FastifyInstance): Promise<AuthServi
 
 export function createToolServices(app: FastifyInstance) {
   const openai = new OpenAIClient();
-  const aggregator = new NewsAggregator(app.log);
+  /** S14 «تطور القصة»: story snapshots, in the editorial store's file (own connection; app.ts closes it). */
+  const storyUpdates = new StoryUpdatesStore(env.editorialStorePath);
+  const aggregator = new NewsAggregator(app.log, storyUpdates);
   const workspace = new EditorialWorkspaceStore(env.editorialStorePath);
   const newsService = new NewsService({
     aggregator,
@@ -44,5 +57,38 @@ export function createToolServices(app: FastifyInstance) {
   const editorialService = new EditorialConversationService({ openai, workspace });
   const generateService = new GenerateService(openai);
   const translateService = new TranslateService(openai);
-  return { aggregator, workspace, newsService, editorialService, generateService, translateService };
+  /** S13: breaking mode and «اللي فاتك». */
+  const breakingService = new BreakingService({ aggregator, openai, workspace });
+  const digestService = new DigestService({ aggregator, openai });
+  const timelineService = new StoryTimelineService({ store: storyUpdates, aggregator, openai });
+  /** S12: «فحص قبل النشر». */
+  const publishCheckService = new PublishCheckService({ openai, workspace });
+  /** S16 onboarding: the editor's preferences (in the editorial store's file, own connection) and the hook styles. */
+  const preferencesStore = new UserPreferencesStore(env.editorialStorePath);
+  const preferencesService = new UserPreferencesService({ store: preferencesStore, aggregator });
+  const hookStylesService = new HookStylesService({ aggregator, openai });
+  return {
+    aggregator,
+    workspace,
+    storyUpdates,
+    preferencesStore,
+    preferencesService,
+    hookStylesService,
+    newsService,
+    editorialService,
+    generateService,
+    translateService,
+    breakingService,
+    digestService,
+    timelineService,
+    publishCheckService,
+  };
+}
+
+/** S15 «سير العمل»: the team directory, the in-memory presence store and the board's workflow service. */
+export function createWorkflowServices(authService: AuthService, workspace: EditorialWorkspaceStore) {
+  const teamService = new TeamService(authService);
+  const presenceService = new PresenceService(new PresenceStore(), teamService);
+  const workflowService = new EditorialWorkflowService({ workspace, team: teamService });
+  return { teamService, presenceService, workflowService };
 }

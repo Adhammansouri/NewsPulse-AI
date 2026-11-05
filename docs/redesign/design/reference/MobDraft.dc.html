@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Newsplus موبايل — المسودة</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/7948739173ca9aa8eabbee69443cef0f">
+<link rel="stylesheet" href="/_blob/210170dd5a2fa534503e7d6a475c3fc9">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="np m" data-theme="{{theme}}">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><linearGradient id="np-ai-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d9b8a"></stop><stop offset="1" stop-color="#0ea5e9"></stop></linearGradient></defs></svg>
+  <header class="m-bar">
+    <a class="icon-btn" href="MobStory.dc.html" aria-label="رجوع إلى الخبر"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+    <span class="badge badge--ai">{{fmtName}}</span>
+    <span class="row" style="gap: 4px"><sc-for list="{{versions}}" as="v" hint-placeholder-count="1"><span class="vchip" aria-current="{{v.cur}}">{{v.label}}</span></sc-for></span>
+    <span class="grow"></span>
+    <button class="btn btn--ink btn--sm" type="button"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9zM5 15H4V4h11v1"></path></svg>نسخ الكل</button>
+  </header>
+
+  <main class="m-scroll col" style="padding: 14px 18px 18px; gap: 12px">
+    <p class="ai-mark" style="color: var(--ink-3)"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>كتبه المحرّر من ٣ مصادر · راجعه قبل النشر</p>
+
+    <sc-if value="{{isError}}" hint-placeholder-val="{{ false }}">
+      <div class="notice notice--error arrive" role="alert" style="align-items: center"><span class="col grow"><b style="font-weight: 600">المحرّر ما قدرش يعدّل</b><span class="t-small">النموذج ما ردّش. طلبك «اختصر دون إضافات» محفوظ.</span></span><button class="btn btn--quiet btn--sm" type="button">أعد المحاولة</button></div>
+    </sc-if>
+
+    <sc-if value="{{f.post}}" hint-placeholder-val="{{ true }}">
+      <div class="typeset col" style="gap: 2px">
+        <div class="block {{hookCls}}"><div class="block__label">{{hookLabel}}<button class="block__copy" type="button">نسخ</button></div><p class="t-display" style="font-size: 20px" dir="rtl">{{hook}}</p></div>
+        <div class="block"><div class="block__label">النص<button class="block__copy {{bodyCopyCls}}" type="button">{{bodyCopyLabel}}</button></div><p class="t-body" style="color: var(--ink); font-size: 15.5px">قررت لجنة السياسة النقدية الإبقاء على أسعار الفائدة دون تغيير للمرة الثالثة على التوالي، وربطت أي تحرك مقبل ببيانات التضخم.</p></div>
+        <div class="block"><div class="block__label">الوسوم<button class="block__copy" type="button">نسخ</button></div><div class="row" style="flex-wrap: wrap; gap: 6px"><span class="tag">#البنك_المركزي</span><span class="tag">#أسعار_الفائدة</span><span class="tag">#التضخم</span></div></div>
+        <div class="block"><div class="block__label">خطاف بديل · اضغط للاستبدال</div><button class="tile tile--row" type="button" style="box-shadow: none; padding: 10px 12px"><span class="grow" style="font-size: 14px">الفائدة كما هي.. فماذا ينتظر المركزي؟</span><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--ink-3)"><path d="M7 7h13l-4-4M17 17H4l4 4"></path></svg></button></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{f.video}}" hint-placeholder-val="{{ false }}">
+      <div class="typeset col" style="gap: 10px">
+        <div class="row" style="gap: 14px; align-items: flex-start">
+          <div class="col" style="width: 128px; height: 228px; flex: none; border-radius: 20px; background: radial-gradient(circle at 70% 20%, #1d6f8f, #0c2340 70%); color: #fff; padding: 12px 10px; justify-content: flex-end; gap: 6px; box-shadow: var(--shadow-2)"><span style="align-self: flex-start; font-size: 10px; font-weight: 600; background: #ef6c57; padding: 1px 6px; border-radius: 5px">الكوفر</span><p style="font-family: var(--f-display); font-size: 15px; line-height: 1.4; font-weight: 700">لماذا قال المركزي «لا» للمرة الثالثة؟</p></div>
+          <div class="col grow" style="gap: 2px"><div class="block" style="margin-inline: -10px; padding: 10px"><div class="block__label">عنوان النشر</div><p class="t-head">لماذا لم يخفض المركزي الفائدة؟</p></div><div class="block" style="margin-inline: -10px; padding: 10px; background: var(--cyan-soft)"><div class="block__label" style="color: var(--cyan)">الهوك · ٠–٣ ث</div><p style="font-weight: 600; font-size: 14.5px; line-height: 1.6">المركزي قال «لا» للمرة الثالثة.. فما الذي ينتظره؟</p></div></div>
+        </div>
+        <div class="block"><div class="block__label">النص · ٤٥ ثانية<button class="block__copy" type="button">نسخ</button></div><p class="t-body" style="color: var(--ink); font-size: 15px">اللجنة أبقت الفائدة كما هي، لأن التضخم رغم تراجعه ما زال فوق المستهدف. فماذا يعني ذلك لقروضك ومدخراتك؟</p></div>
+        <div class="block"><div class="block__label">لقطات / CG</div><ol class="col" style="gap: 6px"><li class="row" style="font-size: 14px"><span class="vchip">١</span>لقطة لمقر البنك المركزي</li><li class="row" style="font-size: 14px"><span class="vchip">٢</span>CG: ثالث تثبيت على التوالي</li></ol></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{f.carousel}}" hint-placeholder-val="{{ false }}">
+      <div class="typeset col" style="gap: 12px">
+        <div class="ai-panel col" style="padding: 12px 14px; gap: 8px; box-shadow: none"><div class="row" style="justify-content: space-between"><span class="ai-mark t-ai">يرسم الصور</span><span class="t-meta num">٢ من ٤ جاهزة</span></div><div class="meter"><span style="width: 50%"></span></div></div>
+        <div class="scroll-x" style="margin-inline: -18px; padding-inline: 18px; gap: 10px; scroll-snap-type: x mandatory">
+          <sc-for list="{{slides}}" as="sl" hint-placeholder-count="4">
+            <figure class="slide {{sl.cls}}" style="width: 250px; flex: none; scroll-snap-align: start">
+              <span class="slide__art" style="background: {{sl.art}}"></span><span class="slide__art" style="background: linear-gradient(180deg, transparent 35%, rgb(5 13 23 / .85))"></span>
+              <span class="row" style="position: absolute; top: 12px; inset-inline: 12px; justify-content: space-between; font-size: 11px"><span class="num" style="opacity: .8">{{sl.n}} / ٤</span><span class="badge" style="background: rgb(255 255 255 / .18); color: #fff; height: 20px; font-size: 11px">{{sl.status}}</span></span>
+              <p style="font-family: var(--f-display); font-size: 18px; line-height: 1.45; font-weight: 700">{{sl.text}}</p>
+            </figure>
+          </sc-for>
+        </div>
+        <div class="block"><div class="block__label">الكابشن<button class="block__copy" type="button">نسخ</button></div><p class="t-body" style="color: var(--ink); font-size: 15px">ثبّت البنك المركزي الفائدة للمرة الثالثة. التضخم تراجع لكنه فوق المستهدف.</p></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{f.briefing}}" hint-placeholder-val="{{ false }}">
+      <div class="typeset col" style="gap: 4px">
+        <div class="block"><div class="block__label">موجز ٣:٠٠ م<button class="block__copy" type="button">نسخ</button></div><p class="t-display" style="font-size: 20px">الفائدة، اجتماع طارئ، والنفط</p></div>
+        <sc-for list="{{brief}}" as="b" hint-placeholder-count="5"><div class="block row" style="align-items: flex-start; gap: 12px"><span class="t-num" style="font-size: 20px; color: var(--cyan); width: 18px">{{b.n}}</span><span class="col grow"><span style="font-weight: 600; font-size: 15px; line-height: 1.6">{{b.t}}</span><span class="t-meta">{{b.s}}</span></span></div></sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{f.doc}}" hint-placeholder-val="{{ false }}">
+      <article class="doc typeset col" style="padding: 0 0 14px; gap: 2px">
+        <div class="ai-strip"></div>
+        <div class="col" style="padding: 12px 18px 0; gap: 2px">
+          <div class="block" style="margin-inline: -10px; padding: 10px"><div class="block__label">العنوان<button class="block__copy" type="button">نسخ</button></div><h2 class="t-display" style="font-size: 20px">المركزي يثبّت الفائدة للمرة الثالثة.. والتضخم ما زال فوق المستهدف</h2></div>
+          <sc-if value="{{isDesk}}" hint-placeholder-val="{{ true }}">
+            <div class="block" style="margin-inline: -10px; padding: 10px"><div class="block__label">المقدمة</div><p style="font-weight: 500; font-size: 15px; line-height: 1.7; color: var(--ink-2)">اللجنة أبقت الأسعار دون تغيير وربطت أي تحرك مقبل ببيانات التضخم.</p></div>
+            <div class="block" style="margin-inline: -10px; padding: 10px"><div class="block__label">النص<button class="block__copy" type="button">نسخ</button></div><p class="t-body" style="color: var(--ink); font-size: 15px">قررت لجنة السياسة النقدية الإبقاء على أسعار الفائدة دون تغيير للمرة الثالثة على التوالي. وقالت اللجنة إن التضخم تراجع خلال الربع الأخير لكنه ما زال أعلى من المستهدف.</p></div>
+          </sc-if>
+          <div class="block" style="margin-inline: -10px; padding: 10px"><div class="block__label">{{pointsLabel}}</div><ul class="col" style="gap: 8px"><sc-for list="{{points}}" as="pt" hint-placeholder-count="3"><li class="row" style="align-items: flex-start; font-size: 14.5px; gap: 10px; line-height: 1.7"><span style="width: 7px; height: 7px; border-radius: 50%; background: var(--ai); margin-top: 9px; flex: none"></span>{{pt}}</li></sc-for></ul></div>
+        </div>
+      </article>
+    </sc-if>
+
+    <sc-if value="{{showChat}}" hint-placeholder-val="{{ false }}">
+      <p class="msg msg--me">اجعل الخطاف سؤالاً</p>
+      <sc-if value="{{isRevising}}" hint-placeholder-val="{{ false }}"><div class="msg msg--ai row" style="gap: 10px"><svg class="pulse-line" width="60" height="20" viewBox="0 0 60 20" aria-hidden="true"><path d="M0 10h16l4-7 6 14 5-11 4 4h25"></path></svg>يعدّل الخطاف…</div></sc-if>
+      <sc-if value="{{isMemory}}" hint-placeholder-val="{{ false }}"><p class="msg msg--ai">حوّلت الخطاف لسؤال. النسخة ٢ محفوظة.</p></sc-if>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{isMemory}}" hint-placeholder-val="{{ false }}">
+    <div class="m-float ai-panel" style="bottom: 140px">
+      <div class="row"><span class="ic-wrap ic-wrap--ai" style="width: 30px; height: 30px; border-radius: 9px"><svg class="ic ic--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 1 6 6c0 2.2-1.2 3.6-2.5 4.7-.7.6-1 1.3-1 2.1V17h-5v-1.2c0-.8-.3-1.5-1-2.1C7.2 12.6 6 11.2 6 9a6 6 0 0 1 6-6zM10 21h4"></path></svg></span><b class="t-ai" style="font-weight: 600">المحرّر تعلّم قاعدة جديدة</b></div>
+      <p style="font-size: 14px; line-height: 1.7">ابدأ خطافات الأخبار الاقتصادية بسؤال مباشر.</p>
+      <div class="row" style="gap: 6px"><button class="btn btn--ai btn--sm grow" type="button">احفظ للفريق</button><button class="btn btn--ghost btn--sm" type="button">عدّل</button><button class="btn btn--ghost btn--sm" type="button">تجاهل</button></div>
+    </div>
+  </sc-if>
+
+  <form class="dock" style="padding-bottom: 26px; flex: none">
+    <div class="scroll-x"><sc-for list="{{quick}}" as="q" hint-placeholder-count="3"><button class="chip chip--sm chip--ai" type="button">{{q}}</button></sc-for></div>
+    <label class="dock__input" style="opacity: {{dockOpacity}}"><span class="sr">اطلب تعديلاً</span><textarea rows="1" placeholder="{{dockPh}}"></textarea><button class="send" type="button" aria-label="إرسال"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"></path></svg></button></label>
+  </form>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"state":{"editor":"enum","options":["social","video","carousel","briefing","desk","facts","revising","memory","error"],"default":"social"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var s = this.props.state ?? 'social';
+    var post = s === 'social' || s === 'revising' || s === 'memory' || s === 'error';
+    var names = { video: 'سكريبت فيديو', carousel: 'كاروسيل', briefing: 'موجز الساعة', desk: 'خبر مكتبي', facts: 'ملف حقائق' };
+    var changed = s === 'memory';
+    var arts = ['radial-gradient(circle at 72% 28%, #2b86a8, #0c2340 70%)', 'radial-gradient(circle at 28% 70%, #0d9b8a, #0c2340 75%)', 'linear-gradient(160deg, #13305a, #0a7cc0)', 'radial-gradient(circle at 60% 35%, #c03b25, #2a0f12 80%)'];
+    var texts = ['المركزي يثبّت الفائدة للمرة الثالثة', 'التضخم تراجع.. لكنه فوق المستهدف', 'اللجنة: أي تحرك مرتبط بالبيانات', 'ماذا يعني ذلك للأسواق؟'];
+    var st = ['جاهزة', 'جاهزة', 'تُرسم…', 'في الانتظار'];
+    return {
+      theme: this.props.theme ?? 'light',
+      fmtName: names[s] || 'منشور سوشيال',
+      versions: changed ? [{ label: 'ن١', cur: 'false' }, { label: 'ن٢', cur: 'true' }] : [{ label: 'ن١', cur: 'true' }],
+      f: { post: post, video: s === 'video', carousel: s === 'carousel', briefing: s === 'briefing', doc: s === 'desk' || s === 'facts' },
+      isDesk: s === 'desk', pointsLabel: s === 'facts' ? 'الحقائق · للإسناد' : 'أبرز النقاط',
+      points: s === 'facts' ? ['القرار: تثبيت أسعار الفائدة', 'التكرار: الثالث على التوالي', 'السبب المعلن: التضخم أعلى من المستهدف', 'الاتجاه: التضخم تراجع في الربع الأخير', 'الإسناد: بيان لجنة السياسة النقدية'] : ['ثالث تثبيت متتالٍ لأسعار الفائدة', 'التضخم تراجع لكنه أعلى من المستهدف', 'اللجنة تربط أي تحرك بالبيانات المقبلة'],
+      hook: changed ? 'هل انتهى زمن خفض الفائدة؟ المركزي يثبّتها للمرة الثالثة' : 'المركزي يثبّت الفائدة للمرة الثالثة.. والتضخم ما زال فوق المستهدف',
+      hookLabel: changed ? 'الخطاف · عُدّل في ن٢' : 'الخطاف', hookCls: changed ? 'is-changed' : '',
+      bodyCopyCls: s === 'social' ? 'is-done' : '', bodyCopyLabel: s === 'social' ? 'تم النسخ' : 'نسخ',
+      isError: s === 'error', isRevising: s === 'revising', isMemory: s === 'memory', showChat: s === 'revising' || s === 'memory',
+      slides: texts.map(function (t, i) { return { n: ['١', '٢', '٣', '٤'][i], text: t, art: arts[i], cls: i < 2 ? '' : 'is-painting', status: st[i] }; }),
+      brief: [
+        { n: '١', t: 'البنك المركزي يثبت أسعار الفائدة للمرة الثالثة', s: 'العربية · قبل ٣ د' },
+        { n: '٢', t: 'اجتماع طارئ لوزراء الخارجية العرب الليلة', s: 'الجزيرة نت · قبل ١١ د' },
+        { n: '٣', t: 'أسعار النفط ترتفع بعد إشارات أوبك+', s: 'Reuters · قبل ٢٦ د' },
+        { n: '٤', t: 'منتخب مصر يعلن قائمة المعسكر المقبل', s: 'العين · قبل ٤٨ د' },
+        { n: '٥', t: 'الذكاء الاصطناعي يختصر تشخيص أمراض القلب', s: 'BBC عربي · قبل ساعة' }
+      ],
+      quick: s === 'video' ? ['قوِّ الهوك', 'اختصر لـ٣٠ ثانية'] : s === 'carousel' ? ['قصّر العناوين', 'أعد رسم الشريحة ٤'] : s === 'briefing' ? ['اجعله ٣ عناوين', 'أضف سطر سياق'] : ['اجعل الخطاف سؤالاً', 'اختصر دون إضافات', 'حوّله لفيديو'],
+      dockOpacity: s === 'revising' ? '.5' : '1', dockPh: s === 'revising' ? 'استنى المحرّر يخلص…' : 'اطلب تعديلاً…'
+    };
+  }
+}
+</script>
+</body>
+</html>

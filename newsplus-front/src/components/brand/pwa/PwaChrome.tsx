@@ -1,7 +1,8 @@
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { IosInstallHint } from "./IosInstallHint";
-import { PwaInstallBanner } from "./PwaInstallBanner";
-import { PwaUpdateToast } from "./PwaUpdateToast";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { PwaInstall } from "./PwaInstall";
+import { PWA_DESKTOP_LAYER_STYLE } from "./PwaDesktopLayer";
+import { PwaUpdate } from "./PwaUpdate";
 
 function PwaServiceWorker() {
   const {
@@ -17,7 +18,7 @@ function PwaServiceWorker() {
   });
 
   return needRefresh ? (
-    <PwaUpdateToast
+    <PwaUpdate
       onUpdate={() => {
         void updateServiceWorker(true);
       }}
@@ -26,14 +27,22 @@ function PwaServiceWorker() {
   ) : null;
 }
 
+/**
+ * Install + update chrome (S10 §4), mounted inside the `.np` root. Mobile surfaces (sheet, `m-float`) position
+ * against `.np.m`; desktop cards share one bottom-centre layer. Production only: the dev server has no SW.
+ */
 export function PwaChrome() {
   if (import.meta.env.DEV) return null;
+  return <PwaSurfaces />;
+}
 
-  return (
+function PwaSurfaces() {
+  const isMobile = useIsMobile();
+  const surfaces = (
     <>
-      <PwaInstallBanner />
-      <IosInstallHint />
+      <PwaInstall />
       <PwaServiceWorker />
     </>
   );
+  return isMobile ? surfaces : <div style={PWA_DESKTOP_LAYER_STYLE}>{surfaces}</div>;
 }
