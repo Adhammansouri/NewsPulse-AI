@@ -43,7 +43,7 @@ export function PwaInstall() {
   }
 
   if (isMobile) return <InstallSheet ios={ios} onInstall={() => void install()} onLater={later} />;
-  return ios ? <IosStepsCard /> : <InstallCard onInstall={() => void install()} onLater={later} />;
+  return ios ? <IosStepsCard onLater={later} /> : <InstallCard onInstall={() => void install()} onLater={later} />;
 }
 
 /** States: «ثبّت Newsplus» card. */
@@ -72,8 +72,11 @@ function InstallCard({ onInstall, onLater }: { onInstall: () => void; onLater: (
   );
 }
 
-/** States: «على الآيفون» — Safari can't prompt, so the card is the two steps. */
-function IosStepsCard() {
+/**
+ * States: «على الآيفون» — Safari can't prompt, so the card is the two steps. The board has no dismiss; «لاحقاً» is
+ * the install card's own (same board), so the card never stays over the screen for good.
+ */
+function IosStepsCard({ onLater }: { onLater: () => void }) {
   const titleId = useId();
   return (
     <PwaDesktopCard labelledBy={titleId} style={{ padding: "16px", gap: "10px" }}>
@@ -94,6 +97,11 @@ function IosStepsCard() {
           إضافة إلى الشاشة الرئيسية
         </li>
       </ol>
+      <div className="row">
+        <Button variant="ghost" size="sm" onClick={onLater}>
+          لاحقاً
+        </Button>
+      </div>
     </PwaDesktopCard>
   );
 }
