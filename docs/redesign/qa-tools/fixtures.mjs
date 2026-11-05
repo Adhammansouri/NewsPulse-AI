@@ -45,3 +45,29 @@ export const conversation = {
   pendingMemory: [],
 };
 export const generate = { title: "التثبيت الثالث: لماذا يتمسك المركزي بالحذر؟", dek: "قرار متوقع، لكن رسائله للأسواق أهم من الرقم نفسه.", body: "أبقى البنك المركزي على أسعار الفائدة دون تغيير للمرة الثالثة على التوالي.\n\nويأتي القرار في وقت تراجعت فيه معدلات التضخم، لكنها لا تزال أعلى من النطاق المستهدف، ما يدفع صانعي السياسة إلى انتظار مزيد من البيانات.\n\nويرى محللون أن البيان حمل إشارات إلى أن أي خفض محتمل لن يكون قبل منتصف العام المقبل.", language: "ar", sourceMode: "page" };
+// S13 / S14 / S15: the story panel's timeline, «وضع العاجل», the digest and presence (NewTimeline, NewBreaking, NewDigest).
+export const timeline = {
+  entries: [
+    { sourceId: "alarabiya", at: ago(14), headline: "المركزي يبقي الفائدة دون تغيير", tag: "first", isNew: false },
+    { sourceId: "sky-arabia", at: ago(10), headline: "التضخم ٣٫١٪ وما زال فوق المستهدف", tag: "number", isNew: false },
+    { sourceId: "asharq", at: ago(4), headline: "المحافظ: «أي تحرك مقبل مرهون بالبيانات»", tag: "quote", isNew: false },
+    { sourceId: "reuters", at: ago(1), headline: "Markets react to a third straight hold", tag: "reaction", isNew: true },
+  ],
+  conflicts: [{ field: "نسبة التضخم", values: [{ sourceId: "sky-arabia", value: "٣٫١٪" }, { sourceId: "reuters", value: "٢٫٩٪" }], safeWording: "حوالي ٣٪" }],
+  agreed: [{ text: "تثبيت الفائدة للمرة الثالثة", sourceCount: 4 }, { text: "التضخم فوق المستهدف", sourceCount: 3 }, { text: "أي تحرك مرتبط بالبيانات", sourceCount: 2 }],
+  confirmedBy: 4,
+};
+export const breaking = {
+  post: "عاجل | البنك المركزي يثبت أسعار الفائدة للمرة الثالثة على التوالي. التفاصيل تتبع.\n#عاجل #البنك_المركزي",
+  ticker: "عاجل: المركزي يثبّت الفائدة للمرة الثالثة على التوالي",
+  alert: "المركزي يثبّت الفائدة للمرة الثالثة. اضغط للتفاصيل",
+  ms: 4200,
+};
+export const digest = {
+  items: [
+    { itemId: "n1", title: "المركزي يثبت الفائدة للمرة الثالثة والأسواق تنتظر التضخم", reason: "٣ مصادر · الأكثر تحديثاً" },
+    { itemId: "n4", title: "منتخب مصر يعلن قائمة المعسكر مع عودة المحترفين", reason: "مصدرين · متوقع يتفاعل عليه الجمهور" },
+  ],
+  summaryText: "المركزي يثبت الفائدة للمرة الثالثة، ومنتخب مصر يعلن قائمة المعسكر.",
+  sourceCount: 5,
+};
