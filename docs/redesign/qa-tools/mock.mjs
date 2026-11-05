@@ -17,13 +17,16 @@ export async function mockApi(page, { session = true, theme = "light" } = {}) {
     if (p === "/health") return route.fulfill(ok({ status: "ok", app: "newsplus", version: "qa", phase: "qa", openai: true }));
     if (p === "/news/sources") return route.fulfill(ok({ sources: F.sources }));
     if (p === "/news/feed") return route.fulfill(ok({ fetchedAt: new Date().toISOString(), items: F.items }));
-    if (p === "/news/summarize") return route.fulfill(ok(F.summary));
+    // The format asked for: the social post for «منشور سوشيال» (Main-social), the desk story otherwise.
+    if (p === "/news/summarize") return route.fulfill(ok(route.request().postDataJSON()?.format === "social" ? F.socialSummary : F.summary));
     if (/^\/news\/items\/[^/]+\/timeline$/.test(p)) return route.fulfill(ok(F.timeline));
     if (p === "/news/breaking") return route.fulfill(ok(F.breaking));
     if (p === "/news/digest") return route.fulfill(ok(F.digest));
     if (p === "/presence") return route.fulfill(ok({ entries: [], ttlSeconds: 60 }));
     if (p === "/presence/heartbeat") return route.fulfill(ok({ entry: { user: { id: USER.id, displayName: USER.displayName, color: "#0d9488" }, activity: "viewing", lastSeenAt: new Date().toISOString() }, ttlSeconds: 60 }));
-    if (p === "/editorial/conversations") return route.fulfill(ok({ items: [F.conversation] }));
+    if (p === "/editorial/conversations") return route.fulfill(ok({ items: [F.socialConversation, F.conversation] }));
+    if (p.startsWith("/editorial/conversations/") && p.endsWith("/check")) return route.fulfill(ok(F.publishCheck));
+    if (p.startsWith("/editorial/conversations/c2")) return route.fulfill(ok(F.socialConversation));
     if (p.startsWith("/editorial/conversations/")) return route.fulfill(ok(F.conversation));
     if (p === "/editorial/memory") return route.fulfill(ok({ rules: [] }));
     if (p === "/generate") return route.fulfill(ok(F.generate));
