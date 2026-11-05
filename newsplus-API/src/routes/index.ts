@@ -11,6 +11,7 @@ import { createOpenAIUsageRoutes } from "./openaiUsageRoutes.js";
 import { createPresenceRoutes } from "./presenceRoutes.js";
 import { createTeamRoutes } from "./teamRoutes.js";
 import { createBreakingDigestRoutes } from "./breakingDigestRoutes.js";
+import { createTimelineRoutes } from "./timelineRoutes.js";
 import { createPublishCheckRoutes } from "./publishCheckRoutes.js";
 import { OpenAIUsageService } from "../services/openaiUsageService.js";
 import type { AuthService } from "../services/authService.js";
@@ -24,6 +25,7 @@ import type { PresenceService } from "../services/presenceService.js";
 import type { TeamService } from "../services/teamService.js";
 import type { BreakingService } from "../services/breakingService.js";
 import type { DigestService } from "../services/digestService.js";
+import type { StoryTimelineService } from "../services/storyTimelineService.js";
 import type { PublishCheckService } from "../services/publishCheckService.js";
 
 type ApiServices = {
@@ -38,6 +40,7 @@ type ApiServices = {
   teamService: TeamService;
   breakingService: BreakingService;
   digestService: DigestService;
+  timelineService: StoryTimelineService;
   publishCheckService: PublishCheckService;
 };
 
@@ -49,6 +52,7 @@ export function createApiRoutes(services: ApiServices): FastifyPluginAsync {
     await app.register(createPushRoutes(services.pushService));
     await app.register(createNewsRoutes(services.newsService));
     await app.register(createBreakingDigestRoutes(services.breakingService, services.digestService));
+    await app.register(createTimelineRoutes(services.timelineService));
     await app.register(createEditorialRoutes(services.editorialService, services.workflowService));
     await app.register(createPublishCheckRoutes(services.publishCheckService));
     await app.register(createPresenceRoutes(services.presenceService));

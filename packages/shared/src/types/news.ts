@@ -107,6 +107,42 @@ export type NewsSummarizeRequest = {
   format?: NewsStoryFormat;
   language?: NewsLanguage;
   carousel?: CarouselOptions;
+  /**
+   * S14: the editor's standing choices for this story (a source conflict settled: «اعتمد ٢٫٩٪», or «اذكر الرقمين
+   * بالإسناد»), injected into the prompt as editor constraints. At most 6, each at most 300 characters.
+   */
+  constraints?: string[];
+};
+
+/** S14 `GET /news/items/:id/timeline` — what each snapshot of the story added. */
+export type TimelineTag = "first" | "number" | "quote" | "reaction" | "update";
+
+/** One snapshot of the story: a source joined it, or a source's headline / excerpt changed. */
+export type TimelineEntry = {
+  sourceId: string;
+  /** ISO time the source published (or changed) it. */
+  at: string;
+  headline: string;
+  tag: TimelineTag;
+  /** Arrived in the last few minutes (the teal dot). */
+  isNew: boolean;
+};
+
+/** Two or more sources disagree on a figure; `safeWording` is what the editor writes until one is chosen. */
+export type SourceConflict = {
+  field: string;
+  values: { sourceId: string; value: string }[];
+  safeWording: string;
+};
+
+export type TimelineData = {
+  /** Oldest first. */
+  entries: TimelineEntry[];
+  conflicts: SourceConflict[];
+  /** «اللي متفق عليه»: a fact and how many sources carry it. */
+  agreed: { text: string; sourceCount: number }[];
+  /** How many sources carry the story («مؤكد من ٤ مصادر»). */
+  confirmedBy: number;
 };
 
 /** S13 `POST /news/breaking`: three short breaking-news outputs for one feed item. */

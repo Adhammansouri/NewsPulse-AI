@@ -5,6 +5,10 @@ export const newsFeedQuerySchema = z.object({
   q: z.string().trim().max(120).optional(),
 });
 
+/** S14 `constraints`: at most 6 per request, each at most 300 characters. */
+export const NEWS_CONSTRAINTS_MAX = 6;
+export const NEWS_CONSTRAINT_MAX_LENGTH = 300;
+
 export const newsStoryFormatSchema = z.enum(["desk", "bulletin", "facts", "context", "social", "video", "carousel"]);
 
 export const carouselOptionsSchema = z.object({
@@ -23,6 +27,8 @@ export const newsSummarizeBodySchema = z
     format: newsStoryFormatSchema.optional(),
     language: z.enum(["ar", "en"]).optional(),
     carousel: carouselOptionsSchema.optional(),
+    /** S14: the editor's standing choices for this story (a settled source conflict). */
+    constraints: z.array(z.string().trim().min(1).max(NEWS_CONSTRAINT_MAX_LENGTH)).max(NEWS_CONSTRAINTS_MAX).optional(),
   })
   .refine((value) => Boolean(value.input || value.itemId || value.briefing), {
     message: "invalid-request",

@@ -28,6 +28,7 @@ import { toolErrorKind } from "@/services/toolErrors";
 import { takeUnsentDraft } from "@/services/unsentDrafts";
 import type { ConflictInfo } from "@/ui/ErrorSurface";
 import { useToast } from "@/ui/Toast";
+import { constraintsFor } from "../timeline/constraints";
 import { readBriefingPins } from "../wire/briefingPins";
 import {
   abandonDraftRun,
@@ -253,11 +254,14 @@ export function useEditorialDesk({
       const itemIds = readBriefingPins();
       return { briefing: true, language: "ar", ...(itemIds.length > 0 ? { itemIds } : {}) };
     }
+    const itemId = detail?.itemId ?? item?.id;
     return {
-      itemId: detail?.itemId ?? item?.id,
+      itemId,
       language: "ar",
       format,
       ...(format === "carousel" ? { carousel: carouselOptions } : {}),
+      // S14: the editor's choices on this story's source conflicts.
+      ...constraintsFor(itemId),
     };
   }
 
@@ -321,7 +325,7 @@ export function useEditorialDesk({
     if (cooldown.active) return;
     resetStory();
     setSelectedFormat("social");
-    start({ itemId: item.id, language: "ar", format: "social" });
+    start({ itemId: item.id, language: "ar", format: "social", ...constraintsFor(item.id) });
   }
 
   /** «إلغاء» (Main-generating, MobGenerating): abort the request and go back to the formats. */

@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import type { NewsFeedItem } from "@newsplus/shared";
+import { features } from "@/config/features";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useNewsFeed } from "@/hooks/useNewsFeed";
 import { getNewsSources } from "@/services/newsService";
@@ -23,6 +24,9 @@ import { storyModel } from "../studio/storyModel";
 import { readStudioLinkState, storyPath, studioLink, type StudioLinkState } from "../studio/studioLink";
 import { useEditorialDesk } from "../studio/useEditorialDesk";
 import { useStudioPresence } from "../studio/useStudioPresence";
+import { MobTimelineScreen } from "../timeline/MobTimeline";
+import { MobStoryTabs } from "../timeline/StoryTabs";
+import { useStoryTab } from "../timeline/useStoryTab";
 import { sourceLanguages } from "../wire/filters";
 
 export default function NewsStoryPage() {
@@ -63,6 +67,8 @@ export default function NewsStoryPage() {
     onShowDesk: () => undefined,
   });
   useStudioPresence(desk, mobile ? item : null);
+  /** S14: «الخبر | تطور القصة | المصادر». */
+  const [storyTab, setStoryTab] = useStoryTab(itemId);
 
   // Arrivals, once per history entry; the state is cleared so a reload doesn't repeat them.
   const arrivalKey = useRef<string | null>(null);
@@ -133,6 +139,16 @@ export default function NewsStoryPage() {
     );
   }
 
+  const tabs = features.timeline ? <MobStoryTabs tab={storyTab} onTab={setStoryTab} /> : null;
+  if (tabs && item && storyTab !== "story") {
+    return (
+      <>
+        <MobTimelineScreen item={item} tab={storyTab} tabs={tabs} backHref={listHref} onBack={backToList} onWrite={desk.generateSummary} />
+        <ArchiveDrawer desk={desk} />
+      </>
+    );
+  }
+
   const copy = formatCopy(desk.selectedFormat, desk.carouselOptions.slides);
   return (
     <>
@@ -144,6 +160,7 @@ export default function NewsStoryPage() {
         action={copy.action}
         notice={desk.generateError && <StudioError error={desk.generateError} onRetry={desk.retry} />}
         deckNotice={<DuplicateWorkNotice itemId={itemId} headline={story.title} onOpenDraft={desk.openConversation} stacked />}
+        tabs={tabs}
         onSelect={(format) => {
           desk.selectFormat(format);
           if (format === "carousel") setSheetOpen(true);

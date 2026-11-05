@@ -10,6 +10,8 @@ import { Button, buttonClassName } from "@/ui/Button";
 import { Icon } from "@/ui/Icon";
 import { IconButton } from "@/ui/IconButton";
 import { VersionChip } from "@/ui/VersionChip";
+import { DIFF_COPY } from "../../diff/copy";
+import { useCompare } from "../../diff/useCompare";
 import { formatSummaryClipboard } from "../../newsFormat";
 import { PUBLISH_COPY } from "../../publish/publishCopy";
 import { usePublishEntry } from "../../publish/publishLink";
@@ -53,9 +55,20 @@ function draftVersions(desk: EditorialDesk, data: NewsSummarizeData): Array<Pick
  * The version chips (Main-social / MobDraft): older ones restore (`POST …/restore`), the current one is
  * marked. The list is also the bar's `grow` spacer: every restore adds a version, so a long list takes only
  * the free space and scrolls sideways (`scroll-x`), keeping the current chip in view, instead of squeezing the
- * bar's buttons.
+ * bar's buttons. With «قارن» (S14) the list stops growing — the board puts «قارن» right after it, then the spacer —
+ * and still scrolls when it runs out of room; `onPick` (MobDraft's version sheet) replaces the chip's restore.
  */
-export function VersionChips({ desk, data }: { desk: EditorialDesk; data: NewsSummarizeData }) {
+export function VersionChips({
+  desk,
+  data,
+  grow = true,
+  onPick,
+}: {
+  desk: EditorialDesk;
+  data: NewsSummarizeData;
+  grow?: boolean;
+  onPick?: (version: { id: string; number: number; current: boolean }) => void;
+}) {
   const listRef = useRef<HTMLSpanElement>(null);
   const versions = draftVersions(desk, data);
   const currentId = desk.detail?.currentVersionId ?? data.versionId;
@@ -64,9 +77,9 @@ export function VersionChips({ desk, data }: { desk: EditorialDesk; data: NewsSu
     if (!list || list.scrollWidth <= list.clientWidth) return;
     list.querySelector('[aria-current="true"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
   }, [currentId, versions.length]);
-  if (versions.length === 0) return <span className="grow" />;
+  if (versions.length === 0) return grow ? <span className="grow" /> : null;
   return (
-    <span ref={listRef} className="row scroll-x grow" style={{ gap: "4px" }} role="list" aria-label={DRAFT_COPY.versions}>
+    <span ref={listRef} className={grow ? "row scroll-x grow" : "row scroll-x"} style={{ gap: "4px" }} role="list" aria-label={DRAFT_COPY.versions}>
       {versions.map((version) => {
         const current = version.id === currentId;
         return (
@@ -75,8 +88,10 @@ export function VersionChips({ desk, data }: { desk: EditorialDesk; data: NewsSu
               as="button"
               current={current}
               aria-label={current ? DRAFT_COPY.currentVersion(version.number) : DRAFT_COPY.restoreVersion(version.number)}
+              aria-haspopup={onPick ? "dialog" : undefined}
               onClick={() => {
-                if (!current) desk.restore(version.id);
+                if (onPick) onPick({ id: version.id, number: version.number, current });
+                else if (!current) desk.restore(version.id);
               }}
             >
               {versionLabel(version.number)}
@@ -102,6 +117,8 @@ function DraftView({ desk, data }: { desk: EditorialDesk; data: NewsSummarizeDat
   const video = format === "video";
   /** «فحص ونشر» (S12): the NewPublish focus view of a social draft. */
   const publish = usePublishEntry(desk);
+  /** «قارن» (S14): NewDiff, over the whole content area (NewsPage). */
+  const compare = useCompare(desk);
 
   // The thread follows the latest message.
   const lastTurn = turns.at(-1)?.key;
@@ -148,7 +165,15 @@ function DraftView({ desk, data }: { desk: EditorialDesk; data: NewsSummarizeDat
             {DRAFT_COPY.story}
           </Button>
           <Badge variant="ai">{name}</Badge>
-          <VersionChips desk={desk} data={data} />
+          <VersionChips desk={desk} data={data} grow={!compare.available} />
+          {compare.available && (
+            <>
+              <Link className={buttonClassName({ variant: "ghost", size: "sm" })} to={compare.to}>
+                {DIFF_COPY.compare}
+              </Link>
+              <span className="grow" />
+            </>
+          )}
           <IconButton label={DRAFT_COPY.switchFormat} title={DRAFT_COPY.switchFormat} icon="swap" onClick={desk.closeDraft} />
           {publish && (
             <Link className={buttonClassName({ variant: "quiet", size: "sm" })} to={publish.to}>

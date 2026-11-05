@@ -8,9 +8,9 @@ export const features = {
   /** Keyboard shortcuts sheet and the rail keyboard button — S11. */
   shortcuts: false,
   /** «تطور القصة» story timeline — S14. */
-  timeline: false,
+  timeline: true,
   /** «قارن» version diff — S14. */
-  diff: false,
+  diff: true,
   /** «فحص ونشر» publish check — S12. */
   publishCheck: true,
 } as const;

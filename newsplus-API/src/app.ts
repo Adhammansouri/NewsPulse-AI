@@ -24,7 +24,7 @@ export async function buildApp() {
 
   const authService = await createAuthService(app);
   const pushService = createPushService(app.log);
-  const { aggregator, workspace, ...toolServices } = createToolServices(app);
+  const { aggregator, workspace, storyUpdates, ...toolServices } = createToolServices(app);
   await app.register(
     createApiRoutes({
       authService,
@@ -42,6 +42,7 @@ export async function buildApp() {
   app.addHook("onClose", async () => {
     aggregator.stop();
     workspace.close();
+    storyUpdates.close();
   });
 
   return app;

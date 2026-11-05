@@ -62,6 +62,7 @@ export function MobStory({
   action,
   notice,
   deckNotice,
+  tabs,
   onSelect,
   onGenerate,
 }: {
@@ -74,6 +75,8 @@ export function MobStory({
   notice?: ReactNode;
   /** A teammate writing about this story (S15 §4), above «ماذا ننشر؟». */
   deckNotice?: ReactNode;
+  /** S14: «الخبر | تطور القصة | المصادر» (MobNewTimeline), first in the scroll. */
+  tabs?: ReactNode;
   onSelect: (format: NewsStoryFormat) => void;
   onGenerate: () => void;
 }) {
@@ -82,6 +85,7 @@ export function MobStory({
   return (
     <>
       <main className="m-scroll col" style={{ padding: "16px", gap: "18px" }}>
+        {tabs}
         {notice}
         <article className="col" style={{ gap: "10px" }}>
           <div className="row t-meta" style={{ flexWrap: "wrap", gap: "8px" }}>

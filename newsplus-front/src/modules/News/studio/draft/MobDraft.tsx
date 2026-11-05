@@ -8,6 +8,9 @@ import { Badge } from "@/ui/Badge";
 import { Button } from "@/ui/Button";
 import { Icon } from "@/ui/Icon";
 import { IconButton } from "@/ui/IconButton";
+import { MobDiff } from "../../diff/MobDiff";
+import { useCompare } from "../../diff/useCompare";
+import { VersionSheet, type SheetVersion } from "../../diff/VersionSheet";
 import { formatSummaryClipboard } from "../../newsFormat";
 import { MobDraftSeg, MobPublish, mobPreviewAvailable, type MobDraftView } from "../../publish/MobPublish";
 import { useCarouselPainter } from "../../useCarouselPainter";
@@ -56,6 +59,9 @@ function DraftView({ desk, data, onBack }: { desk: EditorialDesk; data: NewsSumm
   /** MobNewPreview (S12): «المسودة | المعاينة» at the top of a social draft. */
   const [view, setView] = useState<MobDraftView>("draft");
   const preview = mobPreviewAvailable(data);
+  /** «قارن النسخ» (S14): with two versions or more a chip opens the version sheet; MobNewDiff replaces the draft. */
+  const compare = useCompare(desk);
+  const [sheetVersion, setSheetVersion] = useState<SheetVersion | null>(null);
   const scrollRef = useRef<HTMLElement>(null);
   const format = data.format;
   const carousel = format === "carousel";
@@ -94,6 +100,7 @@ function DraftView({ desk, data, onBack }: { desk: EditorialDesk; data: NewsSumm
 
   const versionKey = data.versionId ?? "draft";
 
+  if (compare.open) return <MobDiff desk={desk} data={data} onClose={compare.exit} />;
   if (preview && view === "preview") return <MobPublish desk={desk} data={data} onDraft={() => setView("draft")} />;
 
   return (
@@ -101,7 +108,7 @@ function DraftView({ desk, data, onBack }: { desk: EditorialDesk; data: NewsSumm
       <header className="m-bar">
         <IconButton label={DRAFT_COPY.backToStory} icon="arrow-back" onClick={onBack} />
         <Badge variant="ai">{name}</Badge>
-        <VersionChips desk={desk} data={data} />
+        <VersionChips desk={desk} data={data} onPick={compare.available ? setSheetVersion : undefined} />
         <Button variant="ink" size="sm" onClick={copyAll}>
           <Icon name="copy" size="sm" />
           {done === "all" ? DRAFT_COPY.copied : DRAFT_COPY.copyAll}
@@ -144,6 +151,9 @@ function DraftView({ desk, data, onBack }: { desk: EditorialDesk; data: NewsSumm
         mobile
         style={DOCK_STYLE}
       />
+      {compare.available && (
+        <VersionSheet version={sheetVersion} onClose={() => setSheetVersion(null)} onCompare={compare.enter} onRestore={desk.restore} />
+      )}
     </>
   );
 }

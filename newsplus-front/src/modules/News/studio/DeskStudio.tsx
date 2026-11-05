@@ -2,6 +2,8 @@
 // (Main-generating), or the draft (S06: DeskDraft; the carousel is DeskCarousel). Inline styles are the board's own.
 import type { NewsFeedItem } from "@newsplus/shared";
 import type { SourceLanguages } from "../wire/filters";
+import { DeskStoryArea } from "../timeline/DeskStoryArea";
+import { usePendingRevision } from "../timeline/usePendingRevision";
 import { deskSteps, footerHint, formatCopy } from "./formats";
 import { DeskCarousel } from "./carousel/DeskCarousel";
 import { DeskDraft } from "./draft/DeskDraft";
@@ -35,6 +37,8 @@ export function DeskStudio({
 }) {
   const story = selected ? storyModel(selected, languages, false) : null;
   useStudioPresence(desk, selected);
+  /** S14 «حدّث المسودة»: the revision waits here while the timeline gives way to the draft. */
+  const updateDraft = usePendingRevision(desk);
 
   if (desk.showEditorial) {
     if (desk.resultFormat === "carousel" && desk.summary) return <DeskCarousel desk={desk} storyTitle={story?.title ?? null} />;
@@ -55,23 +59,32 @@ export function DeskStudio({
     );
   }
 
-  if (!story) return wireLoading ? <StudioLoading /> : <StudioEmpty />;
+  if (!story || !selected) return wireLoading ? <StudioLoading /> : <StudioEmpty />;
 
   const copy = formatCopy(desk.selectedFormat, desk.carouselOptions.slides);
+  // S14: the story's tabs (NewTimeline); «الخبر» is this view, with the «تطور القصة» chip in the story's meta.
   return (
-    <>
-      <div className="enter" style={{ flex: 1, overflowY: "auto", padding: "26px 34px 20px" }}>
-        {desk.generateError && <StudioError error={desk.generateError} onRetry={desk.retry} style={NOTICE_STYLE} />}
-        <StoryPanel story={story} />
-        <DuplicateWorkNotice itemId={selected?.id ?? ""} headline={story.title} onOpenDraft={desk.openConversation} style={DECK_NOTICE_STYLE} />
-        <FormatDeck selected={desk.selectedFormat} approvedRules={desk.approvedRules} onSelect={desk.selectFormat} />
-      </div>
-      <StudioFooter
-        copy={copy}
-        hint={footerHint(copy, story.sourceCount)}
-        onArchive={() => desk.setDrawerOpen(true)}
-        onGenerate={desk.generateSummary}
-      />
-    </>
+    <DeskStoryArea
+      desk={desk}
+      item={selected}
+      title={story.title}
+      onUpdateDraft={updateDraft}
+      story={(timelineChip) => (
+        <>
+          <div className="enter" style={{ flex: 1, overflowY: "auto", padding: "26px 34px 20px" }}>
+            {desk.generateError && <StudioError error={desk.generateError} onRetry={desk.retry} style={NOTICE_STYLE} />}
+            <StoryPanel story={story} timeline={timelineChip} />
+            <DuplicateWorkNotice itemId={selected.id} headline={story.title} onOpenDraft={desk.openConversation} style={DECK_NOTICE_STYLE} />
+            <FormatDeck selected={desk.selectedFormat} approvedRules={desk.approvedRules} onSelect={desk.selectFormat} />
+          </div>
+          <StudioFooter
+            copy={copy}
+            hint={footerHint(copy, story.sourceCount)}
+            onArchive={() => desk.setDrawerOpen(true)}
+            onGenerate={desk.generateSummary}
+          />
+        </>
+      )}
+    />
   );
 }

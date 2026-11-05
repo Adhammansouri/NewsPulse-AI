@@ -74,6 +74,10 @@ export type {
   NewsSummaryFormat,
   NewsSummarySource,
   NewsTopic,
+  SourceConflict,
+  TimelineData,
+  TimelineEntry,
+  TimelineTag,
 } from "./types/news.js";
 export type {
   GenerateData,

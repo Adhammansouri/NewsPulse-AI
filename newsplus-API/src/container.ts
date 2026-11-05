@@ -17,6 +17,8 @@ import { PresenceService, PresenceStore } from "./services/presenceService.js";
 import { EditorialWorkflowService } from "./services/editorialWorkflowService.js";
 import { BreakingService } from "./services/breakingService.js";
 import { DigestService } from "./services/digestService.js";
+import { StoryUpdatesStore } from "./services/storyUpdatesStore.js";
+import { StoryTimelineService } from "./services/storyTimelineService.js";
 import { PublishCheckService } from "./services/publishCheckService.js";
 
 export async function createAuthService(app: FastifyInstance): Promise<AuthService> {
@@ -40,7 +42,9 @@ export async function createAuthService(app: FastifyInstance): Promise<AuthServi
 
 export function createToolServices(app: FastifyInstance) {
   const openai = new OpenAIClient();
-  const aggregator = new NewsAggregator(app.log);
+  /** S14 «تطور القصة»: story snapshots, in the editorial store's file (own connection; app.ts closes it). */
+  const storyUpdates = new StoryUpdatesStore(env.editorialStorePath);
+  const aggregator = new NewsAggregator(app.log, storyUpdates);
   const workspace = new EditorialWorkspaceStore(env.editorialStorePath);
   const newsService = new NewsService({
     aggregator,
@@ -53,17 +57,20 @@ export function createToolServices(app: FastifyInstance) {
   /** S13: breaking mode and «اللي فاتك». */
   const breakingService = new BreakingService({ aggregator, openai, workspace });
   const digestService = new DigestService({ aggregator, openai });
+  const timelineService = new StoryTimelineService({ store: storyUpdates, aggregator, openai });
   /** S12: «فحص قبل النشر». */
   const publishCheckService = new PublishCheckService({ openai, workspace });
   return {
     aggregator,
     workspace,
+    storyUpdates,
     newsService,
     editorialService,
     generateService,
     translateService,
     breakingService,
     digestService,
+    timelineService,
     publishCheckService,
   };
 }

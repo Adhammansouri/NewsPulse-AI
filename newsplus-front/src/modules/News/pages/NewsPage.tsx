@@ -14,6 +14,8 @@ import { IconButton } from "@/ui/IconButton";
 import { AiCooldownCard } from "@/ui/ErrorSurface";
 import { DeskBreaking } from "../breaking/DeskBreaking";
 import { BREAKING_PARAM, breakingPath, isBreakingMode } from "../breaking/breakingModel";
+import { DeskDiff } from "../diff/DeskDiff";
+import { useCompare, useCompareFocus } from "../diff/useCompare";
 import { DeskPublish } from "../publish/DeskPublish";
 import { usePublishFocus } from "../publish/publishLink";
 import { ArchiveDrawer } from "../studio/ArchiveDrawer";
@@ -103,6 +105,10 @@ export default function NewsPage() {
   });
   // NewPublish (S12, `?publish={conversationId}`): the social draft's focus view, over the whole content area.
   const publishData = usePublishFocus(desk, mobile);
+  // NewDiff (S14, `?compare={conversationId}`): «قارن», also over the whole content area on desktop; MobDraft
+  // shows MobNewDiff itself on mobile.
+  useCompareFocus(desk);
+  const compare = useCompare(desk);
 
   useEffect(() => {
     if (!handoff?.input) return;
@@ -243,6 +249,8 @@ export default function NewsPage() {
   const carouselDraft = desk.showEditorial && desk.resultFormat === "carousel" && Boolean(desk.summary);
   // NewBreaking (S13, `?item=…&breaking=1`) also takes the whole content area.
   const breakingMode = isBreakingMode(searchParams) && selected !== null;
+  // One focus view at a time: «فحص ونشر», then «قارن», then breaking mode.
+  const compareData = !publishData && compare.open && desk.showEditorial ? desk.summary : null;
 
   /** «اكتب منشور مفصّل»: leave breaking mode for the story's normal social flow. */
   function leaveBreaking(item: NewsFeedItem) {
@@ -260,7 +268,7 @@ export default function NewsPage() {
 
   return (
     <div className="grow" style={{ display: "flex", minHeight: 0, overflow: "hidden" }}>
-      {!carouselDraft && !breakingMode && !publishData && (
+      {!carouselDraft && !breakingMode && !publishData && !compareData && (
         <WireColumn wire={wire} selectedId={selectedId} onSelect={openStory} onBriefing={startBriefing} />
       )}
       <div
@@ -275,6 +283,8 @@ export default function NewsPage() {
       >
         {publishData ? (
           <DeskPublish desk={desk} data={publishData} />
+        ) : compareData ? (
+          <DeskDiff desk={desk} data={compareData} onClose={compare.exit} />
         ) : breakingMode && selected ? (
           <DeskBreaking key={selected.id} item={selected} onExit={() => leaveBreaking(selected)} />
         ) : (
