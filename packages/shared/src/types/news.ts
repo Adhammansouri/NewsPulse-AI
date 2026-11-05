@@ -284,6 +284,7 @@ export type EditorialMemoryListData = {
 };
 
 export type EditorialMemoryUpdateRequest = {
-  status?: Exclude<EditorialMemoryStatus, "pending">;
+  /** `pending` only undoes an approval (S10 «تراجع»); the API refuses it for rejected / disabled rules. */
+  status?: EditorialMemoryStatus;
   instruction?: string;
 };

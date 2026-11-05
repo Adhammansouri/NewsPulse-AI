@@ -143,13 +143,7 @@ export const STUDIO_COPY = {
   // Background completion (S05 §4)
   draftReady: (format: string) => `المسودة جاهزة: ${format}`,
   open: "افتح",
-  // Generation failed / quota (States `errors[]`, S10 owns the full system-state pass)
-  failedTitle: "المحرّر ما قدرش يكمّل",
-  failedText: "نموذج الذكاء الاصطناعي ما ردّش. اختيارك محفوظ.",
-  retry: "أعد المحاولة",
-  quotaTitle: "رصيد OpenAI خلص",
-  quotaText: "التوليد متوقف لحد ما يتشحن الرصيد من صفحة الفوترة.",
-  quotaCta: "اشحن الرصيد",
+  // A failed generation / the quota: the shared S10 ErrorSurface (SYSTEM_COPY in services/toolErrors.ts).
 } as const;
 
 /** Main: «العربية ومصدر آخر» / «العربية و٢ مصادر أخرى». */

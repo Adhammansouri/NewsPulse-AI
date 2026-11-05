@@ -39,7 +39,8 @@ export const editorialMemoryListQuerySchema = z.object({
 
 export const editorialMemoryUpdateBodySchema = z
   .object({
-    status: z.enum(["approved", "rejected", "disabled"]).optional(),
+    // "pending" only undoes an approval (S10 «تراجع» on «القاعدة اتحفظت لذاكرة الفريق»); the store enforces it.
+    status: z.enum(["pending", "approved", "rejected", "disabled"]).optional(),
     instruction: z.string().trim().min(18).max(280).optional(),
   })
   .refine((value) => Boolean(value.status || value.instruction), {

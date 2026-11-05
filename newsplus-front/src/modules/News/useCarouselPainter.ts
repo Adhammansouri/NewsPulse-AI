@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { CarouselSlide, EditorialConversationDetail, NewsSummarizeData } from "@newsplus/shared";
 import { incrementDailyStat } from "@/services/dailyStats";
+import { useAiCooldown } from "@/hooks/useAiCooldown";
 import { renderCarouselSlide } from "@/services/newsService";
 
 const paintsStarted = new Set<string>();
@@ -25,6 +26,10 @@ export function useCarouselPainter(summary: NewsSummarizeData | undefined) {
   const [painting, setPainting] = useState<string[]>([]);
   const [overlay, setOverlay] = useState<Record<string, CarouselSlide>>({});
   summaryRef.current = summary;
+  // S10: slide renders are AI calls — they wait for the rate-limit cooldown, then pick up where they stopped.
+  const cooling = useAiCooldown().active;
+  const coolingRef = useRef(cooling);
+  coolingRef.current = cooling;
 
   const versionId = summary?.versionId;
   const conversationId = summary?.conversationId;
@@ -45,7 +50,7 @@ export function useCarouselPainter(summary: NewsSummarizeData | undefined) {
       const current = summaryRef.current;
       const id = current?.conversationId;
       const version = current?.versionId;
-      if (!id || !version || current.format !== "carousel") return;
+      if (!id || !version || current.format !== "carousel" || coolingRef.current) return;
       const key = slideKey(version, index);
       if (inflight.current.has(key) || paintsStarted.has(key)) return;
       paintsStarted.add(key);
@@ -90,7 +95,7 @@ export function useCarouselPainter(summary: NewsSummarizeData | undefined) {
   );
 
   useEffect(() => {
-    if (!conversationId || !versionId || summary?.format !== "carousel") return;
+    if (!conversationId || !versionId || summary?.format !== "carousel" || cooling) return;
     const pending = slides.filter(
       (slide) =>
         slide.status === "pending" &&
@@ -101,7 +106,7 @@ export function useCarouselPainter(summary: NewsSummarizeData | undefined) {
     for (const slide of pending.slice(0, Math.max(0, 2 - running))) {
       void paint(slide.index);
     }
-  }, [conversationId, paint, slides, summary?.format, versionId]);
+  }, [conversationId, cooling, paint, slides, summary?.format, versionId]);
 
   const paintingIndexes = painting
     .filter((key) => (versionId ? key.startsWith(`${versionId}:`) : false))

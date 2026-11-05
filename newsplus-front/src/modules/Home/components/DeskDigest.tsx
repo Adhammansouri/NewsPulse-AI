@@ -77,7 +77,7 @@ function DigestPanel({ home }: { home: Home }) {
           </span>
         </span>
         {!digest.loading && (
-          <Button variant="ghost" size="sm" loading={digest.refreshing} onClick={digest.refresh}>
+          <Button variant="ghost" size="sm" loading={digest.refreshing} disabled={digest.aiCooldown} onClick={digest.refresh}>
             {!digest.refreshing && <Icon name="refresh" size="sm" />}
             {C.refresh}
           </Button>
@@ -104,7 +104,7 @@ function DigestPanel({ home }: { home: Home }) {
             ))}
           </ol>
           <div className="row" style={{ paddingTop: "8px" }}>
-            <Button variant="ai" onClick={digest.toBriefing}>
+            <Button variant="ai" disabled={digest.aiCooldown} onClick={digest.toBriefing}>
               <Icon name="sparkle" size="sm" />
               {C.toBriefing}
             </Button>

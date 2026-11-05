@@ -14,25 +14,13 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import { copyText } from "@/services/toolErrors";
+import { copyText, selectText, showCopyFailed } from "@/services/toolErrors";
 import { cx } from "@/ui/cx";
 import { TOAST_DURATION_MS, useToast } from "@/ui/Toast";
 import { DRAFT_COPY } from "./copy";
 
-/** Selects `node`'s text, or the part after `from` (a block's label), for a manual copy. */
-export function selectText(node: HTMLElement | null, from?: Element | null) {
-  const selection = window.getSelection();
-  if (!node || !selection) return;
-  const range = document.createRange();
-  if (from && from.parentNode === node) {
-    range.setStartAfter(from);
-    range.setEnd(node, node.childNodes.length);
-  } else {
-    range.selectNodeContents(node);
-  }
-  selection.removeAllRanges();
-  selection.addRange(range);
-}
+/** Selects `node`'s text, or the part after `from` (a block's label), for a manual copy (S10: shared). */
+export { selectText };
 
 type DraftCopyApi = {
   /** The key of the control showing «تم النسخ». */
@@ -62,10 +50,7 @@ export function DraftCopyProvider({ children }: { children: ReactNode }) {
         },
         () => {
           setDone(null);
-          toast.show(DRAFT_COPY.copyFailed, {
-            icon: "warning",
-            action: { label: DRAFT_COPY.selectText, onAction: select },
-          });
+          showCopyFailed(toast, select);
         },
       );
     },

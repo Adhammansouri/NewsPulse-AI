@@ -59,3 +59,13 @@ export { Meter, type MeterProps } from "./Meter";
 export { Ring, type RingProps } from "./Ring";
 export { VersionChip, type VersionChipProps } from "./VersionChip";
 export { Key, type KeyProps } from "./Key";
+export {
+  AiCooldownCard,
+  AiFailedNotice,
+  AI_RATE_LIMIT_MAX,
+  ConflictNotice,
+  ErrorSurface,
+  QuotaSurface,
+  type ConflictInfo,
+  type ErrorSurfaceProps,
+} from "./ErrorSurface";

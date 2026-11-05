@@ -35,6 +35,7 @@ export async function reviseEditorialConversation(id: string, instruction: strin
   const response = await apiRequest<ApiSuccessResponse<EditorialReviseData>>(API_URLS.EDITORIAL.REVISE(id), {
     method: "POST",
     auth: true,
+    ai: true,
     body: JSON.stringify({ instruction }),
   });
   return response.data;

@@ -1,7 +1,8 @@
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-function requiredInProduction(name: string, value: string | undefined, fallback: string) {
+/** `value`, else `fallback` outside production; production refuses to start without it. Exported for tests. */
+export function requiredInProduction(name: string, value: string | undefined, fallback: string) {
   if (value) return value;
   if ((process.env.NODE_ENV ?? "development") === "production") {
     throw new Error(`${name} is required in production`);
@@ -43,7 +44,8 @@ export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
   jwtSecret: requiredInProduction("JWT_SECRET", process.env.JWT_SECRET, "newsplus-dev-jwt-secret"),
   authSeedIdentifier: process.env.AUTH_SEED_IDENTIFIER ?? "adham",
-  authSeedPassword: process.env.AUTH_SEED_PASSWORD ?? "123456",
+  // S10 §2: the seeded admin must not ship with the development password.
+  authSeedPassword: requiredInProduction("AUTH_SEED_PASSWORD", process.env.AUTH_SEED_PASSWORD, "123456"),
   authSeedEmail: process.env.AUTH_SEED_EMAIL ?? "adham@newsplus.local",
   authSeedPhone: process.env.AUTH_SEED_PHONE ?? "01000000000",
   authSeedDisplayName: process.env.AUTH_SEED_DISPLAY_NAME ?? "Adham",

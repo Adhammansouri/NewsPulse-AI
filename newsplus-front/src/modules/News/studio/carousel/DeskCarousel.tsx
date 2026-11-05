@@ -16,7 +16,7 @@ import { toArabicDigits } from "@/utils/arabic";
 import { formatSummaryClipboard } from "../../newsFormat";
 import { useCarouselPainter } from "../../useCarouselPainter";
 import { CAROUSEL_DENSITIES, CAROUSEL_SLIDE_COUNTS, formatCopy, STUDIO_COPY } from "../formats";
-import { CAROUSEL_COPY, DRAFT_COPY, versionLabel } from "../draft/copy";
+import { CAROUSEL_COPY, DRAFT_COPY, formatNoun, versionLabel } from "../draft/copy";
 import { DraftBlock, DraftCopyProvider, selectText, useDraftCopy } from "../draft/DraftBlock";
 import { carouselTags, textDir } from "../draft/draftModel";
 import { downloadBlob } from "../draft/draftHooks";
@@ -49,7 +49,7 @@ function CarouselView({ desk, storyTitle }: { desk: EditorialDesk; storyTitle: s
   const versionNumber = desk.detail?.versions.find((version) => version.id === desk.detail?.currentVersionId)?.number ?? data.versionNumber;
 
   function copyTexts() {
-    copy("all", formatSummaryClipboard(data), DRAFT_COPY.copiedAll(name), () => selectText(document.getElementById("carousel-texts")));
+    copy("all", formatSummaryClipboard(data), DRAFT_COPY.copiedAll(formatNoun("carousel")), () => selectText(document.getElementById("carousel-texts")));
   }
 
   async function downloadImages() {
@@ -131,7 +131,7 @@ function CarouselView({ desk, storyTitle }: { desk: EditorialDesk; storyTitle: s
                     icon={<Icon name="warning" style={{ color: "var(--warn)", marginTop: "2px" }} />}
                     textClassName="grow col"
                     action={
-                      <Button variant="quiet" size="sm" disabled={painting.includes(view.slide.index)} onClick={() => void redraw(view.slide.index)}>
+                      <Button variant="quiet" size="sm" disabled={painting.includes(view.slide.index) || desk.aiCooldown} onClick={() => void redraw(view.slide.index)}>
                         <Icon name="refresh" size="sm" />
                         {CAROUSEL_COPY.redraw}
                       </Button>
@@ -165,7 +165,7 @@ function CarouselView({ desk, storyTitle }: { desk: EditorialDesk; storyTitle: s
 
       <CarouselSettings
         options={desk.carouselOptions}
-        busy={desk.busy}
+        busy={desk.busy || desk.aiCooldown}
         onChange={desk.setCarouselOptions}
         onUpdate={() => desk.switchFormat("carousel")}
       />

@@ -5,15 +5,10 @@ import type { GenerateStyle } from "@newsplus/shared";
 import type { AiStep } from "@/ui/AiSteps";
 import { Chip } from "@/ui/Chip";
 import { FieldInput, Field } from "@/ui/Field";
-import { Icon } from "@/ui/Icon";
-import { Notice } from "@/ui/Notice";
+import { ErrorSurface } from "@/ui/ErrorSurface";
 import { Segmented } from "@/ui/Segmented";
-import { isOpenAIQuotaError, toolErrorMessage } from "@/services/toolErrors";
 import { ANGLES, LANGUAGES, LENGTHS, STYLE_DEFINITE, STYLE_LABEL, TONES, angleClause } from "../generateDesk";
 import type { GenerateDesk } from "../useGenerateDesk";
-
-/** OpenAI billing (the pre-Pulse QuotaNotice link), until S10 ships the quota surface. */
-const OPENAI_BILLING_URL = "https://platform.openai.com/settings/organization/billing/overview";
 
 /** Resets a `<button>` that wraps text in a row (as the reference does for clickable columns). */
 export const PLAIN_BUTTON_STYLE = { border: 0, padding: 0, background: "transparent", textAlign: "start" } as const;
@@ -85,37 +80,9 @@ export function writingSteps(desk: GenerateDesk, layout: "desk" | "mob"): AiStep
 }
 
 /**
- * A failed write or translation (anything but a refused URL). Interim surface until S10's ErrorSurface:
- * `notice--warn` for the OpenAI quota (+ «اشحن الرصيد»), `notice--error` otherwise.
+ * A failed write or translation (anything but a refused URL): the shared S10 ErrorSurface — «المحرّر ما قدرش
+ * يكمّل» + «أعد المحاولة» (the form is kept), the quota notice / sheet, nothing for a 401 / 429.
  */
-export function ToolErrorNotice({ error, style }: { error: unknown; style?: CSSProperties }) {
-  if (isOpenAIQuotaError(error)) {
-    return (
-      <Notice
-        variant="warn"
-        role="alert"
-        style={{ alignItems: "center", ...style }}
-        textClassName="grow"
-        icon={<Icon name="warning" style={{ color: "var(--warn)" }} />}
-        action={
-          <a className="btn btn--quiet btn--sm" href={OPENAI_BILLING_URL} target="_blank" rel="noreferrer">
-            اشحن الرصيد
-          </a>
-        }
-      >
-        {toolErrorMessage(error)}
-      </Notice>
-    );
-  }
-  return (
-    <Notice
-      variant="error"
-      role="alert"
-      style={style}
-      textClassName="grow"
-      icon={<Icon name="error-circle" style={{ color: "var(--breaking)" }} />}
-    >
-      {toolErrorMessage(error)}
-    </Notice>
-  );
+export function ToolErrorNotice({ error, onRetry, style }: { error: unknown; onRetry?: () => void; style?: CSSProperties }) {
+  return <ErrorSurface error={error} onRetry={onRetry} style={style} />;
 }

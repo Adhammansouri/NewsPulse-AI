@@ -11,6 +11,7 @@ import { PulseLine } from "@/ui/PulseLine";
 import { Segmented } from "@/ui/Segmented";
 import { Skeleton } from "@/ui/Skeleton";
 import { ToolErrorNotice } from "@/modules/Generate/components/GenerateParts";
+import { AiCooldownCard } from "@/ui/ErrorSurface";
 import { LANGUAGE_NAME, charsPhrase, excerpt, outputProps, paragraphs, type SourceKind } from "../translateDesk";
 import type { TranslateDesk } from "../useTranslateDesk";
 
@@ -132,7 +133,7 @@ export function DeskTranslate({ desk }: { desk: TranslateDesk }) {
             <h2 className="t-label">الترجمة الصحفية</h2>
             <span className="t-meta">{LANGUAGE_NAME[desk.target]}</span>
           </div>
-          {desk.error && desk.phase !== "busy" && <ToolErrorNotice error={desk.error} style={{ margin: "14px 18px 0" }} />}
+          {desk.error && desk.phase !== "busy" && <ToolErrorNotice error={desk.error} onRetry={desk.submit} style={{ margin: "14px 18px 0" }} />}
           {desk.phase === "empty" && (
             <div className="grow" style={{ display: "grid", placeItems: "center" }}>
               <EmptyState
@@ -190,7 +191,7 @@ export function DeskTranslate({ desk }: { desk: TranslateDesk }) {
                   <Icon name="sparkle" size="sm" />
                   راجع الترجمة قبل النشر
                 </p>
-                <Button variant="ghost" size="sm" loading={desk.socialPending} onClick={desk.startPost}>
+                <Button variant="ghost" size="sm" loading={desk.socialPending} disabled={desk.aiCooldown} onClick={desk.startPost}>
                   استخدمها في منشور
                 </Button>
                 <Button variant="ink" size="sm" onClick={desk.copyTranslation}>
@@ -202,6 +203,7 @@ export function DeskTranslate({ desk }: { desk: TranslateDesk }) {
           )}
         </section>
       </div>
+      <AiCooldownCard />
     </div>
   );
 }

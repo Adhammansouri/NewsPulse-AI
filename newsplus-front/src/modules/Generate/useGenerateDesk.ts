@@ -9,10 +9,13 @@ import type {
   GenerateStyle,
   GenerateTone,
 } from "@newsplus/shared";
+import { useAiCooldown } from "@/hooks/useAiCooldown";
+import { useUnsentDraft } from "@/hooks/useUnsentDraft";
 import { isApiError } from "@/services/apiError";
 import type { DeskHandoffState } from "@/services/deskHandoff";
 import { generateContent } from "@/services/generateService";
-import { copyText } from "@/services/toolErrors";
+import { copyText, selectCopySource, showCopyFailed } from "@/services/toolErrors";
+import { takeUnsentDraft } from "@/services/unsentDrafts";
 import { useToast } from "@/ui/Toast";
 import { relativeTimeAr } from "@/utils/arabic";
 import {
@@ -49,6 +52,18 @@ export type CopiedBlock = "title" | "dek" | null;
 type Run = { url: string; notes: string; style: GenerateStyle; angle: string; mode: SourceMode };
 type Variables = { body: GenerateRequest; run: Run; signal: AbortSignal };
 
+/** What «الجلسة انتهت» keeps of the form (S10), restored once after signing in. */
+type UnsentForm = {
+  url: string;
+  notes: string;
+  sourceText: string | null;
+  style: GenerateStyle;
+  language: GenerateLanguage;
+  length: GenerateLength;
+  tone: GenerateTone;
+  angle: string;
+};
+
 /** The writing steps move on like the DeskGenerate board (0.7s, 1.5s); the last one stays until the reply. */
 const STEP_DELAYS = [700, 1500] as const;
 const COPIED_MS = 1900;
@@ -61,16 +76,19 @@ export function useGenerateDesk(handoff: DeskHandoffState | null) {
   const toast = useToast();
   const social = useSocialPost();
   const initial = useMemo(() => splitHandoff(handoff?.prompt || handoff?.input), [handoff?.prompt, handoff?.input]);
+  // S10 401: the form the session expiry interrupted comes back once after signing in (a hand-off wins).
+  const [restored] = useState(() => (handoff ? null : takeUnsentDraft<UnsentForm>("generate")));
+  const cooldown = useAiCooldown();
 
-  const [url, setUrlState] = useState(initial.url);
-  const [notes, setNotesState] = useState(initial.notes);
+  const [url, setUrlState] = useState(restored?.url ?? initial.url);
+  const [notes, setNotesState] = useState(restored?.notes ?? initial.notes);
   /** The mobile «رابط أو موضوع» text as typed (url + notes are derived from it); null → show url + notes. */
-  const [sourceText, setSourceTextState] = useState<string | null>(null);
-  const [style, setStyle] = useState<GenerateStyle>(handoff?.style ?? (initial.url ? "brief" : "article"));
-  const [language, setLanguage] = useState<GenerateLanguage>("ar");
-  const [length, setLength] = useState<GenerateLength>("standard");
-  const [tone, setTone] = useState<GenerateTone>("desk");
-  const [angle, setAngle] = useState("");
+  const [sourceText, setSourceTextState] = useState<string | null>(restored?.sourceText ?? null);
+  const [style, setStyle] = useState<GenerateStyle>(restored?.style ?? handoff?.style ?? (initial.url ? "brief" : "article"));
+  const [language, setLanguage] = useState<GenerateLanguage>(restored?.language ?? "ar");
+  const [length, setLength] = useState<GenerateLength>(restored?.length ?? "standard");
+  const [tone, setTone] = useState<GenerateTone>(restored?.tone ?? "desk");
+  const [angle, setAngle] = useState(restored?.angle ?? "");
 
   const [drafts, setDrafts] = useState<GenerateDraft[]>(readDrafts);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -115,7 +133,8 @@ export function useGenerateDesk(handoff: DeskHandoffState | null) {
   const prompt = assignmentPrompt(url, notes);
   const tooLong = prompt.length > ASSIGNMENT_MAX || angle.trim().length > ANGLE_MAX;
   const hasSource = Boolean((url.trim() && host) || notes.trim());
-  const canSubmit = prompt.length >= ASSIGNMENT_MIN && !tooLong && hasSource && !brokenUrl;
+  // S10: «اكتب» waits for the AI rate-limit cooldown.
+  const canSubmit = prompt.length >= ASSIGNMENT_MIN && !tooLong && hasSource && !brokenUrl && !cooldown.active;
   const isEmpty = !url.trim() && !notes.trim();
   const active = drafts.find((draft) => draft.id === activeId) ?? null;
   const angleIsChip = (ANGLES as readonly string[]).includes(angle);
@@ -185,6 +204,15 @@ export function useGenerateDesk(handoff: DeskHandoffState | null) {
   const submitRef = useRef(submit);
   submitRef.current = submit;
 
+  /** «أعد المحاولة» (AI failure): the same request again, from the kept form. */
+  function retry() {
+    submit(run?.mode ?? "auto");
+  }
+
+  useUnsentDraft("generate", (): UnsentForm | null =>
+    url.trim() || notes.trim() ? { url, notes, sourceText, style, language, length, tone, angle } : null,
+  );
+
   // Ctrl/⌘ + Enter writes from anywhere on the screen (the `kbd` on the CTA).
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -234,21 +262,22 @@ export function useGenerateDesk(handoff: DeskHandoffState | null) {
     setMobileView("form");
   }
 
-  async function copyBlock(key: Exclude<CopiedBlock, null>, value: string) {
+  /** A refused clipboard: «تعذّر النسخ» + «حدّد النص» selects what the control copies (S10, as the draft view). */
+  async function copyBlock(key: Exclude<CopiedBlock, null>, value: string, control?: Element | null) {
     try {
       await copyText(value);
       setCopied(key);
     } catch {
-      toast.show("تعذّر النسخ", { icon: "error-circle" });
+      showCopyFailed(toast, () => selectCopySource(control ?? null));
     }
   }
 
-  async function copyAll(draft: GenerateDraft) {
+  async function copyAll(draft: GenerateDraft, control?: Element | null) {
     try {
       await copyText(packCopy(draft));
       toast.show(`نُسخ ${STYLE_DEFINITE[draft.style]} كاملاً`);
     } catch {
-      toast.show("تعذّر النسخ", { icon: "error-circle" });
+      showCopyFailed(toast, () => selectCopySource(control ?? null));
     }
   }
 
@@ -293,6 +322,9 @@ export function useGenerateDesk(handoff: DeskHandoffState | null) {
     run,
     step,
     error,
+    retry,
+    /** S10: the AI rate-limit cooldown is running (AI buttons disabled). */
+    aiCooldown: cooldown.active,
     urlRejected,
     cancel,
     pasteInstead,

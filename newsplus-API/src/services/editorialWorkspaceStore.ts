@@ -17,7 +17,7 @@ import type {
   EditorialPublishPlatform,
   EditorialWorkflowStatus,
 } from "@newsplus/shared";
-import { ConflictError, NotFoundError } from "../utils/errors.js";
+import { ConflictError, NotFoundError, ValidationError } from "../utils/errors.js";
 import { DEFAULT_WORKFLOW_STATUS, isPublishPlatform, isWorkflowStatus, WORKFLOW_STATUSES } from "./editorialWorkflow.js";
 
 export type StoredEditorialCopy = Omit<NewsSummarizeData, "conversationId" | "versionId" | "versionNumber">;
@@ -682,6 +682,10 @@ export class EditorialWorkspaceStore {
     patch: { status?: EditorialMemoryStatus; instruction?: string },
   ): EditorialMemoryRule {
     const current = this.getMemoryRule(id);
+    // Back to «pending» is the undo of an approval only: a rejected or disabled rule never becomes a suggestion again.
+    if (patch.status === "pending" && current.status !== "approved" && current.status !== "pending") {
+      throw new ValidationError();
+    }
     const instruction = patch.instruction?.trim() || current.instruction;
     const status = patch.status ?? current.status;
     this.db

@@ -4,6 +4,7 @@
 import type { MouseEvent, ReactNode } from "react";
 import type { NewsStoryFormat, NewsSummaryFormat } from "@newsplus/shared";
 import { Link } from "react-router-dom";
+import { useAiCooldown } from "@/hooks/useAiCooldown";
 import { Button } from "@/ui/Button";
 import { Icon } from "@/ui/Icon";
 import { SourceMarks } from "@/ui/SourceMarks";
@@ -76,6 +77,8 @@ export function MobStory({
   onSelect: (format: NewsStoryFormat) => void;
   onGenerate: () => void;
 }) {
+  // S10: the AI button waits for the rate-limit cooldown.
+  const cooldown = useAiCooldown();
   return (
     <>
       <main className="m-scroll col" style={{ padding: "16px", gap: "18px" }}>
@@ -157,7 +160,7 @@ export function MobStory({
 
       <footer className="m-cta" style={M_CTA_STYLE}>
         <p className="m-cta__hint">{hint}</p>
-        <Button variant="ai" block size="lg" onClick={onGenerate}>
+        <Button variant="ai" block size="lg" disabled={cooldown.active} onClick={onGenerate}>
           <Icon name="sparkle" />
           {action}
         </Button>

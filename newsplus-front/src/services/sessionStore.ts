@@ -10,6 +10,12 @@ export type NewsplusSession = {
 };
 
 let memorySession: NewsplusSession | null = null;
+/**
+ * S10: the token a 401 rejected. The session stays until the user presses «سجّل الدخول» in the «الجلسة انتهت»
+ * dialog, so the screen (and its unsent text) is still there behind it. A new session (this tab or another)
+ * has another token, which ends the expired state by itself.
+ */
+let expiredToken: string | null = null;
 
 function storageFor(persisted: boolean) {
   return persisted ? localStorage : sessionStorage;
@@ -53,7 +59,21 @@ export function getAccessToken(): string | null {
   return getSession()?.token ?? null;
 }
 
+/** A 401 rejected `token` (still the current one): show «الجلسة انتهت» instead of dropping the screen. */
+export function expireSession(token: string) {
+  if (expiredToken === token) return;
+  expiredToken = token;
+  notify();
+}
+
+/** The current session's token was rejected (401) and the user hasn't signed in again yet. */
+export function isSessionExpired(): boolean {
+  if (expiredToken === null) return false;
+  return getSession()?.token === expiredToken;
+}
+
 export function saveSession(session: Omit<NewsplusSession, "persisted">, persist: boolean) {
+  expiredToken = null;
   memorySession = { ...session, persisted: persist };
   try {
     storageFor(!persist).removeItem(SESSION_KEY);
@@ -74,6 +94,7 @@ export function saveSession(session: Omit<NewsplusSession, "persisted">, persist
 }
 
 export function clearSession() {
+  expiredToken = null;
   memorySession = null;
   try {
     localStorage.removeItem(SESSION_KEY);

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Splash } from "@/components/shell/Splash";
+import { isApiError } from "@/services/apiError";
 import { getCurrentUser } from "@/services/authService";
-import { getSession } from "@/services/sessionStore";
+import { clearSession, getSession } from "@/services/sessionStore";
 import { useSession } from "@/hooks/useSession";
 
 /** Once the splash is up it stays at least this long, so a fast `/auth/me` doesn't flash it (S02 §6). */
@@ -42,12 +43,16 @@ export default function RequireAuth() {
         return;
       }
 
+      const initial = !initialCheckSettled;
       try {
         await getCurrentUser();
         settle(true);
-      } catch {
-        // HTTP 401 clears the matching session. A network/server failure should
-        // leave a valid local session available for reconnecting and offline use.
+      } catch (error) {
+        // HTTP 401 marks the session expired (S10): later on, the «الجلسة انتهت» dialog shows over the screen so
+        // its unsent work can be saved. On the first check after the app loads there is nothing to save yet, so
+        // the session ends and the login opens straight away. A network/server failure leaves a valid local
+        // session available for reconnecting and offline use.
+        if (initial && isApiError(error) && error.status === 401 && !cancelled) clearSession();
         settle(Boolean(getSession()));
       }
     }

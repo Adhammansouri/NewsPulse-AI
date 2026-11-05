@@ -11,6 +11,7 @@ import type { NewsFeedItem } from "@newsplus/shared";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { readDeskHandoff } from "@/services/deskHandoff";
 import { IconButton } from "@/ui/IconButton";
+import { AiCooldownCard } from "@/ui/ErrorSurface";
 import { DeskBreaking } from "../breaking/DeskBreaking";
 import { BREAKING_PARAM, breakingPath, isBreakingMode } from "../breaking/breakingModel";
 import { ArchiveDrawer } from "../studio/ArchiveDrawer";
@@ -274,6 +275,7 @@ export default function NewsPage() {
           <DeskStudio desk={desk} selected={selected} languages={wire.languages} wireLoading={wire.loading} />
         )}
         <ArchiveDrawer desk={desk} />
+        <AiCooldownCard />
       </div>
     </div>
   );

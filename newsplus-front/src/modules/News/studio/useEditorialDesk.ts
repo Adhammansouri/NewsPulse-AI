@@ -6,7 +6,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import type { CarouselOptions, NewsFeedItem, NewsStoryFormat, NewsSummarizeData, NewsSummarizeRequest } from "@newsplus/shared";
+import type {
+  CarouselOptions,
+  EditorialConversationDetail,
+  EditorialMemoryStatus,
+  NewsFeedItem,
+  NewsStoryFormat,
+  NewsSummarizeData,
+  NewsSummarizeRequest,
+} from "@newsplus/shared";
+import { useAiCooldown } from "@/hooks/useAiCooldown";
+import { useUnsentDraft } from "@/hooks/useUnsentDraft";
 import {
   getEditorialConversation,
   listEditorialMemory,
@@ -14,6 +24,9 @@ import {
   reviseEditorialConversation,
   updateEditorialMemory,
 } from "@/services/editorialService";
+import { toolErrorKind } from "@/services/toolErrors";
+import { takeUnsentDraft } from "@/services/unsentDrafts";
+import type { ConflictInfo } from "@/ui/ErrorSurface";
 import { useToast } from "@/ui/Toast";
 import { readBriefingPins } from "../wire/briefingPins";
 import {
@@ -25,12 +38,26 @@ import {
   useDraftRunState,
   watchDraftRun,
 } from "./draftRuns";
+import { showRuleSavedToast } from "./archive/useArchive";
+import { DRAFT_COPY } from "./draft/copy";
+import { restoredToast } from "./draft/restoreToast";
 import { readCarouselOptions, readLastFormat, writeCarouselOptions, writeLastFormat } from "./formatPrefs";
 import { studioLink } from "./studioLink";
 
 type Format = NewsSummarizeData["format"];
 /** The run this studio shows while it is generating. */
 type ActiveRun = { id: number; body: NewsSummarizeRequest };
+
+/** What «الجلسة انتهت» keeps of the draft view (S10): the conversation and the dock's unsent text. */
+type UnsentEditorial = { conversationId: string; instruction: string };
+
+/** The number of the conversation's current version. */
+function currentNumber(detail: EditorialConversationDetail): number | null {
+  return detail.versions.find((version) => version.id === detail.currentVersionId)?.number ?? detail.versions.at(-1)?.number ?? null;
+}
+
+/** Version restores (chips and the «رجعت للنسخة» undo), so the toast's undo can check one is running. */
+const RESTORE_KEY = ["editorial-restore"];
 
 function requestFormat(body: NewsSummarizeRequest): Format {
   return body.briefing ? "briefing" : (body.format ?? "desk");
@@ -64,6 +91,10 @@ export function useEditorialDesk({
   /** «أعد المحاولة» sends the failed request again. */
   const [lastBody, setLastBody] = useState<NewsSummarizeRequest | null>(null);
   const runState = useDraftRunState(queryClient, activeRun?.id ?? null);
+  /** S10: the AI rate-limit cooldown — every AI action here waits for it. */
+  const cooldown = useAiCooldown();
+  /** S10 409: the server's newer version, fetched without replacing the draft on screen until «اعرض ن{n}». */
+  const [conflict, setConflict] = useState<{ conversationId: string; detail: EditorialConversationDetail } | null>(null);
 
   const onOpenItemRef = useRef(onOpenItem);
   useEffect(() => {
@@ -109,17 +140,48 @@ export function useEditorialDesk({
       queryClient.setQueryData(["editorial-conversation", data.conversation.id], data.conversation);
       void queryClient.invalidateQueries({ queryKey: ["editorial-conversations"] });
       void queryClient.invalidateQueries({ queryKey: ["editorial-memory"] });
+      const saved = currentNumber(data.conversation);
+      if (saved !== null) toast.show(DRAFT_COPY.versionSavedToast(saved));
     },
-    onError() {
+    onError(error, { id }) {
+      if (toolErrorKind(error) === "conflict") {
+        // States «المسودة اتعدّلت من مكان تاني»: learn the newer version, keep this one on screen until «اعرض ن{n}».
+        setConflict(null);
+        getEditorialConversation(id).then(
+          (detail) => setConflict({ conversationId: id, detail }),
+          () => void queryClient.invalidateQueries({ queryKey: ["editorial-conversation", id] }),
+        );
+        return;
+      }
       void queryClient.invalidateQueries({ queryKey: ["editorial-conversation", conversationId] });
     },
   });
 
   const restoreMutation = useMutation({
-    mutationFn: ({ id, versionId }: { id: string; versionId: string }) => restoreEditorialVersion(id, versionId),
-    onSuccess(data) {
+    mutationKey: RESTORE_KEY,
+    mutationFn: ({ id, versionId }: { id: string; versionId: string; undoTo?: string; undo?: boolean }) =>
+      restoreEditorialVersion(id, versionId),
+    onSuccess(data, { id, versionId, undoTo, undo }) {
       queryClient.setQueryData(["editorial-conversation", data.conversation.id], data.conversation);
       void queryClient.invalidateQueries({ queryKey: ["editorial-conversations"] });
+      if (undo) {
+        const saved = currentNumber(data.conversation);
+        if (saved !== null) toast.show(DRAFT_COPY.versionSavedToast(saved));
+        return;
+      }
+      const source = data.conversation.versions.find((version) => version.id === versionId)?.number;
+      if (source === undefined) return;
+      // «رجعت للنسخة ١» + «تراجع»: the undo restores the version that was current before.
+      restoredToast(
+        toast,
+        source,
+        undoTo
+          ? () => {
+              // Read live: this closure outlives the render it was made in.
+              if (queryClient.isMutating({ mutationKey: RESTORE_KEY }) === 0) restoreMutation.mutate({ id, versionId: undoTo, undo: true });
+            }
+          : undefined,
+      );
     },
   });
 
@@ -130,12 +192,17 @@ export function useEditorialDesk({
       instruction: next,
     }: {
       id: string;
-      status?: "approved" | "rejected" | "disabled";
+      status?: EditorialMemoryStatus;
       instruction?: string;
+      /** The suggestion's wording before «احفظ للفريق»: «تراجع» puts it back. */
+      suggested?: string;
     }) => updateEditorialMemory(id, { status, instruction: next }),
-    onSuccess() {
+    onSuccess(_rule, { id, status, suggested }) {
       void queryClient.invalidateQueries({ queryKey: ["editorial-conversation", conversationId] });
       void queryClient.invalidateQueries({ queryKey: ["editorial-memory"] });
+      if (status === "approved" && suggested !== undefined) {
+        showRuleSavedToast(toast, () => memoryMutation.mutate({ id, status: "pending", instruction: suggested }));
+      }
     },
   });
 
@@ -148,6 +215,8 @@ export function useEditorialDesk({
   const conversationLoading = Boolean(conversationId) && conversationDetailQuery.isFetching && !detail?.copy;
   const showEditorial = Boolean(summary) || conversationLoading;
   const busy = generating || reviseMutation.isPending || restoreMutation.isPending || memoryMutation.isPending;
+  /** AI actions also wait for the rate-limit cooldown (restore, memory and browsing don't). */
+  const aiBlocked = busy || cooldown.active;
   /** The last generation failed (the studio shows it with «أعد المحاولة»). */
   const generateError = runError ?? failed;
   // The wire shows its own feed / sources errors (Main-error); the studio shows the editorial ones.
@@ -198,6 +267,7 @@ export function useEditorialDesk({
   }
 
   function start(body: NewsSummarizeRequest) {
+    if (cooldown.active) return;
     setRunError(null);
     setRunResult(null);
     setLastBody(body);
@@ -214,7 +284,7 @@ export function useEditorialDesk({
   }
 
   function runSummarize(body: NewsSummarizeRequest) {
-    if (busy) return;
+    if (aiBlocked) return;
     start(body);
   }
 
@@ -227,6 +297,7 @@ export function useEditorialDesk({
     reviseMutation.reset();
     restoreMutation.reset();
     memoryMutation.reset();
+    setConflict(null);
     setConversationId(null);
     setInstruction("");
   }
@@ -239,6 +310,7 @@ export function useEditorialDesk({
 
   /** «موجز الساعة»: the briefing of the top headlines, pinned stories first. */
   function startBriefing() {
+    if (cooldown.active) return;
     resetStory();
     setSelectedFormat("briefing");
     start(storyRequest("briefing"));
@@ -246,6 +318,7 @@ export function useEditorialDesk({
 
   /** Swipe «اكتب منشور»: the story with «منشور سوشيال» selected, generating at once. */
   function startSocial(item: NewsFeedItem) {
+    if (cooldown.active) return;
     resetStory();
     setSelectedFormat("social");
     start({ itemId: item.id, language: "ar", format: "social" });
@@ -315,13 +388,14 @@ export function useEditorialDesk({
   /** Sends a revision: every one is saved as a new version (`POST /editorial/conversations/:id/revise`). */
   function revise(text: string) {
     const value = text.trim();
-    if (busy || !conversationId || !value) return;
+    if (aiBlocked || !conversationId || !value) return;
+    setConflict(null);
     reviseMutation.mutate({ id: conversationId, text: value });
   }
 
   /** The dock: Enter / «إرسال». The request shows in the thread while the editor works, so the field empties. */
   function submitRevision() {
-    if (busy || !conversationId || !instruction.trim()) return;
+    if (aiBlocked || !conversationId || !instruction.trim()) return;
     revise(instruction);
     setInstruction("");
   }
@@ -329,13 +403,24 @@ export function useEditorialDesk({
   /** «أعد المحاولة» (MobDraft-error): the saved request again. */
   function retryRevision() {
     const failed = reviseMutation.variables;
-    if (!busy && failed) reviseMutation.mutate(failed);
+    if (!aiBlocked && failed) reviseMutation.mutate(failed);
   }
 
   /** An older version chip: the API copies it into a new version (`POST /editorial/conversations/:id/restore`). */
   function restore(versionId: string) {
     if (busy || !conversationId) return;
-    restoreMutation.mutate({ id: conversationId, versionId });
+    restoreMutation.mutate({ id: conversationId, versionId, undoTo: detail?.currentVersionId });
+  }
+
+  /** «اعرض ن{n}» (409): show the newer version; the request that hit the conflict goes back to the dock. */
+  function showConflict() {
+    if (!conflict) return;
+    queryClient.setQueryData(["editorial-conversation", conflict.conversationId], conflict.detail);
+    void queryClient.invalidateQueries({ queryKey: ["editorial-conversation", conflict.conversationId] });
+    const text = reviseMutation.variables?.text;
+    reviseMutation.reset();
+    setConflict(null);
+    if (text) setInstruction(text);
   }
 
   function openConversation(id: string) {
@@ -345,6 +430,21 @@ export function useEditorialDesk({
     setDrawerOpen(false);
     onShowDesk();
   }
+
+  // S10 401: «الجلسة انتهت» keeps the dock's unsent text (or the request the expiry refused) with its conversation…
+  useUnsentDraft("editorial", (): UnsentEditorial | null => {
+    const text = instruction.trim() ? instruction : reviseMutation.isError ? (reviseMutation.variables?.text ?? "") : "";
+    return conversationId && text.trim() ? { conversationId, instruction: text } : null;
+  });
+  // …and after signing in, this screen reopens that conversation with the text back in the dock (once).
+  const openConversationRef = useRef(openConversation);
+  openConversationRef.current = openConversation;
+  useEffect(() => {
+    const saved = takeUnsentDraft<UnsentEditorial>("editorial");
+    if (!saved?.conversationId) return;
+    openConversationRef.current(saved.conversationId);
+    setInstruction(saved.instruction);
+  }, []);
 
   function closeDrawer() {
     setDrawerOpen(false);
@@ -360,6 +460,8 @@ export function useEditorialDesk({
     conversationLoading,
     showEditorial,
     busy,
+    /** S10: the AI rate-limit cooldown is running — AI buttons are disabled. */
+    aiCooldown: cooldown.active,
     error,
     /** Opening a saved conversation, restoring a version or a memory decision failed. */
     draftError: conversationDetailQuery.error ?? restoreMutation.error ?? memoryMutation.error,
@@ -368,6 +470,11 @@ export function useEditorialDesk({
     pendingInstruction,
     failedInstruction,
     reviseError: reviseMutation.error,
+    /** 409 on a revision: the newer version and «اعرض ن{n}» (null until it is known). */
+    conflict:
+      conflict && conflict.conversationId === conversationId
+        ? ({ version: currentNumber(conflict.detail) ?? 0, onShow: showConflict } satisfies ConflictInfo)
+        : null,
     generating,
     generateError,
     /** Format of the run being written. */
@@ -400,8 +507,12 @@ export function useEditorialDesk({
     submitRevision,
     retryRevision,
     restore,
-    saveMemory: (id: string, next?: string) =>
-      memoryMutation.mutate(next === undefined ? { id, status: "approved" } : { id, status: "approved", instruction: next }),
+    saveMemory: (id: string, next?: string) => {
+      const suggested = detail?.pendingMemory.find((rule) => rule.id === id)?.instruction;
+      memoryMutation.mutate(
+        next === undefined ? { id, status: "approved", suggested } : { id, status: "approved", instruction: next, suggested },
+      );
+    },
     dismissMemory: (id: string) => memoryMutation.mutate({ id, status: "rejected" }),
     openConversation,
     closeDrawer,

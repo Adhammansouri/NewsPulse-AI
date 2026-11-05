@@ -7,8 +7,8 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import type { EditorialMemoryListData, EditorialMemoryRule, EditorialMemoryUpdateRequest } from "@newsplus/shared";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { listEditorialConversations, listEditorialMemory, updateEditorialMemory } from "@/services/editorialService";
-import { toolErrorMessage } from "@/services/toolErrors";
-import { useToast } from "@/ui/Toast";
+import { isSystemHandledError, toolErrorMessage } from "@/services/toolErrors";
+import { ToastGlyph, useToast, type ToastApi } from "@/ui/Toast";
 import { ARCHIVE_COPY, splitMemory } from "./archiveModel";
 
 export const SEARCH_DEBOUNCE_MS = 300;
@@ -58,6 +58,17 @@ type MemoryPatch = { rule: EditorialMemoryRule; patch: EditorialMemoryUpdateRequ
 /** Toast glyph of «القاعدة اتحفظت لذاكرة الفريق»: the States board draws the memory bulb without its base. */
 const SAVED_GLYPH = "M12 3a6 6 0 0 1 6 6c0 2.2-1.2 3.6-2.5 4.7-.7.6-1 1.3-1 2.1V17h-5v-1.2c0-.8-.3-1.5-1-2.1C7.2 12.6 6 11.2 6 9a6 6 0 0 1 6-6z";
 
+/**
+ * «القاعدة اتحفظت لذاكرة الفريق» + «تراجع» (States toasts[3]), after a suggestion was approved — from the archive
+ * or the draft's «احفظ للفريق». The undo puts the rule back to pending with the wording it was suggested with.
+ */
+export function showRuleSavedToast(toast: ToastApi, onUndo: () => void) {
+  toast.show(ARCHIVE_COPY.ruleSaved, {
+    icon: <ToastGlyph path={SAVED_GLYPH} />,
+    action: { onAction: onUndo },
+  });
+}
+
 export function useArchiveMemory() {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -91,18 +102,14 @@ export function useArchiveMemory() {
     },
     onSuccess(_saved, { rule, patch }) {
       if (rule.status === "pending" && patch.status === "approved") {
-        toast.show(ARCHIVE_COPY.ruleSaved, {
-          icon: (
-            <svg className="ic" viewBox="0 0 24 24" aria-hidden="true" style={{ color: "#5eead4" }}>
-              <path d={SAVED_GLYPH} />
-            </svg>
-          ),
-        });
+        showRuleSavedToast(toast, () =>
+          update({ ...rule, status: "approved" }, { status: "pending", instruction: rule.instruction }),
+        );
       }
     },
     onError(error, _vars, context) {
       if (context?.previous) queryClient.setQueryData(ARCHIVE_MEMORY_KEY, context.previous);
-      toast.show(toolErrorMessage(error), { icon: "error-circle" });
+      if (!isSystemHandledError(error)) toast.show(toolErrorMessage(error), { icon: "error-circle" });
     },
     onSettled(_data, _error, { rule }) {
       track(rule.id, false);

@@ -2,7 +2,7 @@ import { useCallback, useSyncExternalStore } from "react";
 import { isStandaloneDisplay } from "@/services/pwaDetect";
 
 // The browser fires `beforeinstallprompt` once, early. Keeping the deferred event in one module-level
-// store lets every install entry point (PwaInstallBanner, «المزيد» → «ثبّت التطبيق») use the same prompt.
+// store lets every install entry point (PwaInstall, «المزيد» → «ثبّت التطبيق») use the same prompt.
 let deferredPrompt: BeforeInstallPromptEvent | null = null;
 let listening = false;
 const listeners = new Set<() => void>();

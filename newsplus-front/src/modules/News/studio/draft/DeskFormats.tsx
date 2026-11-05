@@ -6,8 +6,7 @@ import { toArabicDigits } from "@/utils/arabic";
 import { cx } from "@/ui/cx";
 import { Icon } from "@/ui/Icon";
 import { formatSummaryClipboard } from "../../newsFormat";
-import { formatCopy } from "../formats";
-import { DRAFT_COPY } from "./copy";
+import { DRAFT_COPY, formatNoun } from "./copy";
 import { DraftBlock, Lines } from "./DraftBlock";
 import {
   briefingItems,
@@ -269,7 +268,7 @@ function DeskBriefing({ data, rev, typeset }: FormatProps) {
       <DraftBlock
         label={DRAFT_COPY.briefingHead(items.length)}
         changedIn={changedIn(rev, "title")}
-        copy={{ key: "briefing", text: formatSummaryClipboard(data), toast: DRAFT_COPY.copiedAll(formatCopy("briefing", 0).name) }}
+        copy={{ key: "briefing", text: formatSummaryClipboard(data), toast: DRAFT_COPY.copiedAll(formatNoun("briefing")) }}
       >
         <h2 className="t-display" dir={dir}>
           {data.title}

@@ -5,7 +5,7 @@ import { cx } from "@/ui/cx";
 import { Icon } from "@/ui/Icon";
 import { formatSummaryClipboard } from "../../newsFormat";
 import { formatCopy } from "../formats";
-import { DRAFT_COPY } from "./copy";
+import { DRAFT_COPY, formatNoun } from "./copy";
 import { changedIn, type FormatProps } from "./DeskFormats";
 import { DraftBlock, Lines } from "./DraftBlock";
 import { briefingItems, docShape, draftDir, socialModel, textDir, videoModel } from "./draftModel";
@@ -246,7 +246,7 @@ function MobBriefing({ data, rev, typeset, createdAt }: FormatProps & { createdA
       <DraftBlock
         label={label}
         changedIn={changedIn(rev, "title")}
-        copy={{ key: "briefing", text: formatSummaryClipboard(data), toast: DRAFT_COPY.copiedAll(name) }}
+        copy={{ key: "briefing", text: formatSummaryClipboard(data), toast: DRAFT_COPY.copiedAll(formatNoun("briefing")) }}
       >
         <p className="t-display" style={{ fontSize: "20px" }} dir={dir}>
           {data.title}

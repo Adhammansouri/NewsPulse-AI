@@ -7,6 +7,7 @@ export async function generateContent(body: GenerateRequest, signal?: AbortSigna
   const response = await apiRequest<ApiSuccessResponse<GenerateData>>(API_URLS.GENERATE.CONTENT, {
     method: "POST",
     auth: true,
+    ai: true,
     body: JSON.stringify(body),
     signal,
   });

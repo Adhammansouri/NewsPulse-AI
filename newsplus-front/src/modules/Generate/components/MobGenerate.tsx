@@ -195,7 +195,7 @@ function MobForm({ desk }: { desk: GenerateDesk }) {
       </main>
 
       <div className="m-cta" style={{ paddingBottom: "12px" }}>
-        {desk.error && !desk.urlRejected && <ToolErrorNotice error={desk.error} />}
+        {desk.error && !desk.urlRejected && <ToolErrorNotice error={desk.error} onRetry={desk.retry} />}
         {empty && <p className="m-cta__hint">الصق رابط أو اكتب موضوع عشان تبدأ</p>}
         <Button variant="ai" block size="lg" disabled={!desk.canSubmit} onClick={() => desk.submit()}>
           <Icon name="sparkle" />
@@ -317,7 +317,7 @@ function MobDone({ desk, draft }: { desk: GenerateDesk; draft: GenerateDraft }) 
             <div className="block" style={BLOCK_STYLE}>
               <div className="block__label">
                 العنوان
-                <CopyButton done={desk.copied === "title"} onClick={() => desk.copyBlock("title", draft.title)} />
+                <CopyButton done={desk.copied === "title"} onClick={(control) => desk.copyBlock("title", draft.title, control)} />
               </div>
               <h1 className="t-display" style={{ fontSize: "22px" }} lang={draft.language} dir={dir}>
                 {draft.title}
@@ -352,12 +352,13 @@ function MobDone({ desk, draft }: { desk: GenerateDesk; draft: GenerateDraft }) 
             size="sm"
             style={{ minHeight: "42px" }}
             loading={desk.social.pending}
+            disabled={desk.social.blocked}
             onClick={() => desk.social.start(packCopy(draft), draft.language)}
           >
             حوّله لمنشور
           </Button>
         </div>
-        <Button variant="ink" block size="lg" onClick={() => desk.copyAll(draft)}>
+        <Button variant="ink" block size="lg" onClick={(event) => desk.copyAll(draft, event.currentTarget)}>
           <Icon name="copy" />
           نسخ {STYLE_DEFINITE[draft.style]} كاملاً
         </Button>

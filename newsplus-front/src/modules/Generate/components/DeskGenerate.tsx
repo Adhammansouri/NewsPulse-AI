@@ -16,6 +16,7 @@ import { Popover } from "@/ui/Popover";
 import { PulseLine } from "@/ui/PulseLine";
 import { Skeleton } from "@/ui/Skeleton";
 import { toArabicDigits } from "@/utils/arabic";
+import { AiCooldownCard } from "@/ui/ErrorSurface";
 import {
   LIMITS_LINE,
   SOURCE_MODE_LABEL,
@@ -226,7 +227,7 @@ export function DeskGenerate({ desk }: { desk: GenerateDesk }) {
         </div>
 
         <div className="col" style={{ gap: "6px", padding: "14px 26px 18px", borderTop: "1px solid var(--line)" }}>
-          {desk.error && !desk.urlRejected && <ToolErrorNotice error={desk.error} />}
+          {desk.error && !desk.urlRejected && <ToolErrorNotice error={desk.error} onRetry={desk.retry} />}
           {desk.tooLong && (
             <p className="hint hint--error" role="alert">
               الحد الأقصى للتعيين {groupedArabic(ASSIGNMENT_MAX)} حرف وللزاوية {groupedArabic(ANGLE_MAX)} حرف.
@@ -253,6 +254,7 @@ export function DeskGenerate({ desk }: { desk: GenerateDesk }) {
       <div className="grow col" style={{ background: "var(--bg)" }}>
         {desk.pending ? <Writing desk={desk} /> : desk.active ? <Done desk={desk} draft={desk.active} /> : <Empty />}
       </div>
+      <AiCooldownCard />
     </div>
   );
 }
@@ -348,12 +350,18 @@ function Done({ desk, draft }: { desk: GenerateDesk; draft: GenerateDraft }) {
           <Icon name="translate" size="sm" />
           ترجم
         </Link>
-        <Button variant="ghost" size="sm" loading={desk.social.pending} onClick={() => desk.social.start(packCopy(draft), draft.language)}>
+        <Button
+          variant="ghost"
+          size="sm"
+          loading={desk.social.pending}
+          disabled={desk.social.blocked}
+          onClick={() => desk.social.start(packCopy(draft), draft.language)}
+        >
           {!desk.social.pending && <Icon name="sparkle" size="sm" style={{ color: "var(--cyan)" }} />}
           حوّله لمنشور سوشيال
         </Button>
         <IconButton label="تنزيل" icon="download" onClick={() => desk.download(draft)} />
-        <Button variant="ink" size="sm" onClick={() => desk.copyAll(draft)}>
+        <Button variant="ink" size="sm" onClick={(event) => desk.copyAll(draft, event.currentTarget)}>
           <Icon name="copy" size="sm" />
           نسخ الكل
         </Button>
@@ -373,7 +381,7 @@ function Done({ desk, draft }: { desk: GenerateDesk; draft: GenerateDraft }) {
             <div className="block">
               <div className="block__label">
                 العنوان
-                <CopyButton done={desk.copied === "title"} onClick={() => desk.copyBlock("title", draft.title)} />
+                <CopyButton done={desk.copied === "title"} onClick={(control) => desk.copyBlock("title", draft.title, control)} />
               </div>
               <h2 className="t-hero" style={{ fontSize: "30px" }} lang={draft.language} dir={dir}>
                 {draft.title}
@@ -383,7 +391,7 @@ function Done({ desk, draft }: { desk: GenerateDesk; draft: GenerateDraft }) {
               <div className="block">
                 <div className="block__label">
                   المقدمة
-                  <CopyButton done={desk.copied === "dek"} onClick={() => desk.copyBlock("dek", draft.dek)} />
+                  <CopyButton done={desk.copied === "dek"} onClick={(control) => desk.copyBlock("dek", draft.dek, control)} />
                 </div>
                 <p
                   className="t-head"
@@ -411,9 +419,9 @@ function Done({ desk, draft }: { desk: GenerateDesk; draft: GenerateDraft }) {
 }
 
 /** `button.block__copy`: «نسخ» → «تم النسخ» (`is-done`) for a moment, as on the Main board. */
-export function CopyButton({ done, onClick }: { done: boolean; onClick: () => void }) {
+export function CopyButton({ done, onClick }: { done: boolean; onClick: (control: HTMLButtonElement) => void }) {
   return (
-    <button className={cx("block__copy", done && "is-done")} type="button" onClick={onClick}>
+    <button className={cx("block__copy", done && "is-done")} type="button" onClick={(event) => onClick(event.currentTarget)}>
       {done ? "تم النسخ" : "نسخ"}
     </button>
   );

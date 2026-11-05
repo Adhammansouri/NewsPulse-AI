@@ -1,6 +1,7 @@
 // Main · studio footer: the chosen format and its hint, «الأرشيف», and the AI button named after the format
 // with its `Ctrl ↵` hint — Ctrl/⌘+Enter presses it from anywhere in the studio. Inline styles are the board's own.
 import { useEffect, useRef } from "react";
+import { useAiCooldown } from "@/hooks/useAiCooldown";
 import { Button } from "@/ui/Button";
 import { Icon } from "@/ui/Icon";
 import { STUDIO_COPY, type FormatCopy } from "./formats";
@@ -17,6 +18,8 @@ export function StudioFooter({
   onArchive: () => void;
   onGenerate: () => void;
 }) {
+  // S10: disabled during the AI rate-limit cooldown (the action itself also waits for it).
+  const cooldown = useAiCooldown();
   const generateRef = useRef(onGenerate);
   useEffect(() => {
     generateRef.current = onGenerate;
@@ -48,7 +51,7 @@ export function StudioFooter({
         <Icon name="history" />
         {STUDIO_COPY.archive}
       </Button>
-      <Button variant="ai" size="lg" onClick={onGenerate} style={{ minWidth: "230px" }} kbd={STUDIO_COPY.kbd}>
+      <Button variant="ai" size="lg" disabled={cooldown.active} onClick={onGenerate} style={{ minWidth: "230px" }} kbd={STUDIO_COPY.kbd}>
         <Icon name="sparkle" />
         {copy.action}
       </Button>

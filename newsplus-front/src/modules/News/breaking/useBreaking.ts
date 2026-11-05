@@ -5,11 +5,13 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { NewsBreakingData, NewsFeedItem } from "@newsplus/shared";
 import { features } from "@/config/features";
+import { useAiCooldown } from "@/hooks/useAiCooldown";
 import { PRESENCE_HEARTBEAT_MS, usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
 import { useSession } from "@/hooks/useSession";
 import { getBreakingOutputs } from "@/services/breakingDigestService";
 import { getEditorialConversation } from "@/services/editorialService";
 import { getPresence } from "@/services/presenceService";
+import { isCooldownError } from "@/services/toolErrors";
 import { formatCopy } from "../studio/formats";
 import { coverage, firstPublishedAt, splitPost, teammateLine } from "./breakingModel";
 import { useCopyFeedback } from "./useCopyFeedback";
@@ -23,6 +25,8 @@ export function useBreaking(item: NewsFeedItem, { mobile }: { mobile: boolean })
   /** The source count the outputs were written for; it follows the item while «تحديث تلقائي» is on. */
   const [writtenFor, setWrittenFor] = useState(sources);
   if (autoUpdate && sources > writtenFor) setWrittenFor(sources);
+  // S10: the outputs are an AI call — they wait for the rate-limit cooldown and are written when it ends.
+  const cooling = useAiCooldown().active;
 
   const outputs = useQuery({
     queryKey: ["news-breaking", item.id, writtenFor],
@@ -32,7 +36,10 @@ export function useBreaking(item: NewsFeedItem, { mobile }: { mobile: boolean })
     retry: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    enabled: !cooling,
   });
+  /** A 429 the cooldown card covers: keep the skeleton until the outputs can be written. */
+  const waiting = cooling || isCooldownError(outputs.error);
 
   /**
    * The outputs on screen. They stay while a new source is being written in (and if that update fails); `at`
@@ -74,8 +81,8 @@ export function useBreaking(item: NewsFeedItem, { mobile }: { mobile: boolean })
     data,
     post: data ? splitPost(data.post) : null,
     /** First request (or its retry): no outputs yet. */
-    loading: !data && (outputs.isPending || outputs.isFetching),
-    error: !data && outputs.isError && !outputs.isFetching ? outputs.error : null,
+    loading: !data && (outputs.isPending || outputs.isFetching || waiting),
+    error: !data && outputs.isError && !outputs.isFetching && !waiting ? outputs.error : null,
     retry: () => void outputs.refetch(),
     generation: current?.at ?? 0,
     copied,

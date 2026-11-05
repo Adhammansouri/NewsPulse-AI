@@ -13,7 +13,7 @@ import { formatSummaryClipboard } from "../../newsFormat";
 import { DeskDraftSkeleton } from "../DraftSkeleton";
 import { formatCopy } from "../formats";
 import type { EditorialDesk } from "../useEditorialDesk";
-import { DRAFT_COPY, quickRevisions, versionLabel } from "./copy";
+import { DRAFT_COPY, formatNoun, quickRevisions, versionLabel } from "./copy";
 import { DeskFormat } from "./DeskFormats";
 import { DraftCopyProvider, selectText, useDraftCopy } from "./DraftBlock";
 import { downloadText, fileStamp, useCompactStudio, useTypeset } from "./draftHooks";
@@ -111,7 +111,7 @@ function DraftView({ desk, data }: { desk: EditorialDesk; data: NewsSummarizeDat
   const chips: QuickChip[] = quickRevisions(format, false).map((label) => ({ key: label, label, run: () => desk.revise(label) }));
 
   function copyAll() {
-    copy("all", formatSummaryClipboard(data), DRAFT_COPY.copiedAll(name), () => selectText(draftRef.current));
+    copy("all", formatSummaryClipboard(data), DRAFT_COPY.copiedAll(formatNoun(format)), () => selectText(draftRef.current));
   }
 
   const thread = (
@@ -161,7 +161,7 @@ function DraftView({ desk, data }: { desk: EditorialDesk; data: NewsSummarizeDat
             {DRAFT_COPY.provenance(data.sources.length, desk.approvedRules)}
           </p>
           {desk.reviseError && desk.failedInstruction && (
-            <ReviseError error={desk.reviseError} instruction={desk.failedInstruction} onRetry={desk.retryRevision} style={NOTICE_GAP} />
+            <ReviseError error={desk.reviseError} instruction={desk.failedInstruction} onRetry={desk.retryRevision} conflict={desk.conflict} style={NOTICE_GAP} />
           )}
           {desk.draftError && <DraftError error={desk.draftError} style={NOTICE_GAP} />}
           <VersionDraft key={data.versionId ?? "draft"} versionKey={data.versionId ?? "draft"} data={data} desk={desk} rev={rev} />
@@ -210,5 +210,5 @@ function VersionDraft({
   rev: ReturnType<typeof revision>;
 }) {
   const typeset = useTypeset(versionKey);
-  return <DeskFormat data={data} rev={rev} typeset={typeset} busy={desk.busy} onRevise={desk.revise} />;
+  return <DeskFormat data={data} rev={rev} typeset={typeset} busy={desk.busy || desk.aiCooldown} onRevise={desk.revise} />;
 }

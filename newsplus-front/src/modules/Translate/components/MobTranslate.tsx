@@ -166,7 +166,7 @@ export function MobTranslate({ desk }: { desk: TranslateDesk }) {
           </p>
         )}
 
-        {desk.error && !desk.pending && <ToolErrorNotice error={desk.error} />}
+        {desk.error && !desk.pending && <ToolErrorNotice error={desk.error} onRetry={desk.submit} />}
 
         {desk.phase === "busy" && (
           <AiPanel as="section" className="col" style={{ padding: "16px", gap: "12px", boxShadow: "none" }} aria-live="polite">
@@ -211,7 +211,7 @@ export function MobTranslate({ desk }: { desk: TranslateDesk }) {
       <div className="m-cta" style={{ paddingBottom: "12px" }}>
         {desk.phase === "done" && !desk.stale ? (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-            <Button variant="quiet" loading={desk.socialPending} onClick={desk.startPost}>
+            <Button variant="quiet" loading={desk.socialPending} disabled={desk.aiCooldown} onClick={desk.startPost}>
               في منشور
             </Button>
             <Button variant="ink" onClick={desk.copyTranslation}>

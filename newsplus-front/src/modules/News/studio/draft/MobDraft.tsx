@@ -16,7 +16,7 @@ import { MobDraftSkeleton } from "../DraftSkeleton";
 import { formatCopy } from "../formats";
 import { M_CTA_STYLE } from "../MobStory";
 import type { EditorialDesk } from "../useEditorialDesk";
-import { DRAFT_COPY, MOB_FORMAT_NAME, offersToVideo, quickRevisions, redrawSlide, TO_VIDEO } from "./copy";
+import { DRAFT_COPY, formatNoun, MOB_FORMAT_NAME, offersToVideo, quickRevisions, redrawSlide, TO_VIDEO } from "./copy";
 import { VersionChips } from "./DeskDraft";
 import { DraftCopyProvider, selectText, useDraftCopy } from "./DraftBlock";
 import { useTypeset } from "./draftHooks";
@@ -85,7 +85,7 @@ function DraftView({ desk, data, onBack }: { desk: EditorialDesk; data: NewsSumm
   if (offersToVideo(format, true)) chips.push({ key: "video", label: TO_VIDEO, run: () => desk.switchFormat("video") });
 
   function copyAll() {
-    copy("all", formatSummaryClipboard(data), DRAFT_COPY.copiedAll(formatCopy(format, 0).name), () => selectText(scrollRef.current));
+    copy("all", formatSummaryClipboard(data), DRAFT_COPY.copiedAll(formatNoun(format)), () => selectText(scrollRef.current));
   }
 
   const versionKey = data.versionId ?? "draft";
@@ -108,7 +108,7 @@ function DraftView({ desk, data, onBack }: { desk: EditorialDesk; data: NewsSumm
           {DRAFT_COPY.provenance(data.sources.length, desk.approvedRules)}
         </p>
         {desk.reviseError && desk.failedInstruction && (
-          <ReviseError error={desk.reviseError} instruction={desk.failedInstruction} onRetry={desk.retryRevision} />
+          <ReviseError error={desk.reviseError} instruction={desk.failedInstruction} onRetry={desk.retryRevision} conflict={desk.conflict} />
         )}
         {desk.draftError && <DraftError error={desk.draftError} />}
         {carousel ? (
@@ -155,7 +155,7 @@ function FormatVersion({
   const typeset = useTypeset(versionKey);
   const createdAt =
     desk.detail?.versions.find((version) => version.id === data.versionId)?.createdAt ?? desk.detail?.createdAt ?? null;
-  return <MobFormat data={data} rev={rev} typeset={typeset} busy={desk.busy} onRevise={desk.revise} createdAt={createdAt} />;
+  return <MobFormat data={data} rev={rev} typeset={typeset} busy={desk.busy || desk.aiCooldown} onRevise={desk.revise} createdAt={createdAt} />;
 }
 
 function CarouselVersion({

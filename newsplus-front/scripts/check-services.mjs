@@ -25,6 +25,8 @@ const user = { id: "editor-1", identifier: "editor", displayName: "Editor", role
 try {
   const sessions = await vite.ssrLoadModule("/src/services/sessionStore.ts");
   const http = await vite.ssrLoadModule("/src/services/httpConfig.ts");
+  const cooldown = await vite.ssrLoadModule("/src/services/aiCooldown.ts");
+  const unsent = await vite.ssrLoadModule("/src/services/unsentDrafts.ts");
   const drafts = await vite.ssrLoadModule("/src/modules/Generate/generateDesk.ts");
   const { default: GeneratePage } = await vite.ssrLoadModule("/src/modules/Generate/pages/GeneratePage.tsx");
   const { ToastProvider } = await vite.ssrLoadModule("/src/ui/Toast.tsx");
@@ -58,13 +60,61 @@ try {
     globalThis.sessionStorage = memoryStorage();
   });
 
-  await test("authenticated 401 responses clear expired sessions for JSON and assets", async () => {
+  await test("authenticated 401 responses mark the session expired for JSON and assets until the user signs in again", async () => {
     globalThis.fetch = async () => new Response(JSON.stringify({ status: "fail", message: "unauthorized" }), { status: 401 });
     for (const request of [() => http.apiRequest("/auth/me", { auth: true }), () => http.apiBlob("/news/carousel/test/asset")]) {
       sessions.saveSession({ token: "expired-token", user }, false);
+      assert.equal(sessions.isSessionExpired(), false);
       await assert.rejects(request());
+      // S10: the screen stays behind «الجلسة انتهت»; «سجّل الدخول» ends the session.
+      assert.equal(sessions.isSessionExpired(), true);
+      assert.equal(sessions.getAccessToken(), "expired-token");
+      sessions.clearSession();
+      assert.equal(sessions.isSessionExpired(), false);
       assert.equal(sessions.getAccessToken(), null);
     }
+    // A new login (here or in another tab) is a new token: no longer expired.
+    sessions.saveSession({ token: "expired-token", user }, false);
+    await assert.rejects(http.apiRequest("/auth/me", { auth: true }));
+    sessions.saveSession({ token: "fresh-token", user }, false);
+    assert.equal(sessions.isSessionExpired(), false);
+  });
+
+  await test("the login request itself never expires a session", async () => {
+    globalThis.fetch = async () => new Response(JSON.stringify({ status: "fail", message: "invalid-credentials" }), { status: 401 });
+    sessions.saveSession({ token: "kept-token", user }, false);
+    await assert.rejects(http.apiRequest("/auth/login", { method: "POST" }));
+    assert.equal(sessions.isSessionExpired(), false);
+    assert.equal(sessions.getAccessToken(), "kept-token");
+  });
+
+  await test("a 429 from an AI route starts the AI cooldown from Retry-After; other 429s don't", async () => {
+    cooldown.clearAiCooldown();
+    globalThis.fetch = async () => new Response(JSON.stringify({ status: "fail", message: "too-many-requests" }), { status: 429, headers: { "Retry-After": "90", "X-RateLimit-Remaining": "0" } });
+    await assert.rejects(http.apiRequest("/auth/login", { method: "POST" }));
+    assert.equal(cooldown.getAiCooldown(), null);
+    sessions.saveSession({ token: "ai-token", user }, false);
+    await assert.rejects(http.apiRequest("/generate", { method: "POST", auth: true }));
+    assert.equal(cooldown.getAiCooldown(), null);
+    await assert.rejects(http.apiRequest("/generate", { method: "POST", auth: true, ai: true }));
+    assert.deepEqual(cooldown.getAiCooldown(), { remaining: 90, total: 90 });
+    // A shorter answer never cuts the running cooldown short.
+    cooldown.startAiCooldown(10);
+    assert.equal(cooldown.getAiCooldown()?.remaining, 90);
+    cooldown.clearAiCooldown();
+    assert.equal(cooldown.getAiCooldown(), null);
+  });
+
+  await test("unsent work is kept for the login and restored once", () => {
+    const stop = unsent.registerUnsentDraft("editorial", () => ({ conversationId: "c1", instruction: "اختصر الخطاف" }));
+    const empty = unsent.registerUnsentDraft("generate", () => null);
+    sessionStorage.setItem("newsplus-unsent:generate", "{\"url\":\"stale\"}");
+    unsent.saveUnsentDrafts();
+    stop();
+    empty();
+    assert.equal(unsent.readUnsentDraft("generate"), null);
+    assert.deepEqual(unsent.takeUnsentDraft("editorial"), { conversationId: "c1", instruction: "اختصر الخطاف" });
+    assert.equal(unsent.takeUnsentDraft("editorial"), null);
   });
 
   await test("temporary server errors preserve the session", async () => {
@@ -107,6 +157,7 @@ try {
     respond(new Response(JSON.stringify({ message: "unauthorized" }), { status: 401 }));
     await assert.rejects(request);
     assert.equal(sessions.getAccessToken(), "new-token");
+    assert.equal(sessions.isSessionExpired(), false);
     sessions.clearSession();
   });
 

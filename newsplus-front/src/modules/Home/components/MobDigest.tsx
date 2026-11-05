@@ -67,7 +67,7 @@ export function MobDigest({ home }: { home: Home }) {
               <Button variant="quiet" size="sm" style={ACTION_STYLE} onClick={digest.copySummary}>
                 {digest.copied ? BREAKING_COPY.copied : C.copySummary}
               </Button>
-              <Button variant="ai" size="sm" style={ACTION_STYLE} onClick={digest.toBriefing}>
+              <Button variant="ai" size="sm" style={ACTION_STYLE} disabled={digest.aiCooldown} onClick={digest.toBriefing}>
                 <Icon name="sparkle" size="sm" />
                 {C.mobToBriefing}
               </Button>

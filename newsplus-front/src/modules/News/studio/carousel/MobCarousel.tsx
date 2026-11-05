@@ -1,6 +1,7 @@
 // MobDraft-carousel: the painting progress while slides are still drawing, the slides in a snapping row with
 // their status, a notice per slide to redraw (as on DeskCarousel), and the caption. Inline styles are the board's.
 import type { NewsSummarizeData } from "@newsplus/shared";
+import { useAiCooldown } from "@/hooks/useAiCooldown";
 import { Button } from "@/ui/Button";
 import { cx } from "@/ui/cx";
 import { Icon } from "@/ui/Icon";
@@ -25,6 +26,8 @@ export function MobCarousel({
   typeset: boolean;
   onRedraw: (index: number) => void;
 }) {
+  // S10: «ارسمها تاني» is an AI call — it waits for the rate-limit cooldown.
+  const cooling = useAiCooldown().active;
   const total = views.length;
   const ready = views.filter((view) => view.phase === "ready").length;
   const drawing = views.some((view) => isPainting(view.phase));
@@ -55,7 +58,7 @@ export function MobCarousel({
             icon={<Icon name="warning" style={{ color: "var(--warn)", marginTop: "2px" }} />}
             textClassName="grow col"
             action={
-              <Button variant="quiet" size="sm" disabled={painting.includes(view.slide.index)} onClick={() => onRedraw(view.slide.index)}>
+              <Button variant="quiet" size="sm" disabled={painting.includes(view.slide.index) || cooling} onClick={() => onRedraw(view.slide.index)}>
                 <Icon name="refresh" size="sm" />
                 {CAROUSEL_COPY.redraw}
               </Button>

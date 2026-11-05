@@ -6,6 +6,7 @@ export async function translateContent(body: TranslateRequest) {
   const response = await apiRequest<ApiSuccessResponse<TranslateData>>(API_URLS.TRANSLATE.TEXT, {
     method: "POST",
     auth: true,
+    ai: true,
     body: JSON.stringify(body),
   });
   return response.data;

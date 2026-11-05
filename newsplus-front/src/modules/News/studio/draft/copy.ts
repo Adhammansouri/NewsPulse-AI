@@ -25,6 +25,9 @@ const OPENING_NOUN: Record<NewsSummaryFormat, string> = {
   carousel: "نصوص الشرائح",
 };
 
+/** The format as a definite noun, for `DRAFT_COPY.copiedAll` (States: «نُسخ المنشور كاملاً»). */
+export const formatNoun = (format: NewsSummaryFormat) => OPENING_NOUN[format];
+
 export const DRAFT_COPY = {
   // Toolbar (Main / DeskDraft) and m-bar (MobDraft)
   story: "الخبر",
@@ -86,6 +89,8 @@ export const DRAFT_COPY = {
       ? `جهّزت ${OPENING_NOUN[format]} وطبّقت ${countPhrase(rules, RULES)} من ذاكرة الفريق. اطلب أي تعديل وسأحفظه كنسخة جديدة.`
       : `جهّزت ${OPENING_NOUN[format]}. اطلب أي تعديل وسأحفظه كنسخة جديدة.`,
   versionSaved: (n: number) => `النسخة ${toArabicDigits(n)} محفوظة.`,
+  /** States toast (no full stop, unlike the thread line). */
+  versionSavedToast: (n: number) => `النسخة ${toArabicDigits(n)} محفوظة`,
   restoredTo: (n: number) => `رجعت للنسخة ${toArabicDigits(n)}`,
   thenBackTo: (n: number) => `ثم عدت للنسخة ${toArabicDigits(n)}`,
   revising: "يعدّل النص…",

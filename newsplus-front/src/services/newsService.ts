@@ -32,6 +32,7 @@ export async function summarizeNews(body: NewsSummarizeRequest, { signal }: { si
   const response = await apiRequest<ApiSuccessResponse<NewsSummarizeData>>(API_URLS.NEWS.SUMMARIZE, {
     method: "POST",
     auth: true,
+    ai: true,
     body: JSON.stringify(body),
     signal,
   });
@@ -42,6 +43,7 @@ export async function renderCarouselSlide(body: CarouselRenderRequest) {
   const response = await apiRequest<ApiSuccessResponse<NewsSummarizeData>>(API_URLS.NEWS.CAROUSEL_RENDER, {
     method: "POST",
     auth: true,
+    ai: true,
     body: JSON.stringify(body),
   });
   return response.data;

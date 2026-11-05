@@ -20,6 +20,18 @@ export const TOAST_DURATION_MS = 1900;
 /** Default action label (States board). */
 export const TOAST_UNDO_LABEL = "تراجع";
 
+/** The boards draw every toast icon in this teal. */
+const TOAST_ICON_STYLE = { color: "#5eead4" } as const;
+
+/** A States toast glyph the boards trim from an icon (one path), for `toast.show(…, { icon: <ToastGlyph … /> })`. */
+export function ToastGlyph({ path }: { path: string }) {
+  return (
+    <svg className="ic" viewBox="0 0 24 24" aria-hidden="true" style={TOAST_ICON_STYLE}>
+      <path d={path} />
+    </svg>
+  );
+}
+
 export type ToastAction = {
   /** Button label — «تراجع» by default; S05 uses «افتح». */
   label?: string;
@@ -43,7 +55,7 @@ export const Toast = forwardRef<HTMLSpanElement, ToastProps>(function Toast(
 ) {
   return (
     <span ref={ref} className={cx("toast", className)} {...rest}>
-      {typeof icon === "string" ? <Icon name={icon as IconName} style={{ color: "#5eead4" }} /> : icon}
+      {typeof icon === "string" ? <Icon name={icon as IconName} style={TOAST_ICON_STYLE} /> : icon}
       {children}
       {action && (
         <button className="btn" type="button" onClick={action.onAction}>

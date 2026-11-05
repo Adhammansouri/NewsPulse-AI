@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import type { NewsFeedItem } from "@newsplus/shared";
+import { useAiCooldown } from "@/hooks/useAiCooldown";
 import { getNewsDigest } from "@/services/breakingDigestService";
 import type { DeskHandoffState } from "@/services/deskHandoff";
 import { useCopyFeedback } from "@/modules/News/breaking/useCopyFeedback";
@@ -32,11 +33,13 @@ export function useDigest({
   const [opened] = useState(() => new Date());
   const [since] = useState(() => digestSince(lastVisit, opened));
   const sinceIso = since === null ? null : new Date(since).toISOString();
+  // S10: the digest is an AI call — it waits for the rate-limit cooldown («حدّث» too).
+  const cooling = useAiCooldown().active;
 
   const query = useQuery({
     queryKey: ["news-digest", sinceIso],
     queryFn: () => getNewsDigest({ since: sinceIso as string }),
-    enabled: sinceIso !== null && online,
+    enabled: sinceIso !== null && online && !cooling,
     staleTime: DIGEST_STALE_MS,
     retry: false,
     refetchOnWindowFocus: false,
@@ -58,7 +61,11 @@ export function useDigest({
     live: data ? digestLiveLine(data) : null,
     rows: data ? digestRows(data, items) : [],
     /** «حدّث». */
-    refresh: () => void query.refetch(),
+    refresh: () => {
+      if (!cooling) void query.refetch();
+    },
+    /** S10: the AI rate-limit cooldown is running — «حدّث» and «حوّله لموجز صباحي» wait. */
+    aiCooldown: cooling,
     refreshing: query.isFetching && Boolean(data),
     /** «انسخ الملخص». */
     copied: copied === "summary",
@@ -67,7 +74,7 @@ export function useDigest({
     },
     /** «حوّله لموجز صباحي»: the digest's stories go first in the briefing, which the newsroom starts on arrival. */
     toBriefing: () => {
-      if (!data) return;
+      if (!data || cooling) return;
       for (const entry of data.items) pinForBriefing(entry.itemId);
       navigate("/news", { state: { briefing: true } satisfies DeskHandoffState });
     },

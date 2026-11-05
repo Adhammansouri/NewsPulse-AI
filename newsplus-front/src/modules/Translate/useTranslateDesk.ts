@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import type { TranslateData, TranslateLanguage, TranslateRequest } from "@newsplus/shared";
+import { useAiCooldown } from "@/hooks/useAiCooldown";
 import { useSocialPost } from "@/modules/Generate/useSocialPost";
 import { incrementDailyStat } from "@/services/dailyStats";
 import type { DeskHandoffState } from "@/services/deskHandoff";
-import { copyText } from "@/services/toolErrors";
+import { copyText, selectCopySource, showCopyFailed } from "@/services/toolErrors";
 import { translateContent } from "@/services/translateService";
 import { useToast } from "@/ui/Toast";
 import {
@@ -30,6 +31,7 @@ const WHOLE_URL = /^https?:\/\/\S+$/i;
 export function useTranslateDesk(handoff: DeskHandoffState | null) {
   const toast = useToast();
   const social = useSocialPost();
+  const cooldown = useAiCooldown();
   const initialSource = handoff?.source?.trim() ?? "";
   const [kind, setKindState] = useState<SourceKind>(() => (WHOLE_URL.test(initialSource) ? "url" : "text"));
   const [text, setText] = useState(() => (WHOLE_URL.test(initialSource) ? "" : (handoff?.source ?? "")));
@@ -67,7 +69,8 @@ export function useTranslateDesk(handoff: DeskHandoffState | null) {
   const pending = mutation.isPending;
   const stale = Boolean(result && result.input !== input);
   const phase: "empty" | "busy" | "done" = pending ? "busy" : result ? "done" : "empty";
-  const canSubmit = Boolean(input) && !tooLong && (kind === "text" || urlValid) && !pending;
+  // S10: the AI button waits for the rate-limit cooldown.
+  const canSubmit = Boolean(input) && !tooLong && (kind === "text" || urlValid) && !pending && !cooldown.active;
 
   useEffect(() => {
     if (!copied) return;
@@ -108,13 +111,15 @@ export function useTranslateDesk(handoff: DeskHandoffState | null) {
     mutation.reset();
   }
 
-  async function copyTranslation() {
+  /** A refused clipboard: «تعذّر النسخ» + «حدّد النص» selects the translation (S10, as the draft view). */
+  async function copyTranslation(event?: { currentTarget: Element }) {
     if (!result) return;
+    const control = event?.currentTarget ?? null;
     try {
       await copyText(result.data.translated);
       setCopied(true);
     } catch {
-      toast.show("تعذّر النسخ", { icon: "error-circle" });
+      showCopyFailed(toast, () => selectCopySource(control));
     }
   }
 
@@ -162,6 +167,8 @@ export function useTranslateDesk(handoff: DeskHandoffState | null) {
     setEditing,
     startPost: () => result && social.start(result.data.translated, result.data.targetLanguage),
     socialPending: social.pending,
+    /** S10: the AI rate-limit cooldown («استخدمها في منشور» waits too). */
+    aiCooldown: cooldown.active,
   };
 }
 

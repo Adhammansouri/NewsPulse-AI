@@ -1,6 +1,7 @@
 // MobStory-carousel: the carousel settings sheet before writing — slide count, image style (قصة / بطاقة preview
 // tiles), text density, the Newsplus mark — mapped to `CarouselOptions`. Inline styles are the board's own.
 import type { CarouselOptions } from "@newsplus/shared";
+import { useAiCooldown } from "@/hooks/useAiCooldown";
 import { Button } from "@/ui/Button";
 import { Icon } from "@/ui/Icon";
 import { IconButton } from "@/ui/IconButton";
@@ -53,6 +54,8 @@ export function MobCarouselSheet({
   onClose: () => void;
   onGenerate: () => void;
 }) {
+  // S10: the AI button waits for the rate-limit cooldown.
+  const cooldown = useAiCooldown();
   return (
     <Sheet open={open} onClose={onClose} aria-labelledby={TITLE_ID} className="col" style={{ paddingBottom: "26px" }}>
       <header className="row" style={{ justifyContent: "space-between", padding: "6px 20px 14px" }}>
@@ -123,7 +126,7 @@ export function MobCarouselSheet({
           </span>
           <Switch checked={options.mark} label={STUDIO_COPY.mark} onCheckedChange={(mark) => onChange({ ...options, mark })} />
         </div>
-        <Button variant="ai" block size="lg" onClick={onGenerate}>
+        <Button variant="ai" block size="lg" disabled={cooldown.active} onClick={onGenerate}>
           <Icon name="sparkle" />
           {carouselSheetAction(options.slides)}
         </Button>

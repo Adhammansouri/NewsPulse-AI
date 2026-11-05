@@ -3,14 +3,15 @@
 // (MobDraft-error). Markup and inline styles are the boards' own.
 import { useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import type { EditorialMemoryRule } from "@newsplus/shared";
-import { isOpenAIQuotaError, toolErrorMessage } from "@/services/toolErrors";
+import { useAiCooldown } from "@/hooks/useAiCooldown";
+import { isSystemHandledError, toolErrorKind, toolErrorMessage } from "@/services/toolErrors";
 import { Button } from "@/ui/Button";
 import { Chip } from "@/ui/Chip";
 import { cx } from "@/ui/cx";
 import { Icon } from "@/ui/Icon";
+import { ErrorSurface, type ConflictInfo } from "@/ui/ErrorSurface";
 import { Notice } from "@/ui/Notice";
 import { PulseLine } from "@/ui/PulseLine";
-import { StudioError } from "../StudioError";
 import { RuleEditField } from "../archive/ArchiveParts";
 import { DRAFT_COPY } from "./copy";
 import type { ThreadTurn } from "./thread";
@@ -83,11 +84,15 @@ export function ReviseDock({
   mobile: boolean;
   style?: CSSProperties;
 }) {
+  // S10: during the AI cooldown the dock keeps its text but sends nothing (send + chips disabled).
+  const cooldown = useAiCooldown();
+  const blocked = busy || cooldown.active;
+
   function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     // Enter sends; Shift+Enter is a new line.
     if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
     event.preventDefault();
-    onSubmit();
+    if (!blocked) onSubmit();
   }
 
   const chipNodes = chips.map((chip) => (
@@ -95,9 +100,9 @@ export function ReviseDock({
       key={chip.key}
       size="sm"
       ai
-      aria-disabled={busy || undefined}
+      aria-disabled={blocked || undefined}
       onClick={() => {
-        if (!busy) chip.run();
+        if (!blocked) chip.run();
       }}
     >
       {chip.label}
@@ -110,7 +115,7 @@ export function ReviseDock({
       style={style}
       onSubmit={(event) => {
         event.preventDefault();
-        onSubmit();
+        if (!blocked) onSubmit();
       }}
     >
       {mobile ? (
@@ -130,7 +135,15 @@ export function ReviseDock({
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={onKeyDown}
         />
-        <button className="send" type="button" aria-label={DRAFT_COPY.send} aria-disabled={busy || undefined} onClick={onSubmit}>
+        <button
+          className="send"
+          type="button"
+          aria-label={DRAFT_COPY.send}
+          aria-disabled={blocked || undefined}
+          onClick={() => {
+            if (!blocked) onSubmit();
+          }}
+        >
           <Icon name="send" />
         </button>
       </label>
@@ -220,19 +233,29 @@ function MemoryButtons({
   );
 }
 
-/** MobDraft-error: the request is kept and «أعد المحاولة» sends it again. Out of credit → the quota notice. */
+/**
+ * MobDraft-error: the request is kept and «أعد المحاولة» sends it again (disabled during the AI cooldown).
+ * S10: every other case is the shared ErrorSurface — quota, «المسودة اتعدّلت من مكان تاني» (409) with
+ * `conflict`, nothing for a 401 / 429 (the session dialog / the cooldown card).
+ */
 export function ReviseError({
   error,
   instruction,
   onRetry,
+  conflict,
   style,
 }: {
   error: unknown;
   instruction: string;
   onRetry: () => void;
+  /** 409: the newest version and «اعرض ن{n}» (null while it is being fetched). */
+  conflict?: ConflictInfo | null;
   style?: CSSProperties;
 }) {
-  if (isOpenAIQuotaError(error)) return <StudioError error={error} onRetry={onRetry} style={style} />;
+  const cooldown = useAiCooldown();
+  const kind = toolErrorKind(error);
+  if (kind === "conflict" && !conflict) return null;
+  if (kind !== "ai-failed") return <ErrorSurface error={error} onRetry={onRetry} conflict={conflict} className="arrive" style={style} />;
   return (
     <Notice
       variant="error"
@@ -241,7 +264,7 @@ export function ReviseError({
       style={{ alignItems: "center", ...style }}
       textClassName="col grow"
       action={
-        <Button variant="quiet" size="sm" onClick={onRetry}>
+        <Button variant="quiet" size="sm" disabled={cooldown.active} onClick={onRetry}>
           {DRAFT_COPY.retry}
         </Button>
       }
@@ -254,6 +277,9 @@ export function ReviseError({
 
 /** Restoring a version, a memory decision or reopening the conversation failed (no board: the API's message). */
 export function DraftError({ error, style }: { error: unknown; style?: CSSProperties }): ReactNode {
+  // S10: a 401 / AI 429 has its own app-wide surface; the quota keeps its designed one.
+  if (!error || isSystemHandledError(error)) return null;
+  if (toolErrorKind(error) === "quota") return <ErrorSurface error={error} className="arrive" style={style} />;
   return (
     <Notice variant="error" role="alert" className="arrive" style={{ alignItems: "center", ...style }} textClassName="col grow">
       <span className="t-small">{toolErrorMessage(error)}</span>

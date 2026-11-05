@@ -18,6 +18,7 @@ export async function getBreakingOutputs(body: NewsBreakingRequest, signal?: Abo
   const response = await apiRequest<ApiSuccessResponse<NewsBreakingData>>(BREAKING_DIGEST_URLS.BREAKING, {
     method: "POST",
     auth: true,
+    ai: true,
     body: JSON.stringify(body),
     signal,
   });
@@ -29,6 +30,7 @@ export async function getNewsDigest(body: NewsDigestRequest, signal?: AbortSigna
   const response = await apiRequest<ApiSuccessResponse<NewsDigestData>>(BREAKING_DIGEST_URLS.DIGEST, {
     method: "POST",
     auth: true,
+    ai: true,
     body: JSON.stringify(body),
     signal,
   });

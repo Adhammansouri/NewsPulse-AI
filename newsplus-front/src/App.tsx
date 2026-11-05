@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PwaChrome } from "@/components/brand/pwa/PwaChrome";
 import AppRoot from "@/components/layouts/AppRoot";
+import { SystemLayer } from "@/components/system/SystemLayer";
 import AppRoutes from "@/routes";
 import { BrowserRouter } from "react-router-dom";
 
@@ -20,8 +21,9 @@ export default function App() {
       <BrowserRouter>
         <AppRoot>
           <AppRoutes />
+          <SystemLayer />
+          <PwaChrome />
         </AppRoot>
-        <PwaChrome />
       </BrowserRouter>
     </QueryClientProvider>
   );
