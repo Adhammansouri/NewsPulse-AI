@@ -53,8 +53,20 @@ jobs:
             set -euo pipefail
             APP_DIR="${{ env.VPS_APP_DIR }}"
             mkdir -p "${APP_DIR}"
-            tar -xzf /tmp/newsplus-vps.tgz -C "${APP_DIR}"
+            # Replace the code folders wholesale. Extracting over them kept files deleted in git and an old prebuilt
+            # newsplus-front/dist, which the Dockerfile ships instead of building the front. Keep each folder's local
+            # .env and data (production data lives in the newsplus_data volume).
+            STAGE="$(mktemp -d)"
+            tar -xzf /tmp/newsplus-vps.tgz -C "${STAGE}"
             rm -f /tmp/newsplus-vps.tgz
+            for dir in newsplus-API newsplus-front packages design-system; do
+              for keep in .env data; do
+                if [ -e "${APP_DIR}/${dir}/${keep}" ]; then cp -a "${APP_DIR}/${dir}/${keep}" "${STAGE}/${dir}/"; fi
+              done
+              rm -rf "${APP_DIR:?}/${dir}"
+            done
+            cp -a "${STAGE}/." "${APP_DIR}/"
+            rm -rf "${STAGE}"
             cd "${APP_DIR}"
             if [ ! -f .env ] && [ -f .env.vps.example ]; then
               cp .env.vps.example .env
