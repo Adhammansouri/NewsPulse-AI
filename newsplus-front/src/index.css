@@ -1,6 +1,5 @@
-/* Tailwind stays only for its base reset (preflight) until the full visual QA confirms the Pulse CSS alone matches the
-   boards (S10 §6); no screen uses a Tailwind utility any more. */
-@import "tailwindcss";
+/* The Pulse design CSS only, on the browser defaults the boards are drawn on (no Tailwind preflight: it squeezed every
+   textarea by its 2px UA margin and every input by its UA padding, 3–4px off the boards; S10 §6 visual QA). */
 @import "./styles/app.css";
 
 html {
