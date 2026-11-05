@@ -2,14 +2,28 @@ import type { NewsStoryFormat, NewsSummarizeData, NewsSummaryFormat, NewsTopic }
 import { NEWS_TOPICS } from "@newsplus/shared";
 
 /**
- * The source marks' colours as the boards draw them (Main, MobWire, MobFilters, MobOnboard, NewTimeline: `mark`
- * backgrounds). The API sends no colour, so a source gets one of these from its id (GLOBAL-RULES: source-mark colours
- * are data-driven, never the boards' per-outlet sample).
+ * The outlets the boards draw, in the boards' colours (Main, MobWire, MobFilters, MobOnboard, NewTimeline: every
+ * `mark` of an outlet has the same background on every board). Keyed by the API's source ids (newsSources.ts).
  */
+const BOARD_SOURCE_TONES: Record<string, string> = {
+  alarabiya: "#0f6e5d",
+  "sky-arabia": "#1d4ed8",
+  asharq: "#c2410c",
+  reuters: "#c2410c",
+  "bbc-ar": "#b91c1c",
+  "bbc-world": "#7f1d1d",
+  "aljazeera-ar": "#a16207",
+  "al-ain": "#6d28d9",
+  ap: "#334155",
+};
+
+/** Any other outlet: one of the boards' mark colours, picked from its id (the API sends no colour). */
 const SOURCE_TONES = ["#0f6e5d", "#1d4ed8", "#c2410c", "#b91c1c", "#a16207", "#6d28d9", "#334155", "#7f1d1d"];
 
-/** A source's mark colour, stable per source id. */
+/** A source's mark colour: the boards' colour for the outlets they draw, else stable per source id. */
 export function sourceTone(id: string) {
+  const board = BOARD_SOURCE_TONES[id];
+  if (board) return board;
   let hash = 0;
   for (let i = 0; i < id.length; i += 1) {
     hash = (hash * 31 + id.charCodeAt(i)) >>> 0;

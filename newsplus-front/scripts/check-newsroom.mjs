@@ -216,13 +216,20 @@ try {
     }
   });
 
-  await test("source marks take one of the boards’ mark colours, the same one for a source every time", () => {
+  await test("source marks: the boards’ colour for the outlets they draw, a stable board colour for any other", () => {
+    assert.equal(sourceTone("alarabiya"), "#0f6e5d");
+    assert.equal(sourceTone("sky-arabia"), "#1d4ed8");
+    assert.equal(sourceTone("asharq"), "#c2410c");
+    assert.equal(sourceTone("reuters"), "#c2410c");
+    assert.equal(sourceTone("bbc-ar"), "#b91c1c");
+    assert.equal(sourceTone("aljazeera-ar"), "#a16207");
+    assert.equal(sourceTone("al-ain"), "#6d28d9");
+    assert.equal(sourceTone("ap"), "#334155");
     const boardColours = ["#0f6e5d", "#1d4ed8", "#c2410c", "#b91c1c", "#a16207", "#6d28d9", "#334155", "#7f1d1d"];
-    for (const id of ["alarabiya", "sky-arabia", "bbc-ar", "reuters", "new-source"]) {
+    for (const id of ["youm7", "hespress", "new-source"]) {
       assert.ok(boardColours.includes(sourceTone(id)), id);
       assert.equal(sourceTone(id), sourceTone(id));
     }
-    assert.ok(new Set(["alarabiya", "sky-arabia", "bbc-ar", "reuters", "ap", "asharq"].map(sourceTone)).size > 1);
   });
 
   await test("the archive groups drafts by day, names formats and versions per board, and dates the memory rules", () => {
