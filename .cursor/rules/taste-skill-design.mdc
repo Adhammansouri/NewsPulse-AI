@@ -1,27 +1,14 @@
 ---
-description: Hybrid design system — Newsplus brand vs Nothing tools
+description: Pulse redesign — docs/redesign is the single source of truth for any UI work
 globs: newsplus-front/**/*,design-system/**/*
 alwaysApply: false
 ---
 
-# Hybrid design (mandatory)
+# Pulse redesign (mandatory)
 
-Read `design-system/HYBRID.md` before UI work.
+Read `docs/redesign/GLOBAL-RULES.md` before UI work, and match `docs/redesign/design/screens` exactly. Never invent design.
 
-## Route split
-
-| Routes | System | Classes / folder |
-|--------|--------|------------------|
-| `/` (Home), Header, Footer | **Newsplus brand** | `brand-*`, `components/brand/`, `tokens.css` |
-| `/news`, `/generate`, `/translate` | **Nothing tools** | `.theme-tools`, `nd-*`, `ToolPage` |
-
-## Before coding
-
-1. Identify surface: marketing vs tool.
-2. Marketing: Taste Skill + Newsplus palette (navy/teal/coral). No monochrome takeover.
-3. Tools: Nothing skill — monochrome, Space Mono labels, segmented bars, inline `[STATUS]` text.
-4. Never apply Nothing styles to Header/Footer or Home hero.
-
-## Stack
-
-React 19 + Vite + Tailwind v4 · fonts: Geist + Noto Arabic (brand) · Space Grotesk/Mono (tools).
+- Boards: `docs/redesign/design/screens/*.jpg` (desktop 1440×900, mobile 390×844); structure, copy and states in `design/reference/*.dc.html`.
+- CSS: `newsplus-front/src/styles/design/` (np4 / npm2 / npx, ported as-is). UI kit: `newsplus-front/src/ui/`.
+- No Tailwind, no `brand-*` / `nd-*` / `.theme-tools` classes, no Nothing styles: the hybrid system was removed in S10.
+- Visual QA: `node docs/redesign/qa-tools/shots.mjs <sprint|all>` with the dev server running.

@@ -4,17 +4,12 @@ Monorepo: `newsplus-API` + `newsplus-front`.
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) and [README.md](./README.md).
 
-## Frontend design (hybrid)
+## Frontend design (Pulse)
 
-Official design system: **[design-system/HYBRID.md](./design-system/HYBRID.md)**
+Single source of truth: **[docs/redesign/](./docs/redesign/README.md)**. Read [GLOBAL-RULES.md](./docs/redesign/GLOBAL-RULES.md) before any UI work and match `docs/redesign/design/screens` exactly; never invent design.
 
-| Layer | Style | Where |
-|-------|-------|-------|
-| **Brand / marketing** | Newsplus navy/teal + Taste Skill | Home, Header, Footer, `/login` |
-| **Tools / dashboard** | [Nothing Design](https://github.com/dominikmartn/nothing-design-skill) | `/news`, `/generate`, `/translate` |
-
-- **Theme:** global light/dark via `html[data-theme]` — `newsplus-front/src/services/themeStore.ts`, toggle in Header + Login
-- Newsplus tokens: `design-system/tokens.css`, `newsplus-design-system.md`
-- Brand components: `newsplus-front/src/components/brand/`
-- Nothing skill: `.cursor/skills/nothing-design/SKILL.md` (tools only)
-- Taste Skill: `.cursor/skills/design-taste-frontend/SKILL.md` (global anti-slop)
+- CSS: `newsplus-front/src/styles/design/` (np4 / npm2 / npx, ported as-is from `docs/redesign/design/css`). No Tailwind.
+- UI kit: `newsplus-front/src/ui/` (class names follow the design CSS).
+- **Theme:** global light/dark via `html[data-theme]` — `newsplus-front/src/services/themeStore.ts`.
+- Visual QA: `node docs/redesign/qa-tools/shots.mjs <sprint|all>` against `docs/redesign/design/screens`.
+- The old hybrid system (`design-system/HYBRID.md`, Nothing tools, `brand-*` / `nd-*`) is superseded.

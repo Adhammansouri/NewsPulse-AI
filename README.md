@@ -70,7 +70,7 @@ npm run install:all  # Install all workspaces
 
 ## Design System
 
-See `design-system/newsplus-design-system.md`.
+The front end follows the Pulse redesign: see [`docs/redesign/`](./docs/redesign/README.md) (rules, boards, design CSS, visual QA). Brand assets (logos) live in `design-system/`.
 
 ## Production
 
