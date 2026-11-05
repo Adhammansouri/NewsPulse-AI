@@ -32,8 +32,7 @@ try {
   const archive = await vite.ssrLoadModule("/src/modules/News/studio/archive/archiveModel.ts");
   const { DeskArchive } = await vite.ssrLoadModule("/src/modules/News/studio/archive/DeskArchive.tsx");
   const { MobArchive } = await vite.ssrLoadModule("/src/modules/News/studio/archive/MobArchive.tsx");
-  const { sourceHost } = await vite.ssrLoadModule("/src/modules/News/sourceLogos.ts");
-  const { SourceMark } = await vite.ssrLoadModule("/src/modules/News/SourceMark.tsx");
+  const { sourceTone } = await vite.ssrLoadModule("/src/modules/News/newsFormat.ts");
   const formats = await vite.ssrLoadModule("/src/modules/News/studio/formats.ts");
   const runs = await vite.ssrLoadModule("/src/modules/News/studio/draftRuns.ts");
   const { MobStory } = await vite.ssrLoadModule("/src/modules/News/studio/MobStory.tsx");
@@ -217,14 +216,13 @@ try {
     }
   });
 
-  await test("publisher identity survives redirects and unknown sources retain an initial fallback", () => {
-    assert.equal(sourceHost("bbc-ar", "https://news.google.com/rss/articles/redirect"), "bbc.com");
-    assert.equal(sourceHost("aljazeera-ar", "https://syndication.example.com/story"), "aljazeera.net");
-    assert.equal(sourceHost("new-source", "https://www.publisher.example.com/story"), "publisher.example.com");
-    assert.equal(sourceHost("new-source", "https://news.google.com/rss/articles/redirect"), null);
-    const fallback = renderToStaticMarkup(h(SourceMark, { id: "new-source", name: "وكالة جديدة", size: 24 }));
-    assert.match(fallback, /news-source-mark--fallback/);
-    assert.doesNotMatch(fallback, /<img/);
+  await test("source marks take one of the boards’ mark colours, the same one for a source every time", () => {
+    const boardColours = ["#0f6e5d", "#1d4ed8", "#c2410c", "#b91c1c", "#a16207", "#6d28d9", "#334155", "#7f1d1d"];
+    for (const id of ["alarabiya", "sky-arabia", "bbc-ar", "reuters", "new-source"]) {
+      assert.ok(boardColours.includes(sourceTone(id)), id);
+      assert.equal(sourceTone(id), sourceTone(id));
+    }
+    assert.ok(new Set(["alarabiya", "sky-arabia", "bbc-ar", "reuters", "ap", "asharq"].map(sourceTone)).size > 1);
   });
 
   await test("the archive groups drafts by day, names formats and versions per board, and dates the memory rules", () => {

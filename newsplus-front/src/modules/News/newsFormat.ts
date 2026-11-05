@@ -1,13 +1,14 @@
 import type { NewsStoryFormat, NewsSummarizeData, NewsSummaryFormat, NewsTopic } from "@newsplus/shared";
 import { NEWS_TOPICS } from "@newsplus/shared";
 
-const SOURCE_TONES = [
-  "var(--color-teal-600)",
-  "var(--color-navy-700)",
-  "var(--color-coral-500)",
-  "var(--color-navy-500)",
-];
+/**
+ * The source marks' colours as the boards draw them (Main, MobWire, MobFilters, MobOnboard, NewTimeline: `mark`
+ * backgrounds). The API sends no colour, so a source gets one of these from its id (GLOBAL-RULES: source-mark colours
+ * are data-driven, never the boards' per-outlet sample).
+ */
+const SOURCE_TONES = ["#0f6e5d", "#1d4ed8", "#c2410c", "#b91c1c", "#a16207", "#6d28d9", "#334155", "#7f1d1d"];
 
+/** A source's mark colour, stable per source id. */
 export function sourceTone(id: string) {
   let hash = 0;
   for (let i = 0; i < id.length; i += 1) {
@@ -16,35 +17,8 @@ export function sourceTone(id: string) {
   return SOURCE_TONES[hash % SOURCE_TONES.length];
 }
 
-export function sourceInitial(name: string) {
-  const trimmed = name.trim();
-  const arabic = trimmed.match(/[\u0600-\u06FF]/);
-  if (arabic) return arabic[0];
-  const latin = trimmed.match(/[A-Za-z0-9]/);
-  return (latin?.[0] ?? trimmed[0] ?? "?").toUpperCase();
-}
-
 export function hasArabic(text: string) {
   return /[\u0600-\u06FF]/.test(text);
-}
-
-export function formatRelative(iso: string) {
-  try {
-    const date = new Date(iso);
-    const diffMs = Date.now() - date.getTime();
-    const minute = 60_000;
-    const hour = 60 * minute;
-    const day = 24 * hour;
-    const rtf = new Intl.RelativeTimeFormat("ar", { numeric: "auto" });
-
-    if (Math.abs(diffMs) < minute) return "الآن";
-    if (Math.abs(diffMs) < hour) return rtf.format(-Math.round(diffMs / minute), "minute");
-    if (Math.abs(diffMs) < day) return rtf.format(-Math.round(diffMs / hour), "hour");
-    if (Math.abs(diffMs) < 7 * day) return rtf.format(-Math.round(diffMs / day), "day");
-    return date.toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" });
-  } catch {
-    return iso;
-  }
 }
 
 const FRESH_MS = 20 * 60 * 1000;
@@ -111,25 +85,6 @@ export function matchesTopicFilter(topic: NewsTopic | undefined, filter: TopicFi
   if (filter === "all") return true;
   const resolved = topic && NEWS_TOPICS.includes(topic) ? topic : "other";
   return resolved === filter;
-}
-
-export function topicFilterCounts(items: Array<{ topic?: NewsTopic }>) {
-  const counts: Record<TopicFilter, number> = {
-    all: items.length,
-    politics: 0,
-    economy: 0,
-    health: 0,
-    sports: 0,
-    tech: 0,
-    science: 0,
-    culture: 0,
-    other: 0,
-  };
-  for (const item of items) {
-    const topic = item.topic && NEWS_TOPICS.includes(item.topic) ? item.topic : "other";
-    counts[topic] += 1;
-  }
-  return counts;
 }
 
 export const STORY_FORMATS: {
